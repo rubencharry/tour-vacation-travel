@@ -1,0 +1,18 @@
+{
+  "name": "tour-vacation",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Monorepo for Tour Vacation (Angular frontend + NestJS backend)",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "start:frontend": "npm run start --workspace=frontend",
+    "start:backend": "npm run start:dev --workspace=backend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "build:backend": "npm run build --workspace=backend",
+    "test:frontend": "npm run test --workspace=frontend",
+    "test:backend": "npm run test --workspace=backend"
+  }
+}
