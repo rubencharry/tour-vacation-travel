@@ -9,7 +9,10 @@ let cachedHandler: Handler;
 
 async function bootstrapServer() {
   const expressApp = express();
-  const nestApp = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
+  const nestApp = await NestFactory.create(
+    AppModule,
+    new ExpressAdapter(expressApp),
+  );
   nestApp.setGlobalPrefix('api');
   nestApp.enableCors();
   await nestApp.init();
@@ -18,13 +21,16 @@ async function bootstrapServer() {
 
 export const handler: Handler = async (event, context, callback) => {
   cachedHandler ??= await bootstrapServer();
-  return cachedHandler(event, context, callback);
+  await cachedHandler(event, context, callback);
 };
 
 if (require.main === module) {
   void (async () => {
     const expressApp = express();
-    const nestApp = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
+    const nestApp = await NestFactory.create(
+      AppModule,
+      new ExpressAdapter(expressApp),
+    );
     nestApp.setGlobalPrefix('api');
     nestApp.enableCors();
     await nestApp.listen(process.env.PORT ?? 3000);
