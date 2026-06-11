@@ -16,11 +16,11 @@ Objetivo de costo: **~$0 USD/mes**. Cualquier sugerencia que rompa eso (containe
 
 | Pieza | Versión | Notas |
 |---|---|---|
-| Angular | 19 | Standalone, routing, SCSS, **sin SSR** (build estático para S3) |
+| Angular | 22 | Standalone, routing, SCSS, **sin SSR** (build estático para S3) |
 | NestJS | 11 | TS strict |
-| Node | v23.11.0 instalado | ⚠️ Lambda soporta 20/22 LTS. Hay que pasar a **Node 22 LTS** antes del deploy. |
+| Node | v23.11.0 local / **22 LTS en CI y Lambda** | `.nvmrc` fija Node 22. EBADENGINE warnings en local son inofensivos. |
 | npm | 11.6.2 | workspaces nativos |
-| TypeScript | 5.x | strict en ambos lados |
+| TypeScript | ~6.0.2 frontend / ^5.7.3 backend | strict en ambos lados |
 
 ---
 
@@ -35,7 +35,7 @@ tour-vacation/
 ├── README.md
 ├── CLAUDE.md             # este archivo
 ├── frontend/             # Angular SPA
-└── backend/              # NestJS API (todavía con app.listen() puro)
+└── backend/              # NestJS API (main.ts dual: local + Lambda handler)
 ```
 
 Scripts root: `start:frontend`, `start:backend`, `build:*`, `test:*`. **Ejecutar todo desde la raíz**, no entrar a las subcarpetas a hacer `npm install` ahí.
@@ -199,75 +199,33 @@ Tablas en On-Demand. **Una tabla por entidad** al principio (más simple que sin
 
 ## Desarrollo local
 
-### Estado actual
-- `npm install` en la raíz ya funciona y hoistea las deps.
+### Estado actual (Fase 1 completa)
+- `npm install` en la raíz hoistea todas las deps.
 - `frontend/` y `backend/` arrancan con `npm run start:frontend` / `start:backend`.
-- **Falta**: proxy del frontend al backend para evitar CORS en dev.
+- Proxy Angular→backend: `frontend/proxy.conf.json` + `proxyConfig` en `angular.json` — `/api/*` → `:3000`.
+- Variables de entorno: `@nestjs/config` carga `backend/.env` (no versionado). Referencia: `backend/.env.example`.
+- `GET /api/health` → `{"status":"pong"}` funcionando.
+- `main.ts` dual: `handler` exportado para Lambda, `require.main === module` para dev local.
+- Bundle Lambda: `npm run build:lambda` → `nest build` + esbuild → `backend/dist-lambda/main.js` (~2.8 MB).
 
-### Pendientes para desarrollo local cómodo
+### Pendiente para desarrollo local cómodo
 
-1. **Proxy de Angular hacia el backend**
-   - Crear `frontend/proxy.conf.json` mapeando `/api/*` → `http://localhost:3000`
-   - Ajustar el `start` de Angular para usar `--proxy-config proxy.conf.json`
-
-2. **Variables de entorno**
-   - Backend: `@nestjs/config` cargando `backend/.env` (no versionado)
-   - Vars iniciales: `AWS_REGION`, `DDB_TABLE_PLANS`, `DDB_TABLE_LEADS`, `SES_FROM_ADDRESS`, `COGNITO_USER_POOL_ID`, `COGNITO_CLIENT_ID`
-   - Frontend: `environment.ts` / `environment.prod.ts` con `apiBaseUrl`
-
-3. **Emulación de servicios AWS**
-   - **DynamoDB Local** (jar oficial o `amazon/dynamodb-local` en Docker) — el SDK v3 acepta `endpoint: 'http://localhost:8000'`
-   - **Email en dev**: imprimir a consola O capturar con MailHog. Evitar SES real en local.
-   - **Cognito en dev**: opción simple → bypass del guard con flag `BYPASS_AUTH=true` solo en dev. Opción robusta → `cognito-local`.
+1. **Emulación de servicios AWS** (Fase 2)
+   - **DynamoDB Local** (jar oficial) — el SDK v3 acepta `endpoint: 'http://localhost:8000'`
+   - **Email en dev**: log a consola cuando `NODE_ENV=development`. Evitar SES real en local.
+   - **Cognito en dev**: bypass del guard con `BYPASS_AUTH=true` (ya en `.env` local).
 
 ---
 
-## Adaptación a Lambda (todavía no hecha)
+## Adaptación a Lambda (✅ hecha en Fase 1)
 
-`backend/src/main.ts` actualmente arranca con `app.listen(3000)`. Para Lambda hay que:
+`backend/src/main.ts` exporta `handler` para Lambda y usa `require.main === module` para dev local.
+Bundle: `npm run build:lambda` → `nest build` (tsc, emite decorator metadata) + esbuild bundlea `dist/main.js` → `dist-lambda/main.js`.
 
-1. Instalar `@vendia/serverless-express` y `aws-lambda`.
-2. Refactorear `main.ts` para exportar **dos cosas**:
-   - `bootstrap()` que hace `app.listen()` cuando se corre local (`if (require.main === module)`)
-   - `handler` exportado que envuelve la app Nest con `serverless-express` para Lambda
-
-3. Apuntar el `entry` del bundler (esbuild/webpack) al archivo del handler.
-4. Verificar que `validation pipes`, `cors`, etc. se aplican antes del `createHandler`.
-
-**Patrón de referencia:**
-```ts
-// main.ts (esquemático)
-import { NestFactory } from '@nestjs/core';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import express from 'express';
-import serverlessExpress from '@vendia/serverless-express';
-import type { Handler } from 'aws-lambda';
-import { AppModule } from './app.module';
-
-let cachedHandler: Handler;
-
-async function bootstrapServer(): Promise<Handler> {
-  const expressApp = express();
-  const nestApp = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
-  nestApp.enableCors();
-  await nestApp.init();
-  return serverlessExpress({ app: expressApp });
-}
-
-export const handler: Handler = async (event, context, callback) => {
-  cachedHandler = cachedHandler ?? (await bootstrapServer());
-  return cachedHandler(event, context, callback);
-};
-
-if (require.main === module) {
-  (async () => {
-    const expressApp = express();
-    const nestApp = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
-    nestApp.enableCors();
-    await nestApp.listen(3000);
-  })();
-}
-```
+**Notas de la implementación:**
+- esbuild NO soporta `emitDecoratorMetadata`, por eso el bundle es two-step: tsc primero, esbuild después.
+- Peer deps opcionales de NestJS (`@nestjs/websockets/*`, `@nestjs/microservices/*`, `class-validator`, `class-transformer`) están marcados como `external` en `build-lambda.mjs`.
+- El handler de Lambda usa `cachedHandler ??=` para warm starts.
 
 ---
 
@@ -279,6 +237,7 @@ if (require.main === module) {
 - **Errores**: throw de `HttpException` (o subclases). Nada de `try/catch` para tragar errores silenciosamente.
 - **Logs**: `Logger` de Nest, no `console.log`.
 - **Commits**: español, presente, prefijo (`feat:`, `fix:`, `chore:`, `refactor:`, `docs:`).
+- **Antes de pushear**: correr `npm run lint:check --workspace=backend` localmente para evitar CI roto por Prettier/ESLint.
 
 ---
 
@@ -348,38 +307,27 @@ El workflow de deploy detecta qué workspace cambió y sólo redeploya lo necesa
 
 ---
 
-### Fase 0 — Repositorio GitHub
-*(Antes de tocar código — se hace una sola vez)*
+### Fase 0 — Repositorio GitHub ✅
+*(Completa)*
 
-1. 🐙 Crear repositorio en GitHub y hacer push del estado actual a `main`.
-2. 🐙 Crear rama `develop` desde `main`.
-3. 🐙 **Branch protection en `main`**:
-   - Requerir PR con al menos 1 aprobación.
-   - Requerir que el check de CI pase antes de mergear.
-   - Deshabilitar push directo y force push.
-   - Sólo ramas `release/*` y `hotfix/*` pueden abrir PR a `main`.
-4. 🐙 **Branch protection en `develop`**:
-   - Requerir PR (sin aprobación obligatoria, pero con CI verde).
-   - Deshabilitar push directo y force push.
-5. 💻 Crear **`.nvmrc`** con `22` para que todos los devs y el CI usen Node 22 LTS (Lambda runtime).
-6. 💻 Crear **`.github/workflows/ci.yml`**: corre en cada PR abierto contra `develop` o `main`:
-   - `npm ci`
-   - Type-check frontend y backend
-   - Lint frontend y backend
-   - Tests frontend y backend
-   - Build frontend y backend
+1. ✅ Repo `rubencharry/tour-vacation-travel` en GitHub (público), push a `main`.
+2. ✅ Rama `develop` creada.
+3. ✅ Branch protection en `main` (PR + 1 aprobación + CI `ci` verde, no force push).
+4. ✅ Branch protection en `develop` (PR + CI verde, no force push).
+5. ✅ `.nvmrc` con `22`.
+6. ✅ `.github/workflows/ci.yml`: lint backend, test backend, build backend y frontend, test frontend.
 
 ---
 
-### Fase 1 — Dev environment + validación local
-*(Sin AWS todavía — todo corre en local)*
+### Fase 1 — Dev environment + validación local ✅
+*(Completa — mergeada a develop via PR #1)*
 
-1. 💻 **Proxy de Angular hacia el backend** (`proxy.conf.json` + ajuste de `start`).
-2. 💻 **`@nestjs/config` y `.env`** en el backend con las vars base.
-3. 💻 **`backend/.env.example`** versionado con todas las vars (valores vacíos o de ejemplo) — referencia para nuevos devs.
-4. 💻 **Endpoint `GET /api/health`** → `{ status: 'pong' }` — valida que la cadena Angular → proxy → NestJS funciona en local.
-5. 💻 **Adaptar `main.ts` a Lambda** con `@vendia/serverless-express` preservando el dev local.
-6. 💻 **Configurar esbuild** para bundlear el backend en un único archivo antes de subir a Lambda (via `nest-cli.json` o script dedicado). Sin esto, Lambda no puede resolver los imports de NestJS.
+1. ✅ Proxy Angular→backend (`frontend/proxy.conf.json` + `proxyConfig` en `angular.json`).
+2. ✅ `@nestjs/config` y `backend/.env` con las vars base.
+3. ✅ `backend/.env.example` versionado.
+4. ✅ `GET /api/health` → `{"status":"pong"}`.
+5. ✅ `main.ts` dual: `handler` Lambda + dev local con `require.main === module`.
+6. ✅ Bundle Lambda: `npm run build:lambda` (two-step: nest build + esbuild).
 
 ---
 
@@ -498,6 +446,12 @@ npm run test:frontend
 # Builds
 npm run build:backend
 npm run build:frontend
+
+# Bundle Lambda (two-step: tsc + esbuild → backend/dist-lambda/main.js)
+npm run build:lambda
+
+# Lint — correr ANTES de pushear para evitar CI roto
+npm run lint:check --workspace=backend
 
 # Agregar dep a un workspace específico
 npm install <pkg> --workspace=backend
