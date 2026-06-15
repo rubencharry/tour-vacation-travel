@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
+import { ValidationPipe } from '@nestjs/common';
 import express from 'express';
 import serverlessExpress from '@vendia/serverless-express';
 import type { Handler } from 'aws-lambda';
@@ -15,6 +16,9 @@ async function bootstrapServer() {
   );
   nestApp.setGlobalPrefix('api');
   nestApp.enableCors();
+  nestApp.useGlobalPipes(
+    new ValidationPipe({ whitelist: true, transform: true }),
+  );
   await nestApp.init();
   return serverlessExpress({ app: expressApp });
 }
@@ -33,6 +37,9 @@ if (require.main === module) {
     );
     nestApp.setGlobalPrefix('api');
     nestApp.enableCors();
+    nestApp.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
     await nestApp.listen(process.env.PORT ?? 3000);
   })();
 }
