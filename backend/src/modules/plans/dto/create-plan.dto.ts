@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsBoolean,
   IsInt,
   IsNumber,
@@ -18,8 +19,9 @@ export class CreatePlanDto {
   @IsString()
   description!: string;
 
-  @IsUrl()
-  imageUrl!: string;
+  @IsArray()
+  @IsUrl({}, { each: true })
+  imageUrls!: string[];
 
   @IsBoolean()
   active!: boolean;

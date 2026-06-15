@@ -3,7 +3,7 @@ export interface Plan {
   title: string;
   priceUsd: number;
   description: string;
-  imageUrl: string;
+  imageUrls: string[];
   active: boolean;
   displayOrder: number;
   createdAt: string;
