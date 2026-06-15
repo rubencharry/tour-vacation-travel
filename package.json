@@ -15,6 +15,7 @@
     "build:lambda": "npm run build:lambda --workspace=backend",
     "test:frontend": "npm run test --workspace=frontend",
     "test:backend": "npm run test --workspace=backend",
+    "start:dynamo": "npm run start:dynamo --workspace=backend",
     "db:setup": "npm run db:setup --workspace=backend"
   }
 }

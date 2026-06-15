@@ -20,6 +20,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "start:dynamo": "node scripts/start-local-db.cjs",
     "db:setup": "node scripts/setup-local-db.mjs"
   },
   "dependencies": {
@@ -47,6 +48,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.0",
     "@types/supertest": "^7.0.0",
+    "dynamodb-local": "^0.0.38",
     "esbuild": "^0.28.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
