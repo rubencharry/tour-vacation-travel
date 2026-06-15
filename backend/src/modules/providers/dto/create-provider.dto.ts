@@ -11,29 +11,29 @@ import type { OperatorType, ProviderStatus } from '../entities/provider.entity';
 
 export class CreateProviderDto {
   @IsEnum(['mayorista', 'operador'] as const)
-  operatorType: OperatorType;
+  operatorType!: OperatorType;
 
   @IsString()
-  businessName: string;
+  businessName!: string;
 
   @IsString()
-  nit: string;
+  nit!: string;
 
   @IsString()
-  mainContact: string;
+  mainContact!: string;
 
   @IsString()
-  contactRole: string;
+  contactRole!: string;
 
   @IsString()
-  phone: string;
+  phone!: string;
 
   @IsOptional()
   @IsString()
   whatsapp?: string;
 
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsOptional()
   @IsString()
@@ -57,7 +57,7 @@ export class CreateProviderDto {
   commissionPct?: number;
 
   @IsEnum(['activo', 'inactivo'] as const)
-  status: ProviderStatus;
+  status!: ProviderStatus;
 
   @IsOptional()
   @IsString()
@@ -65,5 +65,5 @@ export class CreateProviderDto {
 
   @IsArray()
   @IsString({ each: true })
-  services: string[];
+  services!: string[];
 }

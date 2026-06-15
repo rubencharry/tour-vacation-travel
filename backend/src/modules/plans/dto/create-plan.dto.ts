@@ -9,22 +9,22 @@ import {
 
 export class CreatePlanDto {
   @IsString()
-  title: string;
+  title!: string;
 
   @IsNumber()
   @Min(0)
-  priceUsd: number;
+  priceUsd!: number;
 
   @IsString()
-  description: string;
+  description!: string;
 
   @IsUrl()
-  imageUrl: string;
+  imageUrl!: string;
 
   @IsBoolean()
-  active: boolean;
+  active!: boolean;
 
   @IsInt()
   @Min(0)
-  displayOrder: number;
+  displayOrder!: number;
 }
