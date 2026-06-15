@@ -16,6 +16,7 @@
     "test:frontend": "npm run test --workspace=frontend",
     "test:backend": "npm run test --workspace=backend",
     "start:dynamo": "npm run start:dynamo --workspace=backend",
+    "start:dynamo-ui": "npm run start:dynamo-ui --workspace=backend",
     "db:setup": "npm run db:setup --workspace=backend"
   }
 }
