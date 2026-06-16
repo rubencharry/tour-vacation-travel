@@ -339,6 +339,18 @@ El workflow de deploy detecta qué workspace cambió y sólo redeploya lo necesa
 7. 💻 **Módulo `plans`**: entidad + DTOs + repo DDB + controller (CRUD).
 8. 💻 **Módulo `leads`**: entidad + DTOs + repo DDB + controller (POST público, GET admin).
 
+
+#### Comandos para correr el back + DB en local
+Instalar NoSQL Workbench
+
+npm run start:dynamo
+
+npm run start:dynamo-ui
+
+npm run db:setup
+
+npm run start:backend
+
 ---
 
 ### Fase 3 — Primer deploy en AWS

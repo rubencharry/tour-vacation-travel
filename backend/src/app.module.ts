@@ -1,8 +1,19 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { HealthModule } from './modules/health/health.module';
+import { DynamoDbModule } from './modules/dynamodb/dynamodb.module';
+import { PlansModule } from './modules/plans/plans.module';
+import { LeadsModule } from './modules/leads/leads.module';
+import { ProvidersModule } from './modules/providers/providers.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), HealthModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    DynamoDbModule,
+    HealthModule,
+    PlansModule,
+    LeadsModule,
+    ProvidersModule,
+  ],
 })
 export class AppModule {}

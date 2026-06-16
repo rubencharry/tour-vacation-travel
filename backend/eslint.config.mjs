@@ -19,9 +19,17 @@ export default tseslint.config(
       },
       sourceType: 'commonjs',
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ['build-lambda.mjs'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+  },
+  {
+    files: ['build-lambda.mjs'],
+    languageOptions: {
+      sourceType: 'module',
     },
   },
   {
