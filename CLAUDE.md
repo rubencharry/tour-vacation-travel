@@ -247,12 +247,21 @@ Bundle: `npm run build:lambda` → `nest build` (tsc, emite decorator metadata) 
 |---|---|
 | IaC | **AWS CDK** (TypeScript, consistente con el stack) |
 | Single-table vs multi-table DDB | **Multi-table** al principio |
+| Región AWS | **`sa-east-1` (São Paulo)** — audiencia LATAM, ~100ms menos de latencia en API vs us-east-1 |
+
+## URLs de producción (stack desplegado)
+
+| Recurso | URL / ID |
+|---|---|
+| App (CloudFront) | `https://d3rwutlv921ia8.cloudfront.net` |
+| API Gateway | `https://q5omxhvg8k.execute-api.sa-east-1.amazonaws.com/` |
+| S3 bucket | `tourvacationstack-frontendbucketefe2e19c-tttfg7jp9eoh` |
+| CloudFront ID | `E131V4988IIX50` |
 
 ## Decisiones pendientes
 
 | Tema | Opciones | Default sugerido |
 |---|---|---|
-| Región AWS | `us-east-1`, `sa-east-1`, etc. | `us-east-1` (más servicios, más barato) |
 | Dominio | Route 53 vs externo | A definir cuando haya dominio |
 | Manual de marca | Colores, tipografía, logo | **Pedir al cliente antes de la landing** |
 

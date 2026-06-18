@@ -5,7 +5,8 @@
   "description": "Monorepo for Tour Vacation (Angular frontend + NestJS backend)",
   "workspaces": [
     "frontend",
-    "backend"
+    "backend",
+    "infra"
   ],
   "scripts": {
     "start:frontend": "npm run start --workspace=frontend",
@@ -16,6 +17,10 @@
     "test:frontend": "npm run test --workspace=frontend",
     "test:backend": "npm run test --workspace=backend",
     "start:dynamo": "npm run start:dynamo --workspace=backend",
-    "db:setup": "npm run db:setup --workspace=backend"
+    "db:setup": "npm run db:setup --workspace=backend",
+    "cdk:synth": "npm run cdk --workspace=infra -- synth --profile tour-vacation",
+    "cdk:diff": "npm run cdk --workspace=infra -- diff --profile tour-vacation",
+    "deploy:backend": "npm run build:lambda && npm run cdk --workspace=infra -- deploy --profile tour-vacation --require-approval never",
+    "deploy:frontend": "npm run build:frontend && aws s3 sync frontend/dist/frontend/browser s3://$(aws cloudformation describe-stacks --stack-name TourVacationStack --query \"Stacks[0].Outputs[?OutputKey=='FrontendBucketName'].OutputValue\" --output text --profile tour-vacation) --delete --profile tour-vacation && aws cloudfront create-invalidation --distribution-id $(aws cloudformation describe-stacks --stack-name TourVacationStack --query \"Stacks[0].Outputs[?OutputKey=='DistributionId'].OutputValue\" --output text --profile tour-vacation) --paths \"/*\" --profile tour-vacation"
   }
 }
