@@ -247,12 +247,21 @@ Bundle: `npm run build:lambda` → `nest build` (tsc, emite decorator metadata) 
 |---|---|
 | IaC | **AWS CDK** (TypeScript, consistente con el stack) |
 | Single-table vs multi-table DDB | **Multi-table** al principio |
+| Región AWS | **`sa-east-1` (São Paulo)** — audiencia LATAM, ~100ms menos de latencia en API vs us-east-1 |
+
+## URLs de producción (stack desplegado)
+
+| Recurso | URL / ID |
+|---|---|
+| App (CloudFront) | `https://d3rwutlv921ia8.cloudfront.net` |
+| API Gateway | `https://q5omxhvg8k.execute-api.sa-east-1.amazonaws.com/` |
+| S3 bucket | `tourvacationstack-frontendbucketefe2e19c-tttfg7jp9eoh` |
+| CloudFront ID | `E131V4988IIX50` |
 
 ## Decisiones pendientes
 
 | Tema | Opciones | Default sugerido |
 |---|---|---|
-| Región AWS | `us-east-1`, `sa-east-1`, etc. | `us-east-1` (más servicios, más barato) |
 | Dominio | Route 53 vs externo | A definir cuando haya dominio |
 | Manual de marca | Colores, tipografía, logo | **Pedir al cliente antes de la landing** |
 
@@ -331,67 +340,52 @@ El workflow de deploy detecta qué workspace cambió y sólo redeploya lo necesa
 
 ---
 
-### Fase 2 — Backend core (todavía local)
-*(DynamoDB Local JAR para no necesitar AWS todavía)*
+### Fase 2 — Backend core (todavía local) ✅
+*(Completa — mergeada a develop via PR #2)*
 
-5. 💻 **DynamoDB Local**: bajar el JAR oficial y documentar cómo levantarlo para dev.
-6. 💻 **Módulo `dynamodb`** en NestJS: `DynamoDBDocumentClient` singleton, apuntando a `localhost:8000` en dev y a AWS en prod via variable de entorno.
-7. 💻 **Módulo `plans`**: entidad + DTOs + repo DDB + controller (CRUD).
-8. 💻 **Módulo `leads`**: entidad + DTOs + repo DDB + controller (POST público, GET admin).
-
+5. ✅ **DynamoDB Local**: JAR oficial descargado, scripts `start:dynamo` y `db:setup` en el monorepo.
+6. ✅ **Módulo `dynamodb`**: `DynamoDBDocumentClient` singleton, apunta a `localhost:8000` en dev (via `DDB_ENDPOINT`) y al endpoint real de AWS en prod (variable no seteada).
+7. ✅ **Módulo `plans`**: entidad + DTOs + repo DDB + controller (CRUD completo). `imageUrl` → `imageUrls: string[]`.
+8. ✅ **Módulo `leads`**: entidad + DTOs + repo DDB + controller (POST público, GET admin).
+9. ✅ **Módulo `providers`**: entidad + DTOs + repo DDB + controller (CRUD).
 
 #### Comandos para correr el back + DB en local
-Instalar NoSQL Workbench
-
-npm run start:dynamo
-
-npm run start:dynamo-ui
-
-npm run db:setup
-
-npm run start:backend
+```bash
+npm run start:dynamo       # levanta DynamoDB Local JAR en :8000
+npm run db:setup           # crea tablas locales
+npm run start:backend      # NestJS en :3000
+npm run start:frontend     # Angular dev server en :4200
+```
 
 ---
 
-### Fase 3 — Primer deploy en AWS
+### Fase 3 — Primer deploy en AWS ✅
+*(Completa — PR #3, desplegado en sa-east-1)*
 
-**Prerrequisitos (una sola vez, manual):**
-- ☁️ Cuenta AWS creada y acceso a la consola.
-- ☁️ Usuario/rol IAM para deploy con permisos suficientes + `aws configure` en local.
-- 💻 CDK CLI instalado (`npm install -g aws-cdk`).
-- ☁️ **`cdk bootstrap`** en la cuenta y región elegida (crea el bucket S3 que CDK necesita internamente).
-- ☁️ **OIDC provider** en IAM para GitHub Actions (permite que los workflows se autentiquen en AWS sin guardar access keys en GitHub Secrets).
-- ☁️ **IAM role `github-actions-deploy`** con trust policy apuntando al repo, con permisos para Lambda, S3, CloudFront y CDK.
-- 🐙 Guardar en GitHub Secrets: `AWS_ACCOUNT_ID` y `AWS_REGION` (no son secretos sensibles, pero conviene centralizarlos).
+**Prerrequisitos ✅:**
+- ✅ Cuenta AWS + usuario IAM `claude-ci` con `AdministratorAccess`.
+- ✅ Perfil AWS local `tour-vacation` configurado (`aws configure --profile tour-vacation`).
+- ✅ CDK CLI instalado globalmente (`npm install -g aws-cdk`).
+- ✅ `cdk bootstrap` ejecutado en `sa-east-1`.
 
-**Infra base con CDK (stack v1):**
-- 💻 Crear carpeta `infra/` con el proyecto CDK en TypeScript (workspace del monorepo).
-- ☁️ Función **Lambda** (runtime Node 22, handler `main.handler`, memoria 512 MB, timeout 30s — necesario para el cold start de NestJS).
-- ☁️ **API Gateway HTTP API** con ruta `ANY /api/{proxy+}` → Lambda.
-- ☁️ **S3 bucket** para el frontend: Block Public Access habilitado, acceso **sólo vía CloudFront usando OAC** (Origin Access Control — no bucket policy público).
-- ☁️ **CloudFront distribution**:
-  - Origin 1 (S3 + OAC): sirve `/` → Angular SPA.
-  - Origin 2 (API Gateway): sirve `/api/*` → Lambda.
-  - **Custom error response**: 403 y 404 de S3 → `/index.html` con status HTTP 200 (necesario para que Angular Router maneje las rutas directas como `/admin`).
-- ☁️ **IAM role** de Lambda (sin permisos DDB todavía — sólo los básicos de ejecución).
-- 💻 **Pipeline deploy manual v1**: script `deploy:backend` local para el primer deploy.
-- ☁️ **Smoke test**: `GET <url-cloudfront>/api/health` debe devolver `{ status: 'pong' }`.
+**Infra base con CDK ✅ — todo en un solo deploy:**
+- ✅ Carpeta `infra/` creada como workspace del monorepo (`infra/bin/app.ts`, `infra/lib/tour-vacation-stack.ts`).
+- ✅ Lambda (Node 22, 512 MB, 30s, handler `main.handler`).
+- ✅ API Gateway HTTP API — ruta `ANY /api/{proxy+}` → Lambda.
+- ✅ S3 bucket — Block Public Access, acceso solo via CloudFront OAC.
+- ✅ CloudFront — Origin S3 (default `/`) + Origin API Gateway (`/api/*`), custom error 403/404 → `/index.html` HTTP 200.
+- ✅ DynamoDB **Plans** (PK `planId`, On-Demand, RETAIN).
+- ✅ DynamoDB **Leads** (PK `leadId`, GSI `email-index`, On-Demand, RETAIN).
+- ✅ DynamoDB **Providers** (PK `providerId`, On-Demand, RETAIN).
+- ✅ IAM Role Lambda con `grantReadWriteData` sobre las tres tablas.
+- ✅ Scripts `deploy:backend` y `deploy:frontend` en `package.json` raíz.
+- ✅ Smoke test: `GET https://d3rwutlv921ia8.cloudfront.net/api/health` → `{"status":"pong"}`.
 
-**Automatizar el deploy con GitHub Actions:**
-- 💻 Crear **`.github/workflows/deploy.yml`**: se dispara al mergear a `main`.
-  - Detecta qué workspace cambió (`git diff` contra el commit anterior).
-  - Si cambió `backend/` o `infra/`: `cdk deploy` (Lambda + infra).
-  - Si cambió `frontend/`: build Angular → sync S3 → invalidación CloudFront.
-  - Crea el tag `vX.Y.Z` leyendo la versión del `package.json` raíz.
-  - Smoke test final: llama a `/api/health` y falla el workflow si no responde 200.
-- 🐙 A partir de este punto, el único camino a producción es un PR de `release/vX.Y.Z` → `main` con CI verde.
-
-**Conectar DynamoDB real (stack v1 → v1.1):**
-- ☁️ Tabla **`Plans`** (On-Demand, PK `planId`).
-- ☁️ Tabla **`Leads`** (On-Demand, PK `leadId`, GSI por `email`).
-- ☁️ **IAM policy** en el role de Lambda: `dynamodb:*` sobre ambas tablas.
-- ☁️ Variables de entorno en Lambda: `DDB_TABLE_PLANS`, `DDB_TABLE_LEADS`, `AWS_REGION`.
-- 💻 Re-deploy y probar CRUD de planes y captura de leads contra DynamoDB real.
+**Pendiente de Fase 3 (antes de pasar a producción real):**
+- 🐙 **OIDC provider** en IAM para GitHub Actions (autenticación sin access keys en Secrets).
+- 🐙 **IAM role `github-actions-deploy`** con trust policy apuntando al repo.
+- 🐙 Guardar en GitHub Secrets: `AWS_ACCOUNT_ID=507744946224`, `AWS_REGION=sa-east-1`.
+- 💻 **`.github/workflows/deploy.yml`**: se dispara al mergear a `main`, detecta qué workspace cambió, deploya solo lo necesario, crea tag y smoke test final.
 
 ---
 
