@@ -1,13 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { LeadsRepository } from './leads.repository';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { Lead } from './entities/lead.entity';
+import { MailService } from '../mail/mail.service';
+import { leadConfirmationTemplate } from '../mail/templates/lead-confirmation.template';
 
 const IDEMPOTENCY_WINDOW_MS = 60 * 60 * 1000; // 1 hora
 
 @Injectable()
 export class LeadsService {
-  constructor(private readonly repo: LeadsRepository) {}
+  private readonly logger = new Logger(LeadsService.name);
+
+  constructor(
+    private readonly repo: LeadsRepository,
+    private readonly mail: MailService,
+  ) {}
 
   async create(dto: CreateLeadDto): Promise<Lead> {
     const existing = await this.findExisting(dto.email, dto.interestedPlanId);
@@ -20,11 +27,22 @@ export class LeadsService {
       emailSent: false,
     };
     await this.repo.put(lead);
+
+    this.sendConfirmation(lead).catch((err) =>
+      this.logger.error(`Email confirmation failed for ${lead.leadId}: ${err}`),
+    );
+
     return lead;
   }
 
   async findAll(): Promise<Lead[]> {
     return this.repo.findAll();
+  }
+
+  private async sendConfirmation(lead: Lead): Promise<void> {
+    const { subject, html } = leadConfirmationTemplate({ name: lead.name });
+    await this.mail.send({ to: lead.email, subject, html });
+    await this.repo.markEmailSent(lead.leadId);
   }
 
   private async findExisting(
