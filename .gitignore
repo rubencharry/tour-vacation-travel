@@ -38,6 +38,9 @@ Thumbs.db
 coverage/
 .nyc_output/
 
+# DynamoDB Local data (generado en local, no versionar)
+backend/.dynamodb-data/
+
 # Misc
 *.tmp
 *.swp
