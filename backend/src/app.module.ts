@@ -5,6 +5,7 @@ import { DynamoDbModule } from './modules/dynamodb/dynamodb.module';
 import { PlansModule } from './modules/plans/plans.module';
 import { LeadsModule } from './modules/leads/leads.module';
 import { ProvidersModule } from './modules/providers/providers.module';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ProvidersModule } from './modules/providers/providers.module';
     PlansModule,
     LeadsModule,
     ProvidersModule,
+    MailModule,
   ],
 })
 export class AppModule {}

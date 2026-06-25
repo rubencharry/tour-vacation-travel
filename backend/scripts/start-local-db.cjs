@@ -1,8 +1,11 @@
+const path = require('path');
 const dynamoDbLocal = require('dynamodb-local');
+
+const DB_PATH = path.resolve(__dirname, '../.dynamodb-data');
 
 async function main() {
   console.log('Iniciando DynamoDB Local en :8000...');
-  await dynamoDbLocal.launch(8000, null, ['-sharedDb'], true);
+  await dynamoDbLocal.launch(8000, DB_PATH, ['-sharedDb'], true);
 
   process.on('SIGINT', () => {
     dynamoDbLocal.stop(8000);
