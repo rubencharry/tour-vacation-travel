@@ -25,7 +25,7 @@ async function bootstrapServer() {
 
 export const handler: Handler = async (event, context, callback) => {
   cachedHandler ??= await bootstrapServer();
-  await cachedHandler(event, context, callback);
+  return cachedHandler(event, context, callback);
 };
 
 if (require.main === module) {
