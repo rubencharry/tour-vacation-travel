@@ -41,3 +41,9 @@ coverage/
 # Misc
 *.tmp
 *.swp
+
+# DynamoDB Local (binarios descargados, no van al repo)
+dynamodblocal-bin/
+
+# Claude Code (configuración local del agente)
+.claude/
