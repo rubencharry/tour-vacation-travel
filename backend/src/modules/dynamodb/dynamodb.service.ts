@@ -13,7 +13,12 @@ export class DynamoDbService {
 
     const raw = new DynamoDBClient({
       region,
-      ...(endpoint ? { endpoint } : {}),
+      ...(endpoint
+        ? {
+            endpoint,
+            credentials: { accessKeyId: 'local', secretAccessKey: 'local' },
+          }
+        : {}),
     });
 
     this.client = DynamoDBDocumentClient.from(raw, {
