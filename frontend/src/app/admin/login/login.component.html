@@ -1,0 +1,167 @@
+<div class="flex h-screen w-full overflow-hidden bg-surface-container-lowest font-body-md text-on-surface">
+
+  <!-- Columna izquierda -->
+  <div class="hidden lg:flex flex-col justify-between w-[45%] h-full bg-primary-container px-12 py-16 relative overflow-hidden">
+    <div class="absolute inset-0 bg-pattern z-0"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-primary to-transparent opacity-60 z-0"></div>
+
+    <!-- Logo -->
+    <div class="z-10 flex items-center gap-4">
+      <div class="flex items-center justify-center w-12 h-12 bg-brand-teal rounded-full">
+        <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">flight</span>
+      </div>
+      <div>
+        <h2 class="font-headline-md text-headline-md text-on-primary m-0 leading-none">TOUR VACATION</h2>
+        <p class="font-label-md text-label-md text-brand-teal tracking-widest uppercase">Travel</p>
+      </div>
+    </div>
+
+    <!-- Collage de fotos -->
+    <div class="relative z-10 w-full h-[512px] flex items-center justify-center mt-8">
+      <div class="relative w-full max-w-md h-full">
+        <img
+          class="absolute top-0 left-0 w-48 h-64 object-cover rounded-card border-4 border-on-primary shadow-lg transform -rotate-6 z-10"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnEj9vogNTXriHeqpeO6io-ykohEbBBAFHmyTIxCqos6gx13BnZvg037JCv14qF-eL_zO0JdUWU0Kaznn1Jrufmn_Urv_keLrtYefNz1-6gPy-78Esmz_6mNAwGSb_YnDRXZgHgGa3u7tcOK-kDEUrvxV__XeprG3WYxXSLc3RSPLFAnKLeuFZBtTWSuec6OT3RyLyuhEFt3ZpppFQB0oj7dCcDaZK2R5AqcEwkMU2imZh_UOwurrVZ5boSn_b85LPLez2o8yDvrA"
+          alt="Playa tropical"
+        >
+        <img
+          class="absolute top-12 right-0 w-56 h-72 object-cover rounded-card border-4 border-on-primary shadow-lg transform rotate-3 z-20"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlyRrzBwwNuEO0_2l_Tnna-ewzQMfmzkw5ZaKqzn1Py5VBZYFzbuZ0y2r46AsHjuXiRi8bm4SfxkUc65b-MHzSkptP8FwGuLYbQmYiGs22yzrI4aR3HB1XHViZsTimiDzq1Lc_zxSTBEBnKLEa2YECrh2FUWdk1sVoSUmgNk0Vt-Xq6b1tV9XyiGqztbM_-OpWjPSsXH-wslHlgnRWUrNSi8odAlz-n75YOd_KyW-Zb1W9ei-Pgt2hLGcQwYLY4mSbT9AwxcAnddU"
+          alt="Ruinas mayas"
+        >
+        <img
+          class="absolute bottom-0 left-12 w-52 h-56 object-cover rounded-card border-4 border-on-primary shadow-lg transform -rotate-2 z-30"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXdpgsx6APhu-mmNdPlomS_b39rx-6d3sH7D6N4Lv4PyDL5_GV4B2DIyq2hv-vOEQEtrkGs-z_jXoIkrMjMfNLodhSOqsI8ctbZg37HOxtG0SUHSdThnzOMiEGM88G7NMIHXIFD5IIhjum04jXilPDrArhoPAGDxEiApJImJOaQtYdCz3PxB3agk3yLMcEs4bMfEox-WEO5LDCYJRGsJTc0RXQa7M-JJrwo2uwN5bB3Go-7bsL-DlaVrjUTBLK91BunL0x1o8nJZI"
+          alt="Ciudad europea"
+        >
+      </div>
+    </div>
+
+    <!-- Frase -->
+    <div class="z-10 mt-auto">
+      <p class="font-body-lg text-body-lg text-on-primary italic mb-2">"La gestión de grandes viajes empieza aquí."</p>
+      <p class="font-label-md text-label-md text-on-primary-container uppercase tracking-wider">Solo personal autorizado</p>
+    </div>
+  </div>
+
+  <!-- Columna derecha -->
+  <div class="w-full lg:w-[55%] h-full bg-surface-container-lowest flex flex-col justify-center items-center px-margin-mobile sm:px-12 md:px-xl relative">
+    <div class="w-full max-w-md">
+
+      <!-- Logo mobile -->
+      <div class="flex lg:hidden items-center justify-center gap-3 mb-10">
+        <div class="flex items-center justify-center w-10 h-10 bg-brand-teal rounded-full">
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">flight</span>
+        </div>
+        <h2 class="font-headline-md text-title-lg text-primary m-0 leading-none">TOUR VACATION</h2>
+      </div>
+
+      <!-- Ícono desktop -->
+      <div class="hidden lg:flex justify-center mb-6">
+        <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">flight_takeoff</span>
+      </div>
+
+      <!-- Encabezado -->
+      <div class="text-center mb-10">
+        <h1 class="font-headline-lg text-headline-lg text-primary mb-2">Bienvenido</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">Ingresá al panel de administración</p>
+      </div>
+
+      <!-- Error -->
+      @if (error()) {
+        <div class="mb-6 px-4 py-3 bg-error-container text-on-error-container rounded-btn font-body-md text-body-md">
+          {{ error() }}
+        </div>
+      }
+
+      <!-- Formulario -->
+      <form class="space-y-6" (ngSubmit)="onSubmit($event)">
+
+        <!-- Email -->
+        <div class="space-y-2">
+          <label class="font-label-md text-label-md text-primary block" for="email">
+            Correo electrónico
+          </label>
+          <div class="relative border border-outline-variant rounded-btn bg-surface-container-lowest focus-within:border-brand-teal focus-within:ring-1 focus-within:ring-brand-teal transition-shadow duration-200">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="material-symbols-outlined text-outline text-xl">mail</span>
+            </div>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              required
+              placeholder="admin@tourvacation.com"
+              [value]="email()"
+              (input)="email.set($any($event.target).value)"
+              class="block w-full pl-10 pr-3 py-3 bg-transparent text-on-surface font-body-md text-body-md rounded-btn border-none focus:outline-none focus:ring-0"
+            >
+          </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="space-y-2">
+          <label class="font-label-md text-label-md text-primary block" for="password">
+            Contraseña
+          </label>
+          <div class="relative border border-outline-variant rounded-btn bg-surface-container-lowest focus-within:border-brand-teal focus-within:ring-1 focus-within:ring-brand-teal transition-shadow duration-200">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="material-symbols-outlined text-outline text-xl">lock</span>
+            </div>
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              name="password"
+              required
+              placeholder="••••••••"
+              [value]="password()"
+              (input)="password.set($any($event.target).value)"
+              class="block w-full pl-10 pr-10 py-3 bg-transparent text-on-surface font-body-md text-body-md rounded-btn border-none focus:outline-none focus:ring-0"
+            >
+            <button
+              type="button"
+              (click)="togglePassword()"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-primary transition-colors"
+            >
+              <span class="material-symbols-outlined text-xl">
+                {{ showPassword() ? 'visibility_off' : 'visibility' }}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Opciones -->
+        <div class="flex items-center justify-between">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" class="h-4 w-4 rounded border-outline-variant text-brand-teal focus:ring-brand-teal">
+            <span class="font-label-md text-label-md text-on-surface-variant">Recordarme</span>
+          </label>
+          <a href="#" class="font-label-md text-label-md text-primary hover:text-brand-teal transition-colors">
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
+
+        <!-- Botón -->
+        <button
+          type="submit"
+          [disabled]="loading()"
+          class="w-full flex justify-center py-3 px-4 rounded-btn shadow-sm font-label-md text-body-lg text-primary bg-brand-teal hover:bg-brand-teal-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-teal transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+        >
+          @if (loading()) {
+            <span class="material-symbols-outlined animate-spin text-xl mr-2">progress_activity</span>
+          }
+          Ingresar
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="absolute bottom-8 w-full text-center">
+      <p class="font-body-md text-label-md text-outline-variant">
+        © 2025 Tour Vacation Travel — Panel de administración
+      </p>
+    </div>
+  </div>
+
+</div>

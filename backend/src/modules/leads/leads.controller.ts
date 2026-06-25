@@ -4,6 +4,7 @@ import { MailService } from '../mail/mail.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { SendBulkMailDto } from './dto/send-bulk-mail.dto';
 import { promotionTemplate } from '../mail/templates/promotion.template';
+import { Public } from '../auth/public.decorator';
 
 @Controller('leads')
 export class LeadsController {
@@ -12,6 +13,7 @@ export class LeadsController {
     private readonly mail: MailService,
   ) {}
 
+  @Public()
   @Post()
   create(@Body() dto: CreateLeadDto) {
     return this.service.create(dto);
