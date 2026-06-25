@@ -7,10 +7,12 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { PlansService } from './plans.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
+import { GetPlansQueryDto } from './dto/get-plans-query.dto';
 
 @Controller('plans')
 export class PlansController {
@@ -22,8 +24,8 @@ export class PlansController {
   }
 
   @Get()
-  findActive() {
-    return this.service.findActive();
+  findAll(@Query() query: GetPlansQueryDto) {
+    return this.service.findAll(query);
   }
 
   @Get(':id')

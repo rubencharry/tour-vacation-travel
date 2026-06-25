@@ -14,10 +14,37 @@ export class CreatePlanDto {
 
   @IsNumber()
   @Min(0)
-  priceUsd!: number;
+  price!: number;
+
+  @IsString()
+  currency!: string;
+
+  @IsString()
+  priceDetails!: string;
 
   @IsString()
   description!: string;
+
+  @IsInt()
+  @Min(0)
+  durationDays!: number;
+
+  @IsInt()
+  @Min(0)
+  durationNights!: number;
+
+  @IsString()
+  validity!: string;
+
+  @IsString()
+  departureCity!: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  inclusions!: string[];
+
+  @IsString()
+  terms!: string;
 
   @IsArray()
   @IsUrl({}, { each: true })
@@ -25,8 +52,4 @@ export class CreatePlanDto {
 
   @IsBoolean()
   active!: boolean;
-
-  @IsInt()
-  @Min(0)
-  displayOrder!: number;
 }

@@ -186,7 +186,23 @@ Tablas en On-Demand. **Una tabla por entidad** al principio (más simple que sin
 
 ### `Plans`
 - PK: `planId` (UUID)
-- Attrs: `title`, `priceUsd`, `description`, `imageUrl`, `active`, `displayOrder`, `createdAt`, `updatedAt`
+- Attrs:
+  - `title` (string)
+  - `price` (number)
+  - `currency` (string)
+  - `priceDetails` (string)
+  - `description` (string)
+  - `durationDays` (number)
+  - `durationNights` (number)
+  - `validity` (string)
+  - `departureCity` (string)
+  - `inclusions` (string[])
+  - `terms` (string)
+  - `imageUrls` (string[])
+  - `active` (boolean)
+  - `displayOrder` (number)
+  - `createdAt` (string)
+  - `updatedAt` (string)
 
 ### `Leads`
 - PK: `leadId` (UUID)
@@ -194,6 +210,33 @@ Tablas en On-Demand. **Una tabla por entidad** al principio (más simple que sin
 - GSI candidato: `email` (para idempotencia y búsquedas)
 
 > Si en algún punto las queries justifican single-table design, refactorizamos. Hasta entonces, simple.
+
+---
+
+## Contrato de API — Endpoints Clave
+
+### `GET /api/plans` (Paginado y Ordenado)
+Retorna los planes ordenados ascendentemente por `displayOrder`.
+- **Query Params (opcionales):**
+  - `limit`: número (default `10`, min `1`)
+  - `page`: número (default `1`, min `1`)
+  - `active`: booleano (`"true"` o `"false"` en texto)
+- **Formato de Respuesta:**
+  ```json
+  {
+    "data": [ { ...Plan... } ],
+    "meta": {
+      "totalItems": number,
+      "itemCount": number,
+      "itemsPerPage": number,
+      "totalPages": number,
+      "currentPage": number
+    }
+  }
+  ```
+
+### `POST /api/plans`
+Crea un plan con los atributos definidos en el DTO de creación.
 
 ---
 

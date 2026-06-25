@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PutCommand, QueryCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
+import {
+  PutCommand,
+  QueryCommand,
+  ScanCommand,
+  UpdateCommand,
+} from '@aws-sdk/lib-dynamodb';
 import { DynamoDbService } from '../dynamodb/dynamodb.service';
 import { Lead } from './entities/lead.entity';
 
@@ -38,5 +43,16 @@ export class LeadsRepository {
       new ScanCommand({ TableName: this.table }),
     );
     return (result.Items ?? []) as Lead[];
+  }
+
+  async markEmailSent(leadId: string): Promise<void> {
+    await this.db.client.send(
+      new UpdateCommand({
+        TableName: this.table,
+        Key: { leadId },
+        UpdateExpression: 'SET emailSent = :val',
+        ExpressionAttributeValues: { ':val': true },
+      }),
+    );
   }
 }
