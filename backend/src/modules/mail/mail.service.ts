@@ -26,13 +26,23 @@ export class MailService {
 
   constructor(config: ConfigService) {
     this.isDev = config.get('NODE_ENV') !== 'production';
-    this.fromAddress = config.getOrThrow<string>('SES_FROM_ADDRESS');
+    this.fromAddress = config.get<string>('SES_FROM_ADDRESS', '');
+    if (!this.isDev && !this.fromAddress) {
+      this.logger.warn(
+        'SES_FROM_ADDRESS no configurada — envío de mails deshabilitado',
+      );
+    }
     this.ses = new SESClient({ region: config.get('AWS_REGION', 'sa-east-1') });
   }
 
   async send(options: SendMailOptions): Promise<void> {
     if (this.isDev) {
       this.logger.log(`[DEV] To: ${options.to} | Subject: ${options.subject}`);
+      return;
+    }
+
+    if (!this.fromAddress) {
+      this.logger.warn(`Mail omitido (SES no configurada) — To: ${options.to}`);
       return;
     }
 

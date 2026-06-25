@@ -19,6 +19,8 @@ async function buildLambda() {
       '@nestjs/websockets/*',
       '@nestjs/microservices',
       '@nestjs/microservices/*',
+      // Sub-path no resolvible por esbuild; @nestjs/mapped-types lo wrappea en try/catch
+      'class-transformer/storage',
     ],
   });
 
