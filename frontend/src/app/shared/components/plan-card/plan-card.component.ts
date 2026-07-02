@@ -11,6 +11,8 @@ export class PlanCardComponent {
   @Input() showTypeBadge = false;
   @Output() selected = new EventEmitter<void>();
 
+  protected imgError = false;
+
   protected formatPrice(price: number, currency: string): string {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
