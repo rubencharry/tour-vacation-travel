@@ -13,7 +13,7 @@
       Hacemos Realidad el Viaje de tus Sueños
     </h1>
     <p class="text-white/80 font-body-lg text-body-lg mb-8 max-w-lg">
-      Viví lujos sin igual e itinerarios meticulosamente diseñados. Descubrí los destinos más impresionantes del mundo con confianza y estilo.
+      Vive lujos sin igual e itinerarios meticulosamente diseñados. Descubre los destinos más impresionantes del mundo con confianza y estilo.
     </p>
     <div class="flex flex-col sm:flex-row gap-4">
       <a
@@ -66,7 +66,7 @@
   <div class="max-w-[1200px] mx-auto">
     <div class="text-center mb-12">
       <h2 class="text-primary-container font-headline-lg text-[44px] font-bold mb-2">Planes Destacados</h2>
-      <p class="text-outline font-body-md text-body-md">Descubrí nuestras experiencias de viaje más populares</p>
+      <p class="text-outline font-body-md text-body-md">Descubre nuestras experiencias de viaje más populares</p>
     </div>
 
     <!-- Loading skeleton -->
@@ -88,7 +88,7 @@
     @if (plansState().error) {
       <div class="text-center py-12">
         <span class="material-symbols-outlined text-outline text-5xl mb-4 block">wifi_off</span>
-        <p class="text-outline font-body-md text-body-md">No pudimos cargar los planes. Intentá de nuevo más tarde.</p>
+        <p class="text-outline font-body-md text-body-md">No pudimos cargar los planes. Intenta de nuevo más tarde.</p>
       </div>
     }
 
@@ -96,42 +96,7 @@
     @if (!plansState().loading && !plansState().error) {
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
         @for (plan of plansState().plans; track plan.planId) {
-          <div class="bg-white rounded-[20px] shadow-sm overflow-hidden border border-surface-container-highest hover:shadow-soft transition-shadow duration-300 flex flex-col">
-            <div class="relative">
-              <img
-                [src]="plan.imageUrls[0]"
-                [alt]="plan.title"
-                class="w-full h-48 object-cover"
-              >
-              @if (plan.departureCity) {
-                <span class="absolute top-3 left-3 bg-primary-container/80 text-white font-label-md text-[12px] px-2 py-1 rounded-full backdrop-blur-sm">
-                  <span class="material-symbols-outlined text-[14px] align-middle">flight_takeoff</span>
-                  {{ plan.departureCity }}
-                </span>
-              }
-            </div>
-            <div class="p-6 flex flex-col flex-1">
-              <h3 class="text-primary-container font-headline-md text-headline-md mb-1">{{ plan.title }}</h3>
-              <p class="text-outline text-sm mb-3">{{ formatDuration(plan.durationDays, plan.durationNights) }}</p>
-              @if (plan.validity) {
-                <p class="text-on-surface-variant font-body-md text-[13px] mb-4">
-                  <span class="material-symbols-outlined text-[14px] align-middle text-brand-teal">calendar_month</span>
-                  Salidas: {{ plan.validity }}
-                </p>
-              }
-              <div class="flex justify-between items-end mt-auto pt-4 border-t border-surface-container-high">
-                <div>
-                  <span class="text-brand-teal font-bold text-2xl">{{ formatPrice(plan.price, plan.currency) }}</span>
-                  @if (plan.priceDetails) {
-                    <p class="text-outline text-[12px] mt-0.5">{{ plan.priceDetails }}</p>
-                  }
-                </div>
-                <button class="bg-brand-teal hover:bg-brand-terracotta text-white font-label-md text-[13px] px-4 py-2 rounded-btn transition-colors">
-                  Ver Plan
-                </button>
-              </div>
-            </div>
-          </div>
+          <app-plan-card [plan]="plan" (selected)="selectedPlan.set(plan)" />
         }
       </div>
 
@@ -141,9 +106,10 @@
     }
 
     <div class="text-center">
-      <button class="bg-transparent border-2 border-primary-container text-primary-container hover:bg-primary-container hover:text-white font-headline-md font-bold px-8 py-3 rounded-btn transition-colors">
-        Ver todos los planes
-      </button>
+      <a
+        routerLink="/planes"
+        class="inline-block bg-transparent border-2 border-primary-container text-primary-container hover:bg-primary-container hover:text-white font-headline-md font-bold px-8 py-3 rounded-btn transition-colors"
+      >Ver todos los planes</a>
     </div>
   </div>
 </section>
@@ -204,12 +170,16 @@
   </div>
 </section>
 
+@if (selectedPlan(); as plan) {
+  <app-plan-modal [plan]="plan" (closed)="selectedPlan.set(null)" />
+}
+
 <!-- Formulario de Contacto -->
 <section id="contacto" class="bg-brand-teal py-[100px] px-margin-mobile md:px-margin-desktop">
   <div class="max-w-[1200px] mx-auto text-center">
     <h2 class="font-headline-lg text-[48px] font-bold text-white mb-4">¿Listo para Comenzar tu Aventura?</h2>
     <p class="font-body-lg text-[18px] text-white/85 mb-8 max-w-2xl mx-auto">
-      Dejanos tus datos y te contactamos con las mejores ofertas, guías de destinos y propuestas VIP pensadas para vos.
+      Déjanos tus datos y te contactamos con las mejores ofertas, guías de destinos y propuestas VIP pensadas para ti.
     </p>
     <form class="flex flex-col md:flex-row justify-center items-center gap-4 max-w-4xl mx-auto" (submit)="submitForm($event)">
       <input

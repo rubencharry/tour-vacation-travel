@@ -1,4 +1,4 @@
-import { IsBoolean, IsInt, IsOptional, Min } from 'class-validator';
+import { IsBoolean, IsIn, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 export class GetPlansQueryDto {
@@ -22,4 +22,9 @@ export class GetPlansQueryDto {
   })
   @IsBoolean()
   active?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['internacional', 'nacional'])
+  planType?: string;
 }

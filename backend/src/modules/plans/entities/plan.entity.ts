@@ -1,3 +1,5 @@
+export type PlanType = 'internacional' | 'nacional';
+
 export interface Plan {
   planId: string;
   title: string;
@@ -9,10 +11,12 @@ export interface Plan {
   durationNights: number;
   validity: string;
   departureCity: string;
+  planType: PlanType;
   inclusions: string[];
   terms: string;
   imageUrls: string[];
   active: boolean;
+  displayOrder: number;
   createdAt: string;
   updatedAt: string;
 }
