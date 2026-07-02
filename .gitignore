@@ -40,6 +40,7 @@ Thumbs.db
 # Tests / coverage
 coverage/
 .nyc_output/
+/testsprite_tests
 
 # DynamoDB Local data (generado en local, no versionar)
 backend/.dynamodb-data/
@@ -50,3 +51,5 @@ dynamodblocal-bin/
 # Misc
 *.tmp
 *.swp
+
+testsprite_tests\tmp\config.json

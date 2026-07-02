@@ -3,11 +3,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map, catchError, of, startWith } from 'rxjs';
 import { Plan, PlansService } from '../../core/services/plans.service';
 import { ScrollRevealDirective } from '../../shared/directives/scroll-reveal.directive';
+import { RouterLink } from '@angular/router';
+import { PlanCardComponent } from '../../shared/components/plan-card/plan-card.component';
+import { PlanModalComponent } from '../../shared/components/plan-modal/plan-modal.component';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [ScrollRevealDirective],
+  imports: [ScrollRevealDirective, RouterLink, PlanCardComponent, PlanModalComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
 })
@@ -17,9 +20,10 @@ export class LandingComponent {
   protected formName = signal('');
   protected formEmail = signal('');
   protected formPhone = signal('');
+  protected selectedPlan = signal<Plan | null>(null);
 
   protected readonly plansState = toSignal(
-    this.plansService.getPlans({ active: true, limit: 6 }).pipe(
+    this.plansService.getPlans({ active: true, limit: 3 }).pipe(
       map((res) => ({ loading: false, plans: res.data, error: false })),
       startWith({ loading: true, plans: [] as Plan[], error: false }),
       catchError(() => of({ loading: false, plans: [] as Plan[], error: true })),
