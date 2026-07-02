@@ -18,4 +18,7 @@ export const SERVICES_CATALOG: ServiceItem[] = [
   { id: 'kayak', label: 'Kayak / deportes' },
 ];
 
-export const SERVICE_IDS = SERVICES_CATALOG.map((s) => s.id) as [string, ...string[]];
+export const SERVICE_IDS = SERVICES_CATALOG.map((s) => s.id) as [
+  string,
+  ...string[],
+];
