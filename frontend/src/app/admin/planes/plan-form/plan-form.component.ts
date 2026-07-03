@@ -189,7 +189,7 @@ export class PlanFormComponent implements OnInit {
         try {
           const { publicUrl } = await firstValueFrom(
             this.http.post<{ key: string; publicUrl: string }>(
-              '/api/admin/plans/upload-image',
+              '/api/plans/upload-image',
               { file: base64, extension },
             ),
           );
