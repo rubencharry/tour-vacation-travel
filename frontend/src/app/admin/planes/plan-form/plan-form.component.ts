@@ -1,9 +1,10 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { CreatePlanPayload, PlansService } from '../../../core/services/plans.service';
 import { PlanServicesService, PlanService } from '../../../core/services/plan-services.service';
-import { MediaService } from '../../../core/services/media.service';
 import { ToastService } from '../../../core/services/toast.service';
 
 const DEPARTURE_CITIES = [
@@ -31,7 +32,7 @@ export class PlanFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly svc = inject(PlansService);
   private readonly servicesSvc = inject(PlanServicesService);
-  private readonly mediaSvc = inject(MediaService);
+  private readonly http = inject(HttpClient);
   private readonly toast = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -177,15 +178,25 @@ export class PlanFormComponent implements OnInit {
       const id = this.newImageId();
       const reader = new FileReader();
       reader.onload = async (e) => {
-        const preview = (e.target?.result as string) ?? '';
+        const dataUrl = (e.target?.result as string) ?? '';
+        const base64 = dataUrl.split(',')[1];
+        const extension = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+
         this.imageItems.update((items) => [
           ...items,
-          { id, url: '', preview, uploading: true, error: '' },
+          { id, url: '', preview: dataUrl, uploading: true, error: '' },
         ]);
         try {
-          const publicUrl = await this.mediaSvc.uploadFile(file);
+          const { publicUrl } = await firstValueFrom(
+            this.http.post<{ key: string; publicUrl: string }>(
+              '/api/admin/plans/upload-image',
+              { file: base64, extension },
+            ),
+          );
           this.imageItems.update((items) =>
-            items.map((i) => (i.id === id ? { ...i, url: publicUrl, preview: publicUrl, uploading: false } : i)),
+            items.map((i) =>
+              i.id === id ? { ...i, url: publicUrl, preview: publicUrl, uploading: false } : i,
+            ),
           );
         } catch (err: unknown) {
           const msg =

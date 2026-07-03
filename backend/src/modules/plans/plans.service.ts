@@ -100,6 +100,13 @@ export class PlansService {
     await this.repo.delete(planId);
   }
 
+  async uploadImage(
+    base64: string,
+    extension: string,
+  ): Promise<{ key: string; publicUrl: string }> {
+    return this.fileService.saveBase64(base64, extension, 'plans');
+  }
+
   private async addPresignedUrls(plans: Plan[]): Promise<Plan[]> {
     return Promise.all(
       plans.map(async (p) => ({

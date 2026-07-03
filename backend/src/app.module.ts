@@ -8,7 +8,6 @@ import { ProvidersModule } from './modules/providers/providers.module';
 import { MailModule } from './modules/mail/mail.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ServicesModule } from './modules/services/services.module';
-import { MediaModule } from './modules/media/media.module';
 
 @Module({
   imports: [
@@ -21,7 +20,6 @@ import { MediaModule } from './modules/media/media.module';
     MailModule,
     AuthModule,
     ServicesModule,
-    MediaModule,
   ],
 })
 export class AppModule {}
