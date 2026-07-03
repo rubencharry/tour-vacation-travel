@@ -13,6 +13,16 @@ export const routes: Routes = [
       import('./sections/planes/planes.component').then((m) => m.PlanesComponent),
   },
   {
+    path: 'nosotros',
+    loadComponent: () =>
+      import('./sections/nosotros/nosotros.component').then((m) => m.NosotrosComponent),
+  },
+  {
+    path: 'contacto',
+    loadComponent: () =>
+      import('./sections/contacto/contacto.component').then((m) => m.ContactoComponent),
+  },
+  {
     path: 'admin',
     loadChildren: () =>
       import('./admin/admin.routes').then((m) => m.adminRoutes),

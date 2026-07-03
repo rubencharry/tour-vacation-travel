@@ -117,7 +117,7 @@
 <!-- Por Qué Elegirnos -->
 <section id="nosotros" class="bg-primary-container py-xl px-margin-mobile md:px-margin-desktop overflow-hidden">
   <div class="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-    <div class="text-white">
+    <div appScrollReveal direction="left" class="text-white">
       <h2 class="font-headline-lg text-headline-lg mb-6">¿Por Qué Elegir Tour Vacation Travel?</h2>
       <p class="font-body-lg text-body-lg text-white/80 mb-8">
         Combinamos décadas de experiencia con una pasión por descubrir las joyas ocultas del mundo, asegurándonos de que cada detalle sea atendido con precisión.
@@ -131,7 +131,7 @@
         }
       </ul>
     </div>
-    <div class="relative">
+    <div appScrollReveal direction="right" [delay]="100" class="relative">
       <img
         src="/why-us.webp"
         alt="Por qué elegirnos"
@@ -146,8 +146,8 @@
   <div class="max-w-[1200px] mx-auto">
     <h2 class="text-primary-container font-headline-lg text-[44px] font-bold text-center mb-12">Lo Que Dicen Nuestros Viajeros</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      @for (testimonial of testimonials; track testimonial.name) {
-        <div class="bg-white rounded-card shadow-soft p-[28px] flex flex-col">
+      @for (testimonial of testimonials; track testimonial.name; let i = $index) {
+        <div appScrollReveal [delay]="i * 120" class="bg-white rounded-card shadow-soft p-[28px] flex flex-col border-t-[3px] border-transparent hover:border-brand-teal hover:scale-[1.03] transition-all duration-300">
           <span class="material-symbols-outlined text-brand-teal text-4xl mb-4 icon-fill">format_quote</span>
           <p class="font-body-md text-[#444444] italic mb-6 flex-grow">"{{ testimonial.quote }}"</p>
           <div class="flex items-center mt-auto">
