@@ -31,7 +31,9 @@ export class FileService {
         region: this.region,
       });
       this.localBaseUrl = null;
-      this.logger.log(`FileService → S3 bucket: ${mediaBucket} (${this.region})`);
+      this.logger.log(
+        `FileService → S3 bucket: ${mediaBucket} (${this.region})`,
+      );
     } else if (minioEndpoint) {
       const port = parseInt(config.get('MINIO_PORT') ?? '9000');
       const useSSL = config.get('MINIO_USE_SSL') === 'true';
@@ -45,12 +47,16 @@ export class FileService {
         region: this.region,
       });
       this.localBaseUrl = null;
-      this.logger.log(`FileService → MinIO: ${minioEndpoint}:${port} / bucket: ${this.bucket}`);
+      this.logger.log(
+        `FileService → MinIO: ${minioEndpoint}:${port} / bucket: ${this.bucket}`,
+      );
     } else {
       this.client = null;
       this.bucket = null;
       this.localBaseUrl = null;
-      this.logger.warn('FileService → sin bucket configurado, imágenes en disco local.');
+      this.logger.warn(
+        'FileService → sin bucket configurado, imágenes en disco local.',
+      );
     }
   }
 
@@ -59,7 +65,8 @@ export class FileService {
     extension: string,
     folder: string,
   ): Promise<{ name: string; publicUrl: string }> {
-    if (!base64Data || !folder) throw new BadRequestException('Invalid input data');
+    if (!base64Data || !folder)
+      throw new BadRequestException('Invalid input data');
 
     const buffer = Buffer.from(base64Data, 'base64');
     const key = `${folder}/${crypto.randomBytes(16).toString('hex')}.${extension}`;
@@ -76,7 +83,8 @@ export class FileService {
     name: string,
     folder: string,
   ): Promise<{ name: string; publicUrl: string }> {
-    if (!base64Data || !folder) throw new BadRequestException('Invalid input data');
+    if (!base64Data || !folder)
+      throw new BadRequestException('Invalid input data');
 
     const buffer = Buffer.from(base64Data, 'base64');
     const key = `${folder}/${name}.${extension}`;
@@ -121,7 +129,10 @@ export class FileService {
       (urls ?? []).map(async (url) => {
         if (!url) return url;
         // External URL: not our S3 bucket
-        if (url.startsWith('http') && !(this.bucket && url.includes(this.bucket))) {
+        if (
+          url.startsWith('http') &&
+          !(this.bucket && url.includes(this.bucket))
+        ) {
           return url;
         }
         const key = this.extractS3Key(url);
@@ -150,11 +161,18 @@ export class FileService {
     });
     // Return a presigned URL valid for 1 hour so the frontend can preview immediately.
     // The key (name) is what must be stored in the database.
-    const publicUrl = await this.client!.presignedGetObject(this.bucket!, key, 3600);
+    const publicUrl = await this.client!.presignedGetObject(
+      this.bucket!,
+      key,
+      3600,
+    );
     return { name: key, publicUrl };
   }
 
-  private saveLocally(buffer: Buffer, key: string): { name: string; publicUrl: string } {
+  private saveLocally(
+    buffer: Buffer,
+    key: string,
+  ): { name: string; publicUrl: string } {
     const uploadsDir = join(process.cwd(), 'uploads');
     if (!existsSync(uploadsDir)) mkdirSync(uploadsDir, { recursive: true });
     const localName = key.replace(/\//g, '_');
@@ -168,9 +186,12 @@ export class FileService {
 
   private mimeFromExtension(ext: string): string {
     const map: Record<string, string> = {
-      jpg: 'image/jpeg', jpeg: 'image/jpeg',
-      png: 'image/png', webp: 'image/webp',
-      gif: 'image/gif', svg: 'image/svg+xml',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      webp: 'image/webp',
+      gif: 'image/gif',
+      svg: 'image/svg+xml',
     };
     return map[ext.toLowerCase()] ?? 'application/octet-stream';
   }

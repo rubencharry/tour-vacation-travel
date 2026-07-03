@@ -24,7 +24,10 @@ export class PlansService {
       updatedAt: now,
     };
     await this.repo.put(plan);
-    return { ...plan, imageUrls: await this.fileService.presignImageUrls(plan.imageUrls) };
+    return {
+      ...plan,
+      imageUrls: await this.fileService.presignImageUrls(plan.imageUrls),
+    };
   }
 
   async findAll(query: GetPlansQueryDto): Promise<{ data: Plan[]; meta: any }> {
@@ -66,7 +69,10 @@ export class PlansService {
   async findOne(planId: string): Promise<Plan> {
     const plan = await this.repo.findById(planId);
     if (!plan) throw new NotFoundException(`Plan ${planId} no encontrado`);
-    return { ...plan, imageUrls: await this.fileService.presignImageUrls(plan.imageUrls ?? []) };
+    return {
+      ...plan,
+      imageUrls: await this.fileService.presignImageUrls(plan.imageUrls ?? []),
+    };
   }
 
   async update(planId: string, dto: UpdatePlanDto): Promise<Plan> {
@@ -75,11 +81,18 @@ export class PlansService {
     const updates: Partial<Omit<Plan, 'planId' | 'createdAt'>> = {
       ...rest,
       ...(planType ? { planType: planType as PlanType } : {}),
-      ...(imageUrls ? { imageUrls: imageUrls.map((u) => this.fileService.extractS3Key(u)) } : {}),
+      ...(imageUrls
+        ? { imageUrls: imageUrls.map((u) => this.fileService.extractS3Key(u)) }
+        : {}),
       updatedAt: new Date().toISOString(),
     };
     const updated = await this.repo.update(planId, updates);
-    return { ...updated, imageUrls: await this.fileService.presignImageUrls(updated.imageUrls ?? []) };
+    return {
+      ...updated,
+      imageUrls: await this.fileService.presignImageUrls(
+        updated.imageUrls ?? [],
+      ),
+    };
   }
 
   async remove(planId: string): Promise<void> {
