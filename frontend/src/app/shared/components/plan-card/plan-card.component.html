@@ -3,12 +3,20 @@
   (click)="selected.emit()"
 >
   <!-- Imagen -->
-  <div class="relative overflow-hidden aspect-[3/2]">
-    <img
-      [src]="plan.imageUrls[0]"
-      [alt]="plan.title"
-      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-    >
+  <div class="relative overflow-hidden aspect-[3/2] bg-surface-container">
+    @if (plan.imageUrls?.[0] && !imgError) {
+      <img
+        [src]="plan.imageUrls[0]"
+        [alt]="plan.title"
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        (error)="imgError = true"
+      />
+    } @else {
+      <div class="w-full h-full flex flex-col items-center justify-center gap-2 text-on-surface-variant">
+        <span class="material-symbols-outlined text-[48px] opacity-30">landscape</span>
+        <span class="text-caption opacity-50">Sin imagen</span>
+      </div>
+    }
     @if (showTypeBadge) {
       <div class="absolute top-3 left-3 bg-brand-teal text-white px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase">
         {{ plan.planType === 'internacional' ? 'Internacional' : 'Nacional' }}

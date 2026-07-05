@@ -38,6 +38,9 @@ export interface PlansResponse {
   meta: PlansMeta;
 }
 
+export type CreatePlanPayload = Omit<Plan, 'planId' | 'createdAt' | 'updatedAt'>;
+export type UpdatePlanPayload = Partial<CreatePlanPayload>;
+
 @Injectable({ providedIn: 'root' })
 export class PlansService {
   private http = inject(HttpClient);
@@ -49,5 +52,21 @@ export class PlansService {
     if (opts.active !== undefined) params = params.set('active', opts.active);
     if (opts.planType !== undefined) params = params.set('planType', opts.planType);
     return this.http.get<PlansResponse>('/api/plans', { params });
+  }
+
+  getPlan(id: string): Observable<Plan> {
+    return this.http.get<Plan>(`/api/plans/${id}`);
+  }
+
+  createPlan(dto: CreatePlanPayload): Observable<Plan> {
+    return this.http.post<Plan>('/api/plans', dto);
+  }
+
+  updatePlan(id: string, dto: UpdatePlanPayload): Observable<Plan> {
+    return this.http.patch<Plan>(`/api/plans/${id}`, dto);
+  }
+
+  deletePlan(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/plans/${id}`);
   }
 }

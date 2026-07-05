@@ -77,6 +77,11 @@ module.exports = {
         'gutter': '24px',
         'margin-mobile': '16px',
         'margin-desktop': '64px',
+        'sidebar': '240px',
+      },
+      boxShadow: {
+        'coastal': '0 4px 20px -2px rgba(29, 53, 87, 0.08)',
+        'coastal-hover': '0 8px 30px -4px rgba(29, 53, 87, 0.12)',
       },
     },
   },

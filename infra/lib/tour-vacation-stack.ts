@@ -42,6 +42,13 @@ export class TourVacationStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
+    // ── Media bucket (imágenes de planes) ────────────────────────────────────
+
+    const mediaBucket = new s3.Bucket(this, 'MediaBucket', {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
     // ── Lambda ───────────────────────────────────────────────────────────────
 
     const backendLambda = new lambda.Function(this, 'BackendLambda', {
@@ -57,12 +64,14 @@ export class TourVacationStack extends cdk.Stack {
         DDB_TABLE_PLANS: plansTable.tableName,
         DDB_TABLE_LEADS: leadsTable.tableName,
         DDB_TABLE_PROVIDERS: providersTable.tableName,
+        MEDIA_BUCKET_NAME: mediaBucket.bucketName,
       },
     });
 
     plansTable.grantReadWriteData(backendLambda);
     leadsTable.grantReadWriteData(backendLambda);
     providersTable.grantReadWriteData(backendLambda);
+    mediaBucket.grantReadWrite(backendLambda);
 
     // ── API Gateway HTTP API ──────────────────────────────────────────────────
 
@@ -152,6 +161,11 @@ export class TourVacationStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'DistributionId', {
       value: distribution.distributionId,
       description: 'ID de la distribución CloudFront (para invalidaciones)',
+    });
+
+    new cdk.CfnOutput(this, 'MediaBucketName', {
+      value: mediaBucket.bucketName,
+      description: 'Nombre del bucket S3 para imágenes de planes',
     });
   }
 }
