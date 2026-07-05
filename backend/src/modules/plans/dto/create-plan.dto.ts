@@ -56,7 +56,7 @@ export class CreatePlanDto {
   terms!: string;
 
   @IsArray()
-  @IsUrl({}, { each: true })
+  @IsUrl({ require_tld: false }, { each: true })
   imageUrls!: string[];
 
   @IsBoolean()

@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -13,11 +14,18 @@ import { PlansService } from './plans.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 import { GetPlansQueryDto } from './dto/get-plans-query.dto';
+import { UploadImageDto } from './dto/upload-image.dto';
 import { Public } from '../auth/public.decorator';
 
 @Controller('plans')
 export class PlansController {
   constructor(private readonly service: PlansService) {}
+
+  @Post('upload-image')
+  @HttpCode(HttpStatus.OK)
+  uploadImage(@Body() dto: UploadImageDto) {
+    return this.service.uploadImage(dto.file, dto.extension);
+  }
 
   @Post()
   create(@Body() dto: CreatePlanDto) {
