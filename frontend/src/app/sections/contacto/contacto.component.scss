@@ -1,0 +1,26 @@
+:host {
+  display: block;
+}
+
+.info-card {
+  transition: border-color 0.2s ease;
+
+  &:hover .icon-wrap {
+    background-color: var(--color-secondary, #00696e);
+    color: #fff;
+  }
+}
+
+.icon-wrap {
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+input,
+select,
+textarea {
+  &:focus {
+    outline: none;
+  }
+}
