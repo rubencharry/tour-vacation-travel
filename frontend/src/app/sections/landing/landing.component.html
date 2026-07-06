@@ -1,0 +1,209 @@
+<!-- Hero Section -->
+<header class="relative w-full h-[100vh] flex items-center justify-start overflow-hidden pt-[72px]">
+  <div
+    class="absolute inset-0 z-0 bg-cover bg-center"
+    style="background-image: url('/hero-bg.webp');"
+  >
+    <div class="absolute inset-0 bg-gradient-to-r from-primary-container/90 via-primary-container/60 to-transparent w-full md:w-[60%]"></div>
+  </div>
+
+  <div class="relative z-10 px-margin-mobile md:px-margin-desktop w-full md:w-[60%]">
+    <span class="block text-brand-teal uppercase tracking-widest font-label-md text-label-md mb-4 font-bold">Destinos Premier</span>
+    <h1 class="text-white font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg mb-6 leading-tight">
+      Hacemos Realidad el Viaje de tus Sueños
+    </h1>
+    <p class="text-white/80 font-body-lg text-body-lg mb-8 max-w-lg">
+      Vive lujos sin igual e itinerarios meticulosamente diseñados. Descubre los destinos más impresionantes del mundo con confianza y estilo.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4">
+      <a
+        href="#planes"
+        class="inline-block bg-brand-teal hover:bg-brand-terracotta text-white font-label-md text-label-md px-6 py-3 rounded-btn transition-colors shadow-soft text-center"
+      >Ver Planes</a>
+      <a
+        href="#contacto"
+        class="inline-block bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary-container font-label-md text-label-md px-6 py-3 rounded-btn transition-colors text-center"
+      >Contáctanos</a>
+    </div>
+  </div>
+</header>
+
+<!-- Trust Stats Strip -->
+<section class="bg-white py-xl border-b border-surface-container-highest">
+  <div class="max-w-[1200px] mx-auto px-margin-mobile md:px-margin-desktop">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x md:divide-brand-teal-light text-center">
+      @for (stat of stats; track stat.label) {
+        <div class="px-4">
+          <span class="block text-primary-container font-headline-lg text-headline-lg font-bold mb-1">{{ stat.value }}</span>
+          <span class="text-outline font-label-md text-label-md uppercase tracking-wider">{{ stat.label }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Services Section -->
+<section class="bg-brand-cream py-xl px-margin-mobile md:px-margin-desktop">
+  <div class="max-w-[1200px] mx-auto text-center mb-12">
+    <span class="text-brand-teal uppercase tracking-widest font-label-md text-label-md mb-2 block font-bold">Lo Que Ofrecemos</span>
+    <h2 class="text-primary-container font-headline-lg text-headline-lg">Nuestros Servicios Premium</h2>
+  </div>
+  <div class="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    @for (service of services; track service.title; let i = $index) {
+      <div appScrollReveal [delay]="i * 120" class="bg-white p-6 rounded-card shadow-soft hover:-translate-y-2 hover:border-t-[3px] hover:border-brand-teal transition-all duration-300 group border-t-[3px] border-transparent flex flex-col items-center text-center">
+        <div class="w-16 h-16 rounded-full bg-brand-teal-light flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <span class="material-symbols-outlined text-primary-container text-[32px]">{{ service.icon }}</span>
+        </div>
+        <h3 class="text-primary-container font-headline-md text-headline-md mb-2">{{ service.title }}</h3>
+        <p class="text-on-surface-variant font-body-md text-body-md">{{ service.description }}</p>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Planes Destacados -->
+<section id="planes" class="bg-white py-[80px] px-margin-mobile md:px-margin-desktop">
+  <div class="max-w-[1200px] mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="text-primary-container font-headline-lg text-[44px] font-bold mb-2">Planes Destacados</h2>
+      <p class="text-outline font-body-md text-body-md">Descubre nuestras experiencias de viaje más populares</p>
+    </div>
+
+    <!-- Loading skeleton -->
+    @if (plansState().loading) {
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        @for (i of [1, 2, 3]; track i) {
+          <div class="bg-white rounded-[20px] shadow-sm overflow-hidden border border-surface-container-highest animate-pulse">
+            <div class="w-full h-48 bg-surface-container-high"></div>
+            <div class="p-6 space-y-3">
+              <div class="h-6 bg-surface-container-high rounded w-3/4"></div>
+              <div class="h-4 bg-surface-container-high rounded w-1/2"></div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Error state -->
+    @if (plansState().error) {
+      <div class="text-center py-12">
+        <span class="material-symbols-outlined text-outline text-5xl mb-4 block">wifi_off</span>
+        <p class="text-outline font-body-md text-body-md">No pudimos cargar los planes. Intenta de nuevo más tarde.</p>
+      </div>
+    }
+
+    <!-- Plans grid -->
+    @if (!plansState().loading && !plansState().error) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        @for (plan of plansState().plans; track plan.planId) {
+          <app-plan-card [plan]="plan" (selected)="selectedPlan.set(plan)" />
+        }
+      </div>
+
+      @if (plansState().plans.length === 0) {
+        <p class="text-center text-outline font-body-md text-body-md py-12">No hay planes disponibles por el momento.</p>
+      }
+    }
+
+    <div class="text-center">
+      <a
+        routerLink="/planes"
+        class="inline-block bg-transparent border-2 border-primary-container text-primary-container hover:bg-primary-container hover:text-white font-headline-md font-bold px-8 py-3 rounded-btn transition-colors"
+      >Ver todos los planes</a>
+    </div>
+  </div>
+</section>
+
+<!-- Por Qué Elegirnos -->
+<section id="nosotros" class="bg-primary-container py-xl px-margin-mobile md:px-margin-desktop overflow-hidden">
+  <div class="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+    <div appScrollReveal direction="left" class="text-white">
+      <h2 class="font-headline-lg text-headline-lg mb-6">¿Por Qué Elegir Tour Vacation Travel?</h2>
+      <p class="font-body-lg text-body-lg text-white/80 mb-8">
+        Combinamos décadas de experiencia con una pasión por descubrir las joyas ocultas del mundo, asegurándonos de que cada detalle sea atendido con precisión.
+      </p>
+      <ul class="space-y-4 font-body-md text-body-md">
+        @for (benefit of benefits; track benefit) {
+          <li class="flex items-start">
+            <span class="material-symbols-outlined text-brand-teal mr-3 mt-1">check_circle</span>
+            <span>{{ benefit }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+    <div appScrollReveal direction="right" [delay]="100" class="relative">
+      <img
+        src="/why-us.webp"
+        alt="Por qué elegirnos"
+        class="rounded-[20px] shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500 w-full h-auto object-cover max-h-[500px]"
+      >
+    </div>
+  </div>
+</section>
+
+<!-- Testimonios -->
+<section class="bg-brand-cream py-[80px] px-margin-mobile md:px-margin-desktop">
+  <div class="max-w-[1200px] mx-auto">
+    <h2 class="text-primary-container font-headline-lg text-[44px] font-bold text-center mb-12">Lo Que Dicen Nuestros Viajeros</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      @for (testimonial of testimonials; track testimonial.name; let i = $index) {
+        <div appScrollReveal [delay]="i * 120" class="bg-white rounded-card shadow-soft p-[28px] flex flex-col border-t-[3px] border-transparent hover:border-brand-teal hover:scale-[1.03] transition-all duration-300">
+          <span class="material-symbols-outlined text-brand-teal text-4xl mb-4 icon-fill">format_quote</span>
+          <p class="font-body-md text-[#444444] italic mb-6 flex-grow">"{{ testimonial.quote }}"</p>
+          <div class="flex items-center mt-auto">
+            <div class="w-12 h-12 rounded-full bg-brand-teal-light flex items-center justify-center text-primary-container font-headline-md font-bold mr-4">
+              {{ testimonial.initials }}
+            </div>
+            <div>
+              <h4 class="font-headline-md font-semibold text-primary-container text-xl">{{ testimonial.name }}</h4>
+              <p class="font-body-md text-[13px] text-outline mb-1">{{ testimonial.package }}</p>
+              <div class="flex text-brand-teal">
+                @for (star of stars; track star) {
+                  <span class="material-symbols-outlined text-sm icon-fill">star</span>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+@if (selectedPlan(); as plan) {
+  <app-plan-modal [plan]="plan" (closed)="selectedPlan.set(null)" />
+}
+
+<!-- Formulario de Contacto -->
+<section id="contacto" class="bg-brand-teal py-[100px] px-margin-mobile md:px-margin-desktop">
+  <div class="max-w-[1200px] mx-auto text-center">
+    <h2 class="font-headline-lg text-[48px] font-bold text-white mb-4">¿Listo para Comenzar tu Aventura?</h2>
+    <p class="font-body-lg text-[18px] text-white/85 mb-8 max-w-2xl mx-auto">
+      Déjanos tus datos y te contactamos con las mejores ofertas, guías de destinos y propuestas VIP pensadas para ti.
+    </p>
+    <form class="flex flex-col md:flex-row justify-center items-center gap-4 max-w-4xl mx-auto" (submit)="submitForm($event)">
+      <input
+        class="w-full md:w-auto bg-white rounded-btn h-[48px] border border-primary-container px-4 font-body-md text-primary-container focus:outline-none focus:ring-2 focus:ring-primary-container placeholder:text-outline"
+        placeholder="Tu nombre" type="text"
+        [value]="formName()"
+        (input)="formName.set($any($event.target).value)"
+      >
+      <input
+        class="w-full md:w-auto bg-white rounded-btn h-[48px] border border-primary-container px-4 font-body-md text-primary-container focus:outline-none focus:ring-2 focus:ring-primary-container placeholder:text-outline"
+        placeholder="Tu email" type="email"
+        [value]="formEmail()"
+        (input)="formEmail.set($any($event.target).value)"
+      >
+      <input
+        class="w-full md:w-auto bg-white rounded-btn h-[48px] border border-primary-container px-4 font-body-md text-primary-container focus:outline-none focus:ring-2 focus:ring-primary-container placeholder:text-outline"
+        placeholder="Tu teléfono" type="tel"
+        [value]="formPhone()"
+        (input)="formPhone.set($any($event.target).value)"
+      >
+      <button
+        class="w-full md:w-auto bg-white text-primary-container font-headline-md font-bold rounded-btn h-[48px] px-8 hover:bg-brand-cream transition-colors border border-primary-container"
+        type="submit"
+      >Enviar</button>
+    </form>
+  </div>
+</section>

@@ -1,0 +1,423 @@
+@if (loading()) {
+  <div class="flex items-center justify-center py-20 text-on-surface-variant">
+    <span class="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+    Cargando plan...
+  </div>
+} @else {
+<div class="max-w-4xl mx-auto pb-4" [formGroup]="form">
+
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-1 text-caption text-on-surface-variant mb-1">
+    <a routerLink="/admin/planes" class="hover:text-primary transition-colors">Planes</a>
+    <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+    <span class="text-primary font-semibold">
+      {{ isEdit() ? 'Editar Plan' : isDuplicate() ? 'Duplicar Plan' : 'Crear Plan' }}
+    </span>
+  </nav>
+  <div class="flex items-center gap-3 mb-6">
+    <h2 class="font-headline-lg text-headline-lg font-bold text-primary-container">
+      {{ isEdit() ? 'Editar Plan' : isDuplicate() ? 'Duplicar Plan' : 'Crear Nuevo Plan' }}
+    </h2>
+    <span class="text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border"
+      [class]="isDuplicate()
+        ? 'bg-secondary/10 text-secondary border-secondary/20'
+        : isEdit()
+          ? 'bg-primary-container/10 text-primary-container border-primary-container/20'
+          : 'bg-brand-teal/10 text-brand-teal border-brand-teal/20'">
+      {{ isEdit() ? 'Editando' : isDuplicate() ? 'Duplicando' : 'Borrador' }}
+    </span>
+  </div>
+
+  @if (error()) {
+    <div class="mb-4 px-4 py-3 bg-error-container text-on-error-container rounded-btn font-body-md text-body-md">
+      {{ error() }}
+    </div>
+  }
+
+  <div class="space-y-6">
+
+    <!-- 1. Información básica -->
+    <section class="bg-surface-container-lowest rounded-card p-6 md:p-8 shadow-coastal border border-surface-variant">
+      <h3 class="font-headline-md text-headline-md font-bold text-primary-container mb-6 flex items-center gap-2">
+        <span class="material-symbols-outlined text-secondary">info</span>
+        Información básica
+      </h3>
+      <div class="space-y-5">
+
+        <div>
+          <label class="block font-label-md text-label-md text-primary-container mb-1" for="title">
+            Título del plan <span class="text-brand-terracotta">*</span>
+          </label>
+          <input
+            id="title" type="text" formControlName="title"
+            placeholder="Ej. Escapada de Lujo al Caribe"
+            class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+            [class]="isInvalid('title') ? 'border-error' : 'border-brand-teal-light'"
+          />
+          @if (isInvalid('title')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
+        </div>
+
+        <div>
+          <label class="block font-label-md text-label-md text-primary-container mb-1" for="description">
+            Descripción completa <span class="text-brand-terracotta">*</span>
+          </label>
+          <textarea
+            id="description" formControlName="description" rows="5"
+            placeholder="Itinerario detallado, destacados y qué esperar del viaje..."
+            class="w-full bg-surface-container-lowest border rounded-btn px-4 py-3 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors resize-none"
+            [class]="isInvalid('description') ? 'border-error' : 'border-brand-teal-light'"
+          ></textarea>
+          @if (isInvalid('description')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
+        </div>
+
+        <div>
+          <label class="block font-label-md text-label-md text-primary-container mb-1" for="priceDetails">
+            Detalle de precio <span class="text-brand-terracotta">*</span>
+          </label>
+          <input
+            id="priceDetails" type="text" formControlName="priceDetails"
+            placeholder="Ej. Por persona en habitación doble"
+            class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+            [class]="isInvalid('priceDetails') ? 'border-error' : 'border-brand-teal-light'"
+          />
+          @if (isInvalid('priceDetails')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 2. Precio y estado -->
+    <section class="bg-surface-container-lowest rounded-card p-6 md:p-8 shadow-coastal border border-surface-variant">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="font-headline-md text-headline-md font-bold text-primary-container flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary">payments</span>
+          Precio y estado
+        </h3>
+        <div class="flex items-center gap-3">
+          <span class="font-label-md text-label-md text-primary-container">Activo</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" formControlName="active" class="sr-only peer" />
+            <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer
+                        peer-checked:after:translate-x-full peer-checked:after:border-white
+                        after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                        after:bg-white after:border after:rounded-full after:h-5 after:w-5
+                        after:transition-all peer-checked:bg-brand-teal"></div>
+          </label>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+        <div>
+          <label class="block font-label-md text-label-md text-primary-container mb-1" for="price">
+            Precio <span class="text-brand-terracotta">*</span>
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px]">attach_money</span>
+            </span>
+            <input
+              id="price" type="number" formControlName="price" min="0"
+              placeholder="0"
+              class="w-full h-11 bg-surface-container-lowest border rounded-btn pl-10 pr-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+              [class]="isInvalid('price') ? 'border-error' : 'border-brand-teal-light'"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-label-md text-label-md text-primary-container mb-2">
+            Moneda
+          </label>
+          <div class="flex gap-2">
+            @for (opt of currencyOptions; track opt.value) {
+              <button
+                type="button"
+                (click)="form.get('currency')?.setValue(opt.value)"
+                class="flex-1 h-11 rounded-btn border text-sm font-semibold transition-all"
+                [class]="form.get('currency')?.value === opt.value
+                  ? 'bg-brand-teal text-white border-brand-teal shadow-sm'
+                  : 'bg-surface-container-lowest border-surface-variant text-on-surface-variant hover:border-brand-teal/50 hover:text-primary-container'"
+              >{{ opt.label }}</button>
+            }
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-label-md text-label-md text-primary-container mb-2">
+            Tipo de plan
+          </label>
+          <div class="flex gap-2">
+            @for (opt of planTypeOptions; track opt.value) {
+              <button
+                type="button"
+                (click)="form.get('planType')?.setValue(opt.value)"
+                class="flex-1 h-11 rounded-btn border text-sm font-semibold transition-all"
+                [class]="form.get('planType')?.value === opt.value
+                  ? 'bg-brand-teal text-white border-brand-teal shadow-sm'
+                  : 'bg-surface-container-lowest border-surface-variant text-on-surface-variant hover:border-brand-teal/50 hover:text-primary-container'"
+              >{{ opt.label }}</button>
+            }
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 3. Detalles del viaje -->
+    <section class="bg-surface-container-lowest rounded-card p-6 md:p-8 shadow-coastal border border-surface-variant">
+      <h3 class="font-headline-md text-headline-md font-bold text-primary-container mb-6 flex items-center gap-2">
+        <span class="material-symbols-outlined text-secondary">flight_takeoff</span>
+        Detalles del viaje
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        <div>
+          <label class="block font-label-md text-label-md text-primary-container mb-1" for="departureCity">
+            Ciudad de salida <span class="text-brand-terracotta">*</span>
+          </label>
+          <div class="relative">
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-variant pointer-events-none">
+                <span class="material-symbols-outlined text-[18px]">location_city</span>
+              </span>
+              <input
+                id="departureCity"
+                type="text"
+                autocomplete="off"
+                placeholder="Escribí o seleccioná una ciudad"
+                [value]="cityQuery()"
+                (input)="onCityInput($event)"
+                (focus)="onCityFocus()"
+                (blur)="onCityBlur()"
+                class="w-full h-11 bg-surface-container-lowest border rounded-btn pl-10 pr-8 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+                [class]="isInvalid('departureCity') ? 'border-error' : 'border-brand-teal-light'"
+              />
+              <span class="absolute inset-y-0 right-0 flex items-center pr-2 text-on-surface-variant pointer-events-none">
+                <span class="material-symbols-outlined text-[18px] transition-transform duration-150"
+                  [class]="showCitySuggestions() ? 'rotate-180' : ''">expand_more</span>
+              </span>
+            </div>
+
+            @if (showCitySuggestions()) {
+              <div class="absolute z-20 w-full mt-1 bg-surface-container-lowest border border-brand-teal-light rounded-btn shadow-coastal-hover max-h-48 overflow-y-auto">
+                @if (citySuggestions().length > 0) {
+                  @for (city of citySuggestions(); track city) {
+                    <button type="button" (mousedown)="selectCity(city)"
+                      class="w-full px-4 py-2.5 text-left font-body-md text-on-surface hover:bg-brand-teal/10 hover:text-primary-container transition-colors"
+                      [class]="city === cityQuery() ? 'bg-brand-teal/10 text-primary-container font-semibold' : ''">
+                      {{ city }}
+                    </button>
+                  }
+                } @else {
+                  <p class="px-4 py-3 text-caption text-on-surface-variant">No se encontraron ciudades.</p>
+                }
+              </div>
+            }
+          </div>
+          @if (isInvalid('departureCity')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
+        </div>
+
+        <div>
+          <label class="block font-label-md text-label-md text-primary-container mb-1" for="validity">
+            Vigencia <span class="text-brand-terracotta">*</span>
+          </label>
+          <input id="validity" type="text" formControlName="validity"
+            placeholder="Ej. Hasta diciembre 2025"
+            class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+            [class]="isInvalid('validity') ? 'border-error' : 'border-brand-teal-light'" />
+          @if (isInvalid('validity')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
+        </div>
+
+        <div>
+          <label class="block font-label-md text-label-md text-primary-container mb-1" for="durationDays">
+            Días <span class="text-brand-terracotta">*</span>
+          </label>
+          <input id="durationDays" type="number" formControlName="durationDays" min="0"
+            class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors" />
+        </div>
+
+        <div>
+          <label class="block font-label-md text-label-md text-primary-container mb-1" for="durationNights">
+            Noches <span class="text-brand-terracotta">*</span>
+          </label>
+          <input id="durationNights" type="number" formControlName="durationNights" min="0"
+            class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors" />
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block font-label-md text-label-md text-primary-container mb-1" for="displayOrder">
+            Orden de visualización
+          </label>
+          <input id="displayOrder" type="number" formControlName="displayOrder" min="0"
+            class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors md:w-40" />
+          <p class="text-caption text-on-surface-variant mt-1">Número menor = aparece primero en la landing.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. Inclusiones -->
+    <section class="bg-surface-container-lowest rounded-card p-6 md:p-8 shadow-coastal border border-surface-variant">
+      <h3 class="font-headline-md text-headline-md font-bold text-primary-container mb-6 flex items-center gap-2">
+        <span class="material-symbols-outlined text-secondary">check_circle</span>
+        Inclusiones
+      </h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        @for (item of catalog(); track item.id) {
+          <label
+            class="flex items-center gap-2 cursor-pointer p-3 rounded-btn border transition-colors"
+            [class]="selectedInclusions.has(item.id)
+              ? 'border-brand-teal bg-brand-teal/10 text-primary-container'
+              : 'border-surface-variant bg-surface-container text-on-surface-variant hover:border-brand-teal-light'"
+          >
+            <input
+              type="checkbox"
+              [checked]="selectedInclusions.has(item.id)"
+              (change)="toggleInclusion(item.id)"
+              class="sr-only"
+            />
+            <span class="material-symbols-outlined text-[18px]"
+              [class]="selectedInclusions.has(item.id) ? 'text-brand-teal' : 'text-on-surface-variant'">
+              {{ selectedInclusions.has(item.id) ? 'check_box' : 'check_box_outline_blank' }}
+            </span>
+            <span class="font-label-md text-label-md">{{ item.label }}</span>
+          </label>
+        }
+      </div>
+    </section>
+
+    <!-- 5. Imágenes -->
+    <section class="bg-surface-container-lowest rounded-card p-6 md:p-8 shadow-coastal border border-surface-variant">
+      <h3 class="font-headline-md text-headline-md font-bold text-primary-container mb-2 flex items-center gap-2">
+        <span class="material-symbols-outlined text-secondary">image</span>
+        Imágenes
+      </h3>
+      <p class="text-caption text-on-surface-variant mb-4">
+        Arrastrá archivos desde tu computadora o desde el navegador. También podés pegar una URL directamente.
+      </p>
+
+      <!-- Zona de drop -->
+      <div
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        class="flex flex-col items-center justify-center gap-3 p-8 rounded-btn border-2 border-dashed transition-colors cursor-default select-none"
+        [class]="isDragging()
+          ? 'border-brand-teal bg-brand-teal/5'
+          : 'border-surface-variant hover:border-brand-teal-light'"
+      >
+        <input #fileInput type="file" accept="image/*" multiple class="hidden" (change)="onFileInputChange($event)" />
+        <span class="material-symbols-outlined text-[40px] transition-colors"
+          [class]="isDragging() ? 'text-brand-teal' : 'text-on-surface-variant'">
+          cloud_upload
+        </span>
+        <div class="text-center">
+          <p class="font-body-md text-on-surface">
+            {{ isDragging() ? 'Soltá las imágenes aquí' : 'Arrastrá imágenes aquí' }}
+          </p>
+          <p class="text-caption text-on-surface-variant">Formatos: JPG, PNG, WebP, GIF</p>
+        </div>
+        <button type="button" (click)="fileInput.click()"
+          class="px-4 py-2 rounded-btn border border-brand-teal text-brand-teal font-label-md text-label-md hover:bg-brand-teal/10 transition-colors">
+          Seleccionar archivos
+        </button>
+      </div>
+
+      <!-- Thumbnails -->
+      @if (imageItems().length > 0) {
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
+          @for (item of imageItems(); track item.id; let i = $index) {
+            <div
+              class="relative group rounded-card overflow-hidden border-2 transition-colors"
+              [class]="i === principalIndex() ? 'border-brand-teal' : 'border-surface-variant'"
+            >
+              <!-- Preview -->
+              <div class="h-28 bg-surface-container">
+                <img [src]="item.preview" [alt]="'Imagen ' + (i + 1)"
+                  class="w-full h-full object-cover" />
+              </div>
+
+              <!-- Imagen principal badge -->
+              @if (i === principalIndex()) {
+                <div class="absolute top-1.5 left-1.5 flex items-center gap-0.5 bg-brand-teal text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                  <span class="material-symbols-outlined text-[11px]">star</span>
+                  Principal
+                </div>
+              }
+
+              <!-- Estado: subiendo -->
+              @if (item.uploading) {
+                <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-1 text-white">
+                  <span class="material-symbols-outlined animate-spin text-[24px]">progress_activity</span>
+                  <span class="text-[10px]">Subiendo...</span>
+                </div>
+              }
+
+              <!-- Estado: error de upload -->
+              @if (item.error && !item.uploading) {
+                <div class="absolute bottom-0 left-0 right-0 bg-error/90 text-white text-[10px] text-center px-1 py-1 leading-tight">
+                  Error al subir · pegá una URL
+                </div>
+              }
+
+              <!-- Overlay de acciones (solo cuando no está subiendo) -->
+              <div class="absolute inset-0 bg-black/50 transition-opacity flex items-center justify-center gap-2"
+                [class]="item.uploading ? 'opacity-0 pointer-events-none' : 'opacity-0 group-hover:opacity-100'">
+                @if (i !== principalIndex()) {
+                  <button type="button" (click)="setPrincipal(i)" title="Marcar como imagen principal"
+                    class="p-1.5 bg-white rounded-full text-primary-container hover:bg-brand-teal hover:text-white transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">star</span>
+                  </button>
+                }
+                <button type="button" (click)="removeImage(item.id)" title="Eliminar imagen"
+                  class="p-1.5 bg-white rounded-full text-error hover:bg-error hover:text-white transition-colors">
+                  <span class="material-symbols-outlined text-[16px]">delete</span>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+        <p class="text-caption text-on-surface-variant mt-2">
+          Pasá el cursor sobre una imagen y tocá ★ para marcarla como principal (se muestra primero en la landing).
+        </p>
+      }
+    </section>
+
+    <!-- 6. Términos y condiciones -->
+    <section class="bg-surface-container-lowest rounded-card p-6 md:p-8 shadow-coastal border border-surface-variant">
+      <h3 class="font-headline-md text-headline-md font-bold text-primary-container mb-6 flex items-center gap-2">
+        <span class="material-symbols-outlined text-secondary">gavel</span>
+        Términos y condiciones
+      </h3>
+      <textarea formControlName="terms" rows="4"
+        placeholder="Condiciones, restricciones y política de cancelación..."
+        class="w-full bg-surface-container-lowest border rounded-btn px-4 py-3 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors resize-none"
+        [class]="isInvalid('terms') ? 'border-error' : 'border-brand-teal-light'">
+      </textarea>
+      @if (isInvalid('terms')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
+    </section>
+
+  </div>
+</div>
+
+<!-- Barra de acciones sticky -->
+<div class="sticky bottom-0 bg-surface-container-lowest border-t border-surface-variant px-8 py-4 shadow-[0_-4px_24px_rgba(3,31,65,0.08)] flex justify-end gap-3 -mx-8 z-10">
+  <a routerLink="/admin/planes"
+    class="px-6 py-2 rounded-btn border border-primary-container text-primary-container font-label-md text-label-md hover:bg-surface-variant/20 transition-colors">
+    Cancelar
+  </a>
+  <button type="button" (click)="submit(false)" [disabled]="saving()"
+    class="px-6 py-2 rounded-btn border border-primary-container text-primary-container font-label-md text-label-md hover:bg-surface-variant/20 transition-colors disabled:opacity-50">
+    Guardar borrador
+  </button>
+  <button type="button" (click)="submit(true)" [disabled]="saving()"
+    class="px-6 py-2 rounded-btn bg-brand-teal text-white font-label-md text-label-md shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center gap-2 disabled:opacity-50 disabled:transform-none">
+    @if (saving()) {
+      <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+    } @else {
+      <span class="material-symbols-outlined text-[18px]">publish</span>
+    }
+    {{ isEdit() ? 'Guardar cambios' : isDuplicate() ? 'Crear copia' : 'Publicar plan' }}
+  </button>
+</div>
+}

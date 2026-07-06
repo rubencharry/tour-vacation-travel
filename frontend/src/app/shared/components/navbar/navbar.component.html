@@ -1,0 +1,59 @@
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop bg-brand-cream shadow-sm h-[72px]">
+  <!-- Logo -->
+  <a routerLink="/" class="flex items-center">
+    <img src="/logo.png" alt="Tour Vacation Travel" class="h-[40px] w-auto">
+  </a>
+
+  <!-- Desktop Nav -->
+  <div class="hidden md:flex space-x-8">
+    <a
+      routerLink="/"
+      routerLinkActive="text-brand-teal border-b-2 border-brand-teal"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="font-label-md text-label-md text-on-surface-variant hover:text-brand-teal transition-colors pb-1"
+    >Inicio</a>
+    <a
+      routerLink="/planes"
+      routerLinkActive="text-brand-teal border-b-2 border-brand-teal"
+      class="font-label-md text-label-md text-on-surface-variant hover:text-brand-teal transition-colors pb-1"
+    >Planes</a>
+    <a
+      routerLink="/nosotros"
+      routerLinkActive="text-brand-teal border-b-2 border-brand-teal"
+      class="font-label-md text-label-md text-on-surface-variant hover:text-brand-teal transition-colors pb-1"
+    >Nosotros</a>
+    <a
+      routerLink="/contacto"
+      routerLinkActive="text-brand-teal border-b-2 border-brand-teal"
+      class="font-label-md text-label-md text-on-surface-variant hover:text-brand-teal transition-colors pb-1"
+    >Contacto</a>
+  </div>
+
+  <!-- CTA Button -->
+  <div class="hidden md:flex">
+    <a
+      routerLink="/contacto"
+      class="bg-brand-teal hover:bg-brand-terracotta text-white font-label-md text-label-md px-4 py-2 rounded-btn transition-colors shadow-sm"
+    >Cotiza tu Viaje</a>
+  </div>
+
+  <!-- Mobile Menu Toggle -->
+  <button
+    class="md:hidden text-primary-container p-1"
+    (click)="toggleMobileMenu()"
+    [attr.aria-label]="mobileMenuOpen() ? 'Cerrar menú' : 'Abrir menú'"
+  >
+    <span class="material-symbols-outlined">{{ mobileMenuOpen() ? 'close' : 'menu' }}</span>
+  </button>
+</nav>
+
+<!-- Mobile Dropdown -->
+@if (mobileMenuOpen()) {
+  <div class="fixed top-[72px] left-0 w-full bg-brand-cream z-40 flex flex-col px-margin-mobile py-6 space-y-4 shadow-md md:hidden">
+    <a routerLink="/" class="text-on-surface-variant font-label-md text-label-md hover:text-brand-teal transition-colors" (click)="closeMobileMenu()">Inicio</a>
+    <a routerLink="/planes" class="text-on-surface-variant font-label-md text-label-md hover:text-brand-teal transition-colors" (click)="closeMobileMenu()">Planes</a>
+    <a routerLink="/nosotros" class="text-on-surface-variant font-label-md text-label-md hover:text-brand-teal transition-colors" (click)="closeMobileMenu()">Nosotros</a>
+    <a routerLink="/contacto" class="text-on-surface-variant font-label-md text-label-md hover:text-brand-teal transition-colors" (click)="closeMobileMenu()">Contacto</a>
+    <a routerLink="/contacto" class="bg-brand-teal text-white font-label-md text-label-md px-4 py-2 rounded-btn w-fit" (click)="closeMobileMenu()">Cotiza tu Viaje</a>
+  </div>
+}

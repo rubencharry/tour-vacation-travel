@@ -1,0 +1,148 @@
+<!-- Greeting -->
+<div class="flex items-start justify-between mb-8">
+  <div>
+    <h2 class="font-headline-md text-headline-md text-primary-container tracking-tight">
+      {{ greeting }}, {{ auth.currentUser().name.split(' ')[0] }} {{ greetingEmoji }}
+    </h2>
+    <p class="text-on-surface-variant mt-1 text-sm">Todo en orden · aquí está el resumen de hoy 🌊</p>
+  </div>
+  <a
+    routerLink="/admin/planes/nuevo"
+    class="flex items-center gap-2 bg-brand-teal text-white px-4 py-2.5 rounded-btn text-sm font-semibold hover:shadow-md hover:-translate-y-0.5 transition-all shadow-sm shrink-0"
+  >
+    <span class="material-symbols-outlined text-[18px]">add</span>
+    Nuevo Plan
+  </a>
+</div>
+
+<!-- Quick actions -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+
+  <a routerLink="/admin/planes/nuevo"
+    class="bg-surface-container-lowest rounded-card border border-surface-variant p-4 flex items-center gap-3 hover:shadow-coastal-hover hover:-translate-y-0.5 transition-all duration-150 group">
+    <div class="w-10 h-10 bg-brand-teal/10 rounded-full flex items-center justify-center group-hover:bg-brand-teal/20 transition-colors shrink-0">
+      <span class="material-symbols-outlined text-brand-teal text-[20px]" style="font-variation-settings:'FILL' 1">add_location_alt</span>
+    </div>
+    <span class="font-semibold text-sm text-primary-container leading-tight">Nuevo<br>Plan</span>
+  </a>
+
+  <a routerLink="/admin/leads"
+    class="bg-surface-container-lowest rounded-card border border-surface-variant p-4 flex items-center gap-3 hover:shadow-coastal-hover hover:-translate-y-0.5 transition-all duration-150 group">
+    <div class="w-10 h-10 bg-brand-terracotta/10 rounded-full flex items-center justify-center group-hover:bg-brand-terracotta/20 transition-colors shrink-0">
+      <span class="material-symbols-outlined text-brand-terracotta text-[20px]" style="font-variation-settings:'FILL' 1">group</span>
+    </div>
+    <span class="font-semibold text-sm text-primary-container leading-tight">Ver<br>Leads</span>
+  </a>
+
+  <button
+    class="bg-surface-container-lowest rounded-card border border-surface-variant p-4 flex items-center gap-3 hover:shadow-coastal-hover hover:-translate-y-0.5 transition-all duration-150 group text-left">
+    <div class="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center group-hover:bg-secondary/20 transition-colors shrink-0">
+      <span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings:'FILL' 1">download</span>
+    </div>
+    <span class="font-semibold text-sm text-primary-container leading-tight">Exportar<br>CSV</span>
+  </button>
+
+  <a href="/" target="_blank" rel="noopener"
+    class="bg-surface-container-lowest rounded-card border border-surface-variant p-4 flex items-center gap-3 hover:shadow-coastal-hover hover:-translate-y-0.5 transition-all duration-150 group">
+    <div class="w-10 h-10 bg-brand-teal-light/30 rounded-full flex items-center justify-center group-hover:bg-brand-teal-light/50 transition-colors shrink-0">
+      <span class="material-symbols-outlined text-primary-container text-[20px]" style="font-variation-settings:'FILL' 1">open_in_new</span>
+    </div>
+    <span class="font-semibold text-sm text-primary-container leading-tight">Ver<br>Sitio</span>
+  </a>
+
+</div>
+
+<!-- KPIs -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  @for (kpi of kpiCards; track kpi.label) {
+    <div class="bg-surface-container-lowest p-5 rounded-card shadow-coastal border border-surface-variant hover:shadow-coastal-hover transition-shadow duration-150 group">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-11 h-11 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform" [ngClass]="kpi.iconBg">
+          <span class="material-symbols-outlined text-[22px]" [ngClass]="kpi.iconColor" style="font-variation-settings:'FILL' 1">{{ kpi.icon }}</span>
+        </div>
+        <span class="text-xs font-bold px-2 py-1 rounded-full" [ngClass]="kpi.badgeColor">{{ kpi.badge }}</span>
+      </div>
+      <p class="text-3xl font-bold text-primary-container tracking-tight">{{ kpi.value }}</p>
+      <p class="font-label-md text-label-md text-on-surface-variant mt-0.5">{{ kpi.label }}</p>
+    </div>
+  }
+</div>
+
+<!-- Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+
+  <div class="bg-surface-container-lowest rounded-card shadow-coastal border border-surface-variant p-5">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="font-headline-md text-headline-md text-primary-container">Crecimiento de Leads</h3>
+        <p class="text-xs text-on-surface-variant mt-0.5">Últimos 7 días</p>
+      </div>
+      <span class="text-xs font-bold text-brand-teal bg-brand-teal/10 px-2 py-1 rounded-full">+18%</span>
+    </div>
+    <div class="relative h-52">
+      <canvas #leadGrowthCanvas></canvas>
+    </div>
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-card shadow-coastal border border-surface-variant p-5">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="font-headline-md text-headline-md text-primary-container">Leads por Destino</h3>
+        <p class="text-xs text-on-surface-variant mt-0.5">Top 5 más consultados</p>
+      </div>
+      <div class="flex items-center gap-3 text-caption text-on-surface-variant">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-sm bg-primary-container inline-block"></span>Estándar
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-sm bg-brand-teal inline-block"></span>Premium
+        </span>
+      </div>
+    </div>
+    <div class="relative h-52">
+      <canvas #plansCanvas></canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- Leads recientes -->
+<div class="bg-surface-container-lowest rounded-card shadow-coastal border border-surface-variant overflow-hidden">
+  <div class="flex items-center justify-between px-5 py-4 border-b border-surface-variant">
+    <h3 class="font-headline-md text-headline-md text-primary-container">Leads recientes</h3>
+    <a routerLink="/admin/leads" class="text-sm text-brand-teal font-semibold hover:underline flex items-center gap-0.5">
+      Ver todos
+      <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+    </a>
+  </div>
+
+  <div class="divide-y divide-surface-variant">
+    @for (lead of recentLeads; track lead.email) {
+      <div class="flex items-center gap-4 px-5 py-3.5 hover:bg-surface-container/50 transition-colors">
+        <div class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+          <span class="text-white text-xs font-bold">{{ lead.initials }}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-sm text-primary-container truncate">{{ lead.name }}</p>
+          <p class="text-caption text-on-surface-variant truncate">{{ lead.email }}</p>
+        </div>
+        <div class="text-right shrink-0 hidden sm:block">
+          <p class="text-sm text-on-surface font-medium">{{ lead.destination }}</p>
+          <p class="text-caption text-on-surface-variant">{{ lead.date }}</p>
+        </div>
+        @if (lead.sent) {
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-teal/10 text-brand-teal shrink-0">Enviado</span>
+        } @else {
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-terracotta/10 text-brand-terracotta shrink-0">Pendiente</span>
+        }
+      </div>
+    }
+
+    @if (recentLeads.length === 0) {
+      <div class="flex flex-col items-center justify-center py-12 text-on-surface-variant">
+        <span class="material-symbols-outlined text-[40px] mb-2 opacity-30">inbox</span>
+        <p class="text-sm">Sin leads aún</p>
+      </div>
+    }
+  </div>
+</div>

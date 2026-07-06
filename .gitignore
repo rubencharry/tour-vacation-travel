@@ -5,6 +5,7 @@ node_modules/
 
 # Build outputs
 dist/
+dist-lambda/
 build/
 out-tsc/
 *.tsbuildinfo
@@ -33,10 +34,22 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
+# Claude Code
+.claude/
+
 # Tests / coverage
 coverage/
 .nyc_output/
+/testsprite_tests
+
+# DynamoDB Local data (generado en local, no versionar)
+backend/.dynamodb-data/
+
+# DynamoDB Local JAR y librerías (binarios descargados, no van al repo)
+dynamodblocal-bin/
 
 # Misc
 *.tmp
 *.swp
+
+testsprite_tests\tmp\config.json
