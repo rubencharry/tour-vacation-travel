@@ -52,6 +52,8 @@ module.exports = {
         'body-md': ['Nunito Sans', 'sans-serif'],
         'label-md': ['Nunito Sans', 'sans-serif'],
         'caption': ['Nunito Sans', 'sans-serif'],
+        'editorial': ['Cormorant Garamond', 'Georgia', 'serif'],
+        'condensed': ['Barlow Condensed', 'sans-serif'],
       },
       fontSize: {
         'display-lg': ['56px', { lineHeight: '64px', letterSpacing: '-0.02em', fontWeight: '700' }],

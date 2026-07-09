@@ -15,16 +15,8 @@ export class ContactoComponent {
   protected nombre = signal('');
   protected email = signal('');
   protected telefono = signal('');
-  protected asunto = signal('Planificación de Viaje');
   protected mensaje = signal('');
   protected formState = signal<FormState>('idle');
-
-  protected readonly asuntos = [
-    'Planificación de Viaje',
-    'Reserva Existente',
-    'Consulta General',
-    'Cotización de Plan',
-  ];
 
   protected async enviarMensaje(): Promise<void> {
     if (!this.nombre() || !this.email() || !this.mensaje()) return;
@@ -38,7 +30,6 @@ export class ContactoComponent {
       this.nombre.set('');
       this.email.set('');
       this.telefono.set('');
-      this.asunto.set('Planificación de Viaje');
       this.mensaje.set('');
       this.formState.set('idle');
     }, 3000);

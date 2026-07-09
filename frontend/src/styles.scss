@@ -27,6 +27,15 @@
   transform: none;
 }
 
+@keyframes scrollLine {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.scroll-line-animation {
+  animation: scrollLine 2s ease-in-out infinite;
+}
+
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
