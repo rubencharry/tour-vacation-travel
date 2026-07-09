@@ -4,38 +4,66 @@
     class="absolute inset-0 z-0 bg-cover bg-center"
     style="background-image: url('/hero-bg.webp');"
   >
-    <div class="absolute inset-0 bg-gradient-to-r from-primary-container/90 via-primary-container/60 to-transparent w-full md:w-[60%]"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/70 to-transparent w-full md:w-[65%]"></div>
+    <div class="absolute inset-0 bg-primary/30 md:hidden"></div>
   </div>
 
-  <div class="relative z-10 px-margin-mobile md:px-margin-desktop w-full md:w-[60%]">
-    <span class="block text-brand-teal uppercase tracking-widest font-label-md text-label-md mb-4 font-bold">Destinos Premier</span>
-    <h1 class="text-white font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg mb-6 leading-tight">
-      Hacemos Realidad el Viaje de tus Sueños
+  <!-- Decorative coordinates -->
+  <div class="absolute top-24 right-8 hidden md:flex flex-col items-end gap-1 text-white/20 select-none">
+    <span class="text-[10px] tracking-[0.25em] uppercase font-condensed">4.7110° N · 74.0721° W</span>
+    <div class="w-full h-[1px] bg-white/15 mt-1"></div>
+  </div>
+
+  <div class="relative z-10 px-margin-mobile md:px-margin-desktop w-full md:w-[62%]">
+    <!-- Eyebrow -->
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-[1.5px] bg-brand-terracotta"></div>
+      <span class="text-brand-terracotta uppercase tracking-[0.25em] text-[10px] font-bold font-condensed">Destinos Premier</span>
+    </div>
+
+    <!-- Editorial headline: two-part typographic treatment -->
+    <h1 class="mb-8 text-white">
+      <span class="block font-condensed font-bold uppercase text-[44px] md:text-[64px] leading-[0.95] tracking-[-0.01em]">
+        Hacemos Realidad
+      </span>
+      <span class="block font-editorial italic font-normal text-white/90 mt-2 text-[34px] md:text-[52px] leading-[1.1]">
+        el Viaje de tus Sueños
+      </span>
     </h1>
-    <p class="text-white/80 font-body-lg text-body-lg mb-8 max-w-lg">
+
+    <p class="text-white/70 text-[16px] md:text-[18px] mb-10 max-w-md leading-relaxed">
       Vive lujos sin igual e itinerarios meticulosamente diseñados. Descubre los destinos más impresionantes del mundo con confianza y estilo.
     </p>
+
     <div class="flex flex-col sm:flex-row gap-4">
       <a
         href="#planes"
-        class="inline-block bg-brand-teal hover:bg-brand-terracotta text-white font-label-md text-label-md px-6 py-3 rounded-btn transition-colors shadow-soft text-center"
-      >Ver Planes</a>
+        class="inline-block bg-brand-terracotta hover:bg-white hover:text-primary text-white font-condensed font-bold px-8 py-3.5 rounded-btn transition-all shadow-lg text-center tracking-[0.15em] text-[12px] uppercase"
+      >Explorar Planes</a>
       <a
         href="#contacto"
-        class="inline-block bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary-container font-label-md text-label-md px-6 py-3 rounded-btn transition-colors text-center"
+        class="inline-block bg-transparent border border-white/50 hover:border-white text-white font-condensed px-8 py-3.5 rounded-btn transition-colors text-center tracking-[0.15em] text-[12px] uppercase"
       >Contáctanos</a>
     </div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 text-white/40">
+    <div class="w-[1px] h-10 bg-white/20 relative overflow-hidden">
+      <div class="absolute inset-0 bg-white/70 scroll-line-animation"></div>
+    </div>
+    <span class="text-[9px] uppercase tracking-[0.3em] font-condensed">Scroll</span>
   </div>
 </header>
 
 <!-- Trust Stats Strip -->
 <section class="bg-white py-xl border-b border-surface-container-highest">
   <div class="max-w-[1200px] mx-auto px-margin-mobile md:px-margin-desktop">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x md:divide-brand-teal-light text-center">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x md:divide-surface-container-high text-center">
       @for (stat of stats; track stat.label) {
         <div class="px-4">
-          <span class="block text-primary-container font-headline-lg text-headline-lg font-bold mb-1">{{ stat.value }}</span>
-          <span class="text-outline font-label-md text-label-md uppercase tracking-wider">{{ stat.label }}</span>
+          <span class="block text-brand-terracotta font-editorial italic leading-none mb-2" style="font-size: 44px;">{{ stat.value }}</span>
+          <span class="text-outline text-[11px] uppercase tracking-[0.12em] font-bold font-condensed">{{ stat.label }}</span>
         </div>
       }
     </div>
@@ -44,20 +72,29 @@
 
 <!-- Services Section -->
 <section class="bg-brand-cream py-xl px-margin-mobile md:px-margin-desktop">
-  <div class="max-w-[1200px] mx-auto text-center mb-12">
-    <span class="text-brand-teal uppercase tracking-widest font-label-md text-label-md mb-2 block font-bold">Lo Que Ofrecemos</span>
-    <h2 class="text-primary-container font-headline-lg text-headline-lg">Nuestros Servicios Premium</h2>
-  </div>
-  <div class="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    @for (service of services; track service.title; let i = $index) {
-      <div appScrollReveal [delay]="i * 120" class="bg-white p-6 rounded-card shadow-soft hover:-translate-y-2 hover:border-t-[3px] hover:border-brand-teal transition-all duration-300 group border-t-[3px] border-transparent flex flex-col items-center text-center">
-        <div class="w-16 h-16 rounded-full bg-brand-teal-light flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-          <span class="material-symbols-outlined text-primary-container text-[32px]">{{ service.icon }}</span>
-        </div>
-        <h3 class="text-primary-container font-headline-md text-headline-md mb-2">{{ service.title }}</h3>
-        <p class="text-on-surface-variant font-body-md text-body-md">{{ service.description }}</p>
+  <div class="max-w-[1200px] mx-auto">
+    <div class="text-center mb-12">
+      <div class="flex items-center justify-center gap-3 mb-4">
+        <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+        <span class="text-brand-terracotta uppercase tracking-[0.25em] text-[10px] font-bold font-condensed">Lo Que Ofrecemos</span>
+        <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
       </div>
-    }
+      <h2 class="text-primary-container font-editorial italic font-normal leading-tight text-[38px] md:text-[48px]">
+        Nuestros Servicios Premium
+      </h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      @for (service of services; track service.title; let i = $index) {
+        <div appScrollReveal [delay]="i * 120"
+          class="bg-white p-6 rounded-card shadow-soft hover:-translate-y-2 hover:border-t-[3px] hover:border-brand-terracotta transition-all duration-300 group border-t-[3px] border-transparent flex flex-col items-center text-center">
+          <div class="w-16 h-16 rounded-full bg-brand-teal-light flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-primary-container text-[32px]">{{ service.icon }}</span>
+          </div>
+          <h3 class="text-primary-container font-condensed font-semibold text-[20px] mb-2 tracking-[0.01em]">{{ service.title }}</h3>
+          <p class="text-on-surface-variant font-body-md text-body-md">{{ service.description }}</p>
+        </div>
+      }
+    </div>
   </div>
 </section>
 
@@ -65,22 +102,40 @@
 <section id="planes" class="bg-white py-[80px] px-margin-mobile md:px-margin-desktop">
   <div class="max-w-[1200px] mx-auto">
     <div class="text-center mb-12">
-      <h2 class="text-primary-container font-headline-lg text-[44px] font-bold mb-2">Planes Destacados</h2>
-      <p class="text-outline font-body-md text-body-md">Descubre nuestras experiencias de viaje más populares</p>
+      <div class="flex items-center justify-center gap-3 mb-4">
+        <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+        <span class="text-brand-terracotta uppercase tracking-[0.25em] text-[10px] font-bold font-condensed">Planes Destacados</span>
+        <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+      </div>
+      <h2 class="text-primary-container font-editorial italic font-normal leading-tight mb-3 text-[34px] md:text-[52px]">
+        Experiencias que transforman
+      </h2>
+      <p class="text-outline font-body-md text-body-md">Itinerarios diseñados para cada tipo de viajero</p>
     </div>
 
     <!-- Loading skeleton -->
     @if (plansState().loading) {
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-        @for (i of [1, 2, 3]; track i) {
-          <div class="bg-white rounded-[20px] shadow-sm overflow-hidden border border-surface-container-highest animate-pulse">
-            <div class="w-full h-48 bg-surface-container-high"></div>
-            <div class="p-6 space-y-3">
-              <div class="h-6 bg-surface-container-high rounded w-3/4"></div>
-              <div class="h-4 bg-surface-container-high rounded w-1/2"></div>
-            </div>
+      <div>
+        <div class="bg-white rounded-2xl border border-surface-container-highest animate-pulse overflow-hidden flex flex-col md:flex-row md:h-[360px] mb-6">
+          <div class="md:w-[55%] h-48 md:h-full bg-surface-container-high"></div>
+          <div class="p-10 md:w-[45%] space-y-4 flex flex-col justify-center">
+            <div class="h-3 bg-surface-container-high rounded w-1/3"></div>
+            <div class="h-8 bg-surface-container-high rounded w-4/5"></div>
+            <div class="h-4 bg-surface-container-high rounded w-full"></div>
+            <div class="h-4 bg-surface-container-high rounded w-3/4"></div>
           </div>
-        }
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          @for (i of [1, 2]; track i) {
+            <div class="bg-white rounded-[20px] shadow-sm overflow-hidden border border-surface-container-highest animate-pulse">
+              <div class="w-full h-48 bg-surface-container-high"></div>
+              <div class="p-6 space-y-3">
+                <div class="h-6 bg-surface-container-high rounded w-3/4"></div>
+                <div class="h-4 bg-surface-container-high rounded w-1/2"></div>
+              </div>
+            </div>
+          }
+        </div>
       </div>
     }
 
@@ -92,24 +147,93 @@
       </div>
     }
 
-    <!-- Plans grid -->
+    <!-- Plans: editorial layout -->
     @if (!plansState().loading && !plansState().error) {
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-        @for (plan of plansState().plans; track plan.planId) {
-          <app-plan-card [plan]="plan" (selected)="selectedPlan.set(plan)" />
-        }
-      </div>
-
       @if (plansState().plans.length === 0) {
         <p class="text-center text-outline font-body-md text-body-md py-12">No hay planes disponibles por el momento.</p>
+      } @else {
+        <!-- Featured first plan: horizontal editorial card -->
+        @if (plansState().plans[0]; as featured) {
+          <div
+            class="group cursor-pointer bg-white rounded-2xl overflow-hidden border border-surface-container-highest shadow-coastal hover:shadow-coastal-hover transition-all duration-500 flex flex-col md:flex-row mb-6"
+            (click)="selectedPlan.set(featured)"
+          >
+            <!-- Image side -->
+            <div class="relative overflow-hidden md:w-[55%] aspect-video md:aspect-auto min-h-[240px] md:min-h-[360px] bg-surface-container flex-shrink-0">
+              @if (featured.imageUrls?.[0]) {
+                <img
+                  [src]="featured.imageUrls[0]"
+                  [alt]="featured.title"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+              } @else {
+                <div class="w-full h-full flex flex-col items-center justify-center gap-2 text-on-surface-variant">
+                  <span class="material-symbols-outlined text-[64px] opacity-20">landscape</span>
+                </div>
+              }
+              <div class="absolute top-4 left-4 bg-brand-terracotta text-white px-4 py-1.5 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full font-condensed">
+                Plan Destacado
+              </div>
+              @if (featured.departureCity) {
+                <div class="absolute bottom-4 left-4 bg-primary-container/80 text-white px-3 py-1.5 rounded-full text-[11px] backdrop-blur-sm flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[13px]">flight_takeoff</span>
+                  {{ featured.departureCity }}
+                </div>
+              }
+            </div>
+            <!-- Content side -->
+            <div class="p-8 md:p-10 lg:p-12 flex flex-col justify-between md:w-[45%]">
+              <div>
+                <p class="text-outline text-[11px] uppercase tracking-[0.15em] font-bold mb-3 font-condensed">
+                  {{ formatDuration(featured.durationDays, featured.durationNights) }}
+                </p>
+                <h3 class="text-primary-container font-editorial italic font-normal leading-tight mb-4 text-[28px] md:text-[34px]">
+                  {{ featured.title }}
+                </h3>
+                @if (featured.description) {
+                  <p class="text-on-surface-variant text-[15px] leading-relaxed line-clamp-3 mb-6">
+                    {{ featured.description }}
+                  </p>
+                }
+              </div>
+              <div>
+                <div class="h-[1px] bg-surface-container-high mb-6"></div>
+                <div class="flex items-baseline gap-3 mb-5">
+                  <span class="text-brand-terracotta font-bold leading-none" style="font-size: 30px;">
+                    {{ formatPrice(featured.price, featured.currency) }}
+                  </span>
+                  @if (featured.validity) {
+                    <span class="text-outline text-[13px]">{{ featured.validity }}</span>
+                  }
+                </div>
+                <div class="flex items-center gap-2 text-brand-teal text-[12px] font-bold tracking-[0.12em] uppercase font-condensed group-hover:gap-3 transition-all">
+                  <span>Ver detalles del plan</span>
+                  <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Remaining plans in 2-col grid -->
+        @if (plansState().plans.length > 1) {
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            @for (plan of plansState().plans.slice(1); track plan.planId) {
+              <app-plan-card [plan]="plan" [editorial]="true" (selected)="selectedPlan.set(plan)" />
+            }
+          </div>
+        }
       }
     }
 
-    <div class="text-center">
+    <div class="text-center mt-12">
       <a
         routerLink="/planes"
-        class="inline-block bg-transparent border-2 border-primary-container text-primary-container hover:bg-primary-container hover:text-white font-headline-md font-bold px-8 py-3 rounded-btn transition-colors"
-      >Ver todos los planes</a>
+        class="inline-flex items-center gap-2 bg-transparent border border-primary-container text-primary-container hover:bg-primary-container hover:text-white font-condensed font-bold px-8 py-3 rounded-btn transition-colors tracking-[0.12em] text-[12px] uppercase"
+      >
+        Ver todos los planes
+        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+      </a>
     </div>
   </div>
 </section>
@@ -118,15 +242,21 @@
 <section id="nosotros" class="bg-primary-container py-xl px-margin-mobile md:px-margin-desktop overflow-hidden">
   <div class="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
     <div appScrollReveal direction="left" class="text-white">
-      <h2 class="font-headline-lg text-headline-lg mb-6">¿Por Qué Elegir Tour Vacation Travel?</h2>
-      <p class="font-body-lg text-body-lg text-white/80 mb-8">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-[1.5px] bg-brand-terracotta"></div>
+        <span class="text-brand-terracotta uppercase tracking-[0.25em] text-[10px] font-bold font-condensed">Nuestra Diferencia</span>
+      </div>
+      <h2 class="font-editorial italic font-normal leading-tight mb-6 text-white text-[32px] md:text-[44px]">
+        ¿Por Qué Elegir Tour Vacation Travel?
+      </h2>
+      <p class="font-body-lg text-body-lg text-white/75 mb-8">
         Combinamos décadas de experiencia con una pasión por descubrir las joyas ocultas del mundo, asegurándonos de que cada detalle sea atendido con precisión.
       </p>
       <ul class="space-y-4 font-body-md text-body-md">
         @for (benefit of benefits; track benefit) {
           <li class="flex items-start">
-            <span class="material-symbols-outlined text-brand-teal mr-3 mt-1">check_circle</span>
-            <span>{{ benefit }}</span>
+            <span class="material-symbols-outlined text-brand-terracotta mr-3 mt-0.5 text-[20px]">check_circle</span>
+            <span class="text-white/85">{{ benefit }}</span>
           </li>
         }
       </ul>
@@ -144,20 +274,30 @@
 <!-- Testimonios -->
 <section class="bg-brand-cream py-[80px] px-margin-mobile md:px-margin-desktop">
   <div class="max-w-[1200px] mx-auto">
-    <h2 class="text-primary-container font-headline-lg text-[44px] font-bold text-center mb-12">Lo Que Dicen Nuestros Viajeros</h2>
+    <div class="text-center mb-12">
+      <div class="flex items-center justify-center gap-3 mb-4">
+        <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+        <span class="text-brand-terracotta uppercase tracking-[0.25em] text-[10px] font-bold font-condensed">Testimonios</span>
+        <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+      </div>
+      <h2 class="text-primary-container font-editorial italic font-normal leading-tight text-[34px] md:text-[48px]">
+        Lo que dicen quienes viajaron
+      </h2>
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       @for (testimonial of testimonials; track testimonial.name; let i = $index) {
-        <div appScrollReveal [delay]="i * 120" class="bg-white rounded-card shadow-soft p-[28px] flex flex-col border-t-[3px] border-transparent hover:border-brand-teal hover:scale-[1.03] transition-all duration-300">
-          <span class="material-symbols-outlined text-brand-teal text-4xl mb-4 icon-fill">format_quote</span>
-          <p class="font-body-md text-[#444444] italic mb-6 flex-grow">"{{ testimonial.quote }}"</p>
+        <div appScrollReveal [delay]="i * 120"
+          class="bg-white rounded-card shadow-soft p-[28px] flex flex-col border-t-[3px] border-transparent hover:border-brand-terracotta hover:scale-[1.02] transition-all duration-300">
+          <span class="material-symbols-outlined text-brand-terracotta text-4xl mb-4 icon-fill">format_quote</span>
+          <p class="font-body-md text-[#444444] italic mb-6 flex-grow text-[15px] leading-relaxed">"{{ testimonial.quote }}"</p>
           <div class="flex items-center mt-auto">
-            <div class="w-12 h-12 rounded-full bg-brand-teal-light flex items-center justify-center text-primary-container font-headline-md font-bold mr-4">
+            <div class="w-12 h-12 rounded-full bg-brand-terracotta/10 flex items-center justify-center text-brand-terracotta font-editorial font-bold text-[18px] mr-4">
               {{ testimonial.initials }}
             </div>
             <div>
-              <h4 class="font-headline-md font-semibold text-primary-container text-xl">{{ testimonial.name }}</h4>
-              <p class="font-body-md text-[13px] text-outline mb-1">{{ testimonial.package }}</p>
-              <div class="flex text-brand-teal">
+              <h4 class="font-condensed font-semibold text-primary-container text-[20px] tracking-[0.01em]">{{ testimonial.name }}</h4>
+              <p class="text-[12px] text-outline mb-1">{{ testimonial.package }}</p>
+              <div class="flex text-brand-terracotta">
                 @for (star of stars; track star) {
                   <span class="material-symbols-outlined text-sm icon-fill">star</span>
                 }
@@ -175,33 +315,40 @@
 }
 
 <!-- Formulario de Contacto -->
-<section id="contacto" class="bg-brand-teal py-[100px] px-margin-mobile md:px-margin-desktop">
+<section id="contacto" class="bg-primary py-[100px] px-margin-mobile md:px-margin-desktop">
   <div class="max-w-[1200px] mx-auto text-center">
-    <h2 class="font-headline-lg text-[48px] font-bold text-white mb-4">¿Listo para Comenzar tu Aventura?</h2>
-    <p class="font-body-lg text-[18px] text-white/85 mb-8 max-w-2xl mx-auto">
+    <div class="flex items-center justify-center gap-3 mb-5">
+      <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+      <span class="text-brand-terracotta uppercase tracking-[0.25em] text-[10px] font-bold font-condensed">Comienza tu Aventura</span>
+      <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+    </div>
+    <h2 class="font-editorial italic font-normal text-white mb-4 leading-tight text-[34px] md:text-[54px]">
+      ¿Listo para tu próxima aventura?
+    </h2>
+    <p class="text-white/65 text-[17px] mb-10 max-w-2xl mx-auto leading-relaxed">
       Déjanos tus datos y te contactamos con las mejores ofertas, guías de destinos y propuestas VIP pensadas para ti.
     </p>
     <form class="flex flex-col md:flex-row justify-center items-center gap-4 max-w-4xl mx-auto" (submit)="submitForm($event)">
       <input
-        class="w-full md:w-auto bg-white rounded-btn h-[48px] border border-primary-container px-4 font-body-md text-primary-container focus:outline-none focus:ring-2 focus:ring-primary-container placeholder:text-outline"
+        class="w-full md:w-auto bg-white/10 border border-white/25 hover:border-white/50 focus:border-white/70 rounded-btn h-[48px] px-4 text-white placeholder:text-white/35 focus:outline-none transition-all text-[15px]"
         placeholder="Tu nombre" type="text"
         [value]="formName()"
         (input)="formName.set($any($event.target).value)"
       >
       <input
-        class="w-full md:w-auto bg-white rounded-btn h-[48px] border border-primary-container px-4 font-body-md text-primary-container focus:outline-none focus:ring-2 focus:ring-primary-container placeholder:text-outline"
+        class="w-full md:w-auto bg-white/10 border border-white/25 hover:border-white/50 focus:border-white/70 rounded-btn h-[48px] px-4 text-white placeholder:text-white/35 focus:outline-none transition-all text-[15px]"
         placeholder="Tu email" type="email"
         [value]="formEmail()"
         (input)="formEmail.set($any($event.target).value)"
       >
       <input
-        class="w-full md:w-auto bg-white rounded-btn h-[48px] border border-primary-container px-4 font-body-md text-primary-container focus:outline-none focus:ring-2 focus:ring-primary-container placeholder:text-outline"
+        class="w-full md:w-auto bg-white/10 border border-white/25 hover:border-white/50 focus:border-white/70 rounded-btn h-[48px] px-4 text-white placeholder:text-white/35 focus:outline-none transition-all text-[15px]"
         placeholder="Tu teléfono" type="tel"
         [value]="formPhone()"
         (input)="formPhone.set($any($event.target).value)"
       >
       <button
-        class="w-full md:w-auto bg-white text-primary-container font-headline-md font-bold rounded-btn h-[48px] px-8 hover:bg-brand-cream transition-colors border border-primary-container"
+        class="w-full md:w-auto bg-brand-terracotta hover:bg-white hover:text-primary text-white font-condensed font-bold rounded-btn h-[48px] px-8 transition-all tracking-[0.15em] text-[11px] uppercase"
         type="submit"
       >Enviar</button>
     </form>

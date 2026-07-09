@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ScrollRevealDirective } from '../../shared/directives/scroll-reveal.directive';
 
@@ -10,61 +10,52 @@ import { ScrollRevealDirective } from '../../shared/directives/scroll-reveal.dir
   styleUrl: './nosotros.component.scss',
 })
 export class NosotrosComponent {
-  protected readonly VISIBLE = 3;
-
-  protected currentSlide = signal(0);
-  protected readonly maxSlide = computed(() => this.team.length - this.VISIBLE);
-  protected readonly dots = computed(() =>
-    Array.from({ length: this.maxSlide() + 1 }, (_, i) => i),
-  );
-  protected readonly trackTranslate = computed(
-    () => `translateX(-${this.currentSlide() * (100 / this.VISIBLE)}%)`,
-  );
-
   protected readonly team = [
     {
-      name: 'Ana Martínez',
-      role: 'CEO & Fundadora',
-      photo: 'https://i.pravatar.cc/400?img=47',
-      years: '15 años en la industria',
+      name: 'Blanca',
+      role: 'Socia Fundadora & Directora Ejecutiva',
+      photo: '/team/blanca.webp',
+      years: '15 años de experiencia',
     },
     {
-      name: 'Carlos Ruiz',
-      role: 'Director de Operaciones',
-      photo: 'https://i.pravatar.cc/400?img=68',
-      years: '12 años de experiencia',
+      name: 'José',
+      role: 'Socio Fundador & Director de Operaciones',
+      photo: '/team/jose.webp',
+      years: '20 años de experiencia',
     },
     {
-      name: 'Lucía Gómez',
-      role: 'Jefa de Experiencias',
-      photo: 'https://i.pravatar.cc/400?img=48',
-      years: '10 años en turismo',
+      name: 'Rubén',
+      role: 'Desarrollador Web & Arquitecto Cloud AWS',
+      photo: '/team/ruben.webp',
+      years: '3 años de experiencia',
     },
     {
-      name: 'Sebastián López',
-      role: 'Asesor Senior Europa',
-      photo: 'https://i.pravatar.cc/400?img=52',
-      years: '8 años en la región',
+      name: 'María José',
+      role: 'Directora Creativa & Imagen de Marca',
+      photo: '/team/maria-jose.webp',
+      years: '1 año de experiencia',
     },
     {
-      name: 'Valentina Cruz',
-      role: 'Asesora Caribe & Pacífico',
-      photo: 'https://i.pravatar.cc/400?img=44',
-      years: '7 años de experiencia',
+      name: 'Francy',
+      role: 'Especialista en Diseño de Producto Turístico',
+      photo: '/team/francy.webp',
+      years: '7 años en turismo',
     },
     {
-      name: 'Mateo Herrera',
-      role: 'Asesor Asia & Oceanía',
-      photo: 'https://i.pravatar.cc/400?img=11',
-      years: '6 años en la región',
-    },
-    {
-      name: 'Camila Torres',
+      name: 'Valentina',
       role: 'Directora de Marketing',
-      photo: 'https://i.pravatar.cc/400?img=45',
-      years: '9 años en el sector',
+      photo: '/team/valentina.webp',
+      years: '3 años de experiencia',
+    },
+    {
+      name: 'Yulieth',
+      role: 'Especialista en Diseño de Producto Turístico',
+      photo: '/team/yulieth.webp',
+      years: '7 años en turismo',
     },
   ];
+
+  protected readonly displayTeam = [...this.team, ...this.team];
 
   protected readonly values = [
     {
@@ -88,16 +79,4 @@ export class NosotrosComponent {
       description: 'Más de 120 destinos y aliados estratégicos en los 5 continentes.',
     },
   ];
-
-  protected prev(): void {
-    this.currentSlide.update((n) => Math.max(0, n - 1));
-  }
-
-  protected next(): void {
-    this.currentSlide.update((n) => Math.min(this.maxSlide(), n + 1));
-  }
-
-  protected goTo(index: number): void {
-    this.currentSlide.set(index);
-  }
 }

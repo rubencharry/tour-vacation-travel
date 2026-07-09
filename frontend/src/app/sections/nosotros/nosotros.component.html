@@ -1,39 +1,41 @@
-<!-- ═══════════════════════════════════════════════════════
-     HERO
-══════════════════════════════════════════════════════════ -->
+<!-- Hero -->
 <header class="relative w-full h-[70vh] flex items-center justify-start overflow-hidden pt-[72px]">
   <div class="absolute inset-0 z-0 bg-cover bg-center"
        style="background-image: url('/nosotros-bg.webp');">
-    <div class="absolute inset-0 bg-gradient-to-r from-primary-container/92 via-primary-container/70 to-transparent"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/75 to-transparent"></div>
+    <div class="absolute inset-0 bg-primary/30 md:hidden"></div>
   </div>
-  <div class="relative z-10 px-margin-mobile md:px-margin-desktop w-full md:w-[55%]">
-    <span class="block text-brand-teal uppercase tracking-widest font-label-md text-label-md mb-4 font-bold">
-      Quiénes Somos
-    </span>
-    <h1 class="text-white font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg mb-6 leading-tight">
-      Detrás de Cada Viaje, Hay una Historia
+  <div class="relative z-10 px-margin-mobile md:px-margin-desktop w-full md:w-[60%]">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-[1.5px] bg-brand-terracotta"></div>
+      <span class="text-brand-terracotta uppercase tracking-[0.25em] text-[10px] font-bold font-condensed">Quiénes Somos</span>
+    </div>
+    <h1 class="text-white mb-6">
+      <span class="block font-condensed font-bold uppercase text-[40px] md:text-[58px] leading-[0.95] tracking-[-0.01em]">
+        Detrás de Cada Viaje,
+      </span>
+      <span class="block font-editorial italic font-normal text-white/90 mt-2 text-[32px] md:text-[50px] leading-[1.1]">
+        Hay una Historia
+      </span>
     </h1>
-    <p class="text-white/80 font-body-lg text-body-lg max-w-lg">
+    <p class="text-white/70 font-body-lg text-body-lg max-w-lg">
       Desde 2009, convertimos sueños en itinerarios con pasión, experiencia y un equipo que conoce el mundo.
     </p>
   </div>
 </header>
 
-<!-- ═══════════════════════════════════════════════════════
-     MISIÓN Y VISIÓN
-══════════════════════════════════════════════════════════ -->
+<!-- Misión y Visión -->
 <section class="bg-brand-cream py-xl px-margin-mobile md:px-margin-desktop">
   <div class="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
 
-    <!-- Misión -->
     <div appScrollReveal direction="left" class="flex flex-col">
-      <div class="w-14 h-14 rounded-full bg-brand-teal/15 flex items-center justify-center mb-6">
-        <span class="material-symbols-outlined text-brand-teal text-[28px]">travel_explore</span>
+      <div class="w-14 h-14 rounded-full bg-brand-terracotta/10 flex items-center justify-center mb-6">
+        <span class="material-symbols-outlined text-brand-terracotta text-[28px]">travel_explore</span>
       </div>
-      <h2 class="font-headline-lg text-headline-lg text-primary-container font-bold mb-4">
+      <h2 class="font-condensed font-bold text-[26px] tracking-[0.02em] text-primary-container mb-3">
         Nuestra Misión
       </h2>
-      <div class="w-12 h-1 bg-brand-teal rounded-full mb-6"></div>
+      <div class="w-12 h-[2px] bg-brand-terracotta rounded-full mb-6"></div>
       <p class="font-body-lg text-body-lg text-on-surface-variant">
         Diseñar experiencias de viaje extraordinarias que superen las expectativas de nuestros clientes,
         combinando destinos cuidadosamente seleccionados con un servicio personalizado y una atención
@@ -41,15 +43,14 @@
       </p>
     </div>
 
-    <!-- Visión -->
     <div appScrollReveal direction="right" [delay]="150" class="flex flex-col">
-      <div class="w-14 h-14 rounded-full bg-brand-teal/15 flex items-center justify-center mb-6">
-        <span class="material-symbols-outlined text-brand-teal text-[28px]">rocket_launch</span>
+      <div class="w-14 h-14 rounded-full bg-brand-terracotta/10 flex items-center justify-center mb-6">
+        <span class="material-symbols-outlined text-brand-terracotta text-[28px]">rocket_launch</span>
       </div>
-      <h2 class="font-headline-lg text-headline-lg text-primary-container font-bold mb-4">
+      <h2 class="font-condensed font-bold text-[26px] tracking-[0.02em] text-primary-container mb-3">
         Nuestra Visión
       </h2>
-      <div class="w-12 h-1 bg-brand-teal rounded-full mb-6"></div>
+      <div class="w-12 h-[2px] bg-brand-terracotta rounded-full mb-6"></div>
       <p class="font-body-lg text-body-lg text-on-surface-variant">
         Ser la agencia de viajes de referencia en América Latina, reconocida por transformar la
         forma en que las personas descubren el mundo: con elegancia, confianza y la certeza de
@@ -60,16 +61,16 @@
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════
-     VALORES
-══════════════════════════════════════════════════════════ -->
+<!-- Valores -->
 <section class="bg-primary-container py-xl px-margin-mobile md:px-margin-desktop">
   <div class="max-w-[1200px] mx-auto">
     <div class="text-center mb-14">
-      <span class="text-brand-teal uppercase tracking-widest font-label-md text-label-md mb-2 block font-bold">
-        Lo Que Nos Define
-      </span>
-      <h2 class="text-white font-headline-lg text-headline-lg">
+      <div class="flex items-center justify-center gap-3 mb-4">
+        <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+        <span class="text-brand-terracotta uppercase tracking-[0.25em] text-[10px] font-bold font-condensed">Lo Que Nos Define</span>
+        <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+      </div>
+      <h2 class="text-white font-editorial italic font-normal leading-tight text-[34px] md:text-[48px]">
         Nuestros Valores
       </h2>
     </div>
@@ -78,11 +79,11 @@
       @for (value of values; track value.title; let i = $index) {
         <div appScrollReveal [delay]="i * 100"
              class="bg-white/5 border border-white/10 rounded-card p-8 flex flex-col items-center text-center
-                    hover:bg-white/10 hover:border-brand-teal/40 hover:-translate-y-1 transition-all duration-300">
-          <div class="w-16 h-16 rounded-full bg-brand-teal/20 flex items-center justify-center mb-5">
-            <span class="material-symbols-outlined text-brand-teal text-[28px] icon-fill">{{ value.icon }}</span>
+                    hover:bg-white/10 hover:border-brand-terracotta/40 hover:-translate-y-1 transition-all duration-300">
+          <div class="w-16 h-16 rounded-full bg-brand-terracotta/20 flex items-center justify-center mb-5">
+            <span class="material-symbols-outlined text-brand-terracotta text-[28px] icon-fill">{{ value.icon }}</span>
           </div>
-          <h3 class="font-headline-md text-headline-md text-white font-bold mb-3">{{ value.title }}</h3>
+          <h3 class="font-condensed font-bold text-[20px] tracking-[0.01em] text-white mb-3">{{ value.title }}</h3>
           <p class="font-body-md text-body-md text-white/70">{{ value.description }}</p>
         </div>
       }
@@ -90,17 +91,17 @@
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════
-     EQUIPO — CARRUSEL
-══════════════════════════════════════════════════════════ -->
+<!-- Equipo -->
 <section class="bg-brand-cream py-xl px-margin-mobile md:px-margin-desktop">
   <div class="max-w-[1200px] mx-auto">
 
     <div class="text-center mb-14">
-      <span class="text-brand-teal uppercase tracking-widest font-label-md text-label-md mb-2 block font-bold">
-        Las Personas Detrás
-      </span>
-      <h2 class="text-primary-container font-headline-lg text-headline-lg">
+      <div class="flex items-center justify-center gap-3 mb-4">
+        <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+        <span class="text-brand-terracotta uppercase tracking-[0.25em] text-[10px] font-bold font-condensed">Las Personas Detrás</span>
+        <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+      </div>
+      <h2 class="text-primary-container font-editorial italic font-normal leading-tight text-[34px] md:text-[48px]">
         Nuestro Equipo
       </h2>
     </div>
@@ -110,12 +111,12 @@
       @for (member of team; track member.name) {
         <div class="bg-white rounded-card shadow-soft overflow-hidden">
           <img [src]="member.photo" [alt]="member.name"
-               class="w-full h-[180px] object-cover">
+               class="w-full aspect-[3/4] object-cover">
           <div class="p-4">
-            <h3 class="font-headline-md text-[16px] text-primary-container font-bold leading-tight mb-1">
+            <h3 class="font-condensed font-bold text-[16px] text-primary-container leading-tight mb-1">
               {{ member.name }}
             </h3>
-            <p class="text-brand-teal font-label-md text-[11px] uppercase tracking-wider leading-tight mb-1">
+            <p class="text-brand-terracotta font-condensed font-bold text-[11px] uppercase tracking-wider leading-tight mb-1">
               {{ member.role }}
             </p>
             <p class="text-outline font-body-md text-[12px]">{{ member.years }}</p>
@@ -124,107 +125,58 @@
       }
     </div>
 
-    <!-- Desktop: sliding carousel -->
+    <!-- Desktop: sliding carousel marquee -->
     <div class="hidden md:block">
-      <div class="relative px-10">
-
-        <!-- Prev button -->
-        <button
-          (click)="prev()"
-          [disabled]="currentSlide() === 0"
-          aria-label="Anterior"
-          class="absolute left-0 top-[40%] -translate-y-1/2 z-10
-                 w-11 h-11 rounded-full bg-white shadow-soft
-                 flex items-center justify-center
-                 text-primary-container hover:bg-brand-teal hover:text-white
-                 transition-all duration-200
-                 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-primary-container">
-          <span class="material-symbols-outlined">chevron_left</span>
-        </button>
-
-        <!-- Track wrapper -->
-        <div class="overflow-hidden">
-          <div class="flex transition-transform duration-500 ease-in-out"
-               [style.transform]="trackTranslate()">
-            @for (member of team; track member.name) {
-              <div class="min-w-[33.333%] flex-shrink-0 px-3 box-border">
-                <div class="bg-white rounded-card shadow-soft overflow-hidden group">
-                  <div class="relative overflow-hidden">
-                    <img [src]="member.photo" [alt]="member.name"
-                         class="w-full h-[280px] object-cover group-hover:scale-105 transition-transform duration-500">
-                    <div class="absolute inset-0 bg-gradient-to-t from-primary-container/60 to-transparent
-                                opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                  <div class="p-6">
-                    <h3 class="font-headline-md text-headline-md text-primary-container font-bold mb-1">
-                      {{ member.name }}
-                    </h3>
-                    <p class="text-brand-teal font-label-md text-label-md uppercase tracking-wider mb-2">
-                      {{ member.role }}
-                    </p>
-                    <p class="text-outline font-body-md text-body-md">{{ member.years }}</p>
-                  </div>
-                </div>
+      <div class="team-marquee-wrap" role="region" aria-label="Carrusel de equipo">
+        <div class="team-track">
+          @for (member of displayTeam; track member.name + '_' + $index) {
+            <div class="team-card bg-white rounded-card shadow-soft overflow-hidden group">
+              <div class="relative overflow-hidden">
+                <img [src]="member.photo" [alt]="member.name"
+                     class="w-full aspect-[3/4] object-cover group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent
+                            opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
-            }
-          </div>
+              <div class="p-6">
+                <h3 class="font-condensed font-bold text-[22px] text-primary-container mb-1">
+                  {{ member.name }}
+                </h3>
+                <p class="text-brand-terracotta font-condensed font-bold text-[12px] uppercase tracking-[0.12em] mb-2">
+                  {{ member.role }}
+                </p>
+                <p class="text-outline font-body-md text-body-md">{{ member.years }}</p>
+              </div>
+            </div>
+          }
         </div>
-
-        <!-- Next button -->
-        <button
-          (click)="next()"
-          [disabled]="currentSlide() === maxSlide()"
-          aria-label="Siguiente"
-          class="absolute right-0 top-[40%] -translate-y-1/2 z-10
-                 w-11 h-11 rounded-full bg-white shadow-soft
-                 flex items-center justify-center
-                 text-primary-container hover:bg-brand-teal hover:text-white
-                 transition-all duration-200
-                 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-primary-container">
-          <span class="material-symbols-outlined">chevron_right</span>
-        </button>
-
-      </div>
-
-      <!-- Pagination dots -->
-      <div class="flex justify-center items-center gap-2 mt-8">
-        @for (dot of dots(); track dot) {
-          <button
-            (click)="goTo(dot)"
-            [attr.aria-label]="'Ir al slide ' + (dot + 1)"
-            class="h-2 rounded-full transition-all duration-300"
-            [class]="dot === currentSlide()
-              ? 'bg-brand-teal w-6'
-              : 'bg-outline/25 w-2 hover:bg-outline/50'">
-          </button>
-        }
       </div>
     </div>
-
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════
-     CTA FINAL
-══════════════════════════════════════════════════════════ -->
-<section class="bg-brand-teal py-xl px-margin-mobile md:px-margin-desktop">
+<!-- CTA Final -->
+<section class="bg-primary py-xl px-margin-mobile md:px-margin-desktop">
   <div class="max-w-[1200px] mx-auto text-center">
-    <h2 class="font-headline-lg text-headline-lg text-white font-bold mb-4">
+    <div class="flex items-center justify-center gap-3 mb-5">
+      <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+      <span class="text-brand-terracotta uppercase tracking-[0.25em] text-[10px] font-bold font-condensed">Empecemos</span>
+      <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+    </div>
+    <h2 class="font-editorial italic font-normal text-white leading-tight mb-4 text-[34px] md:text-[50px]">
       ¿Listo para Crear tu Próxima Aventura?
     </h2>
-    <p class="font-body-lg text-body-lg text-white/85 mb-8 max-w-2xl mx-auto">
+    <p class="font-body-lg text-body-lg text-white/65 mb-8 max-w-2xl mx-auto">
       Habla con uno de nuestros asesores y diseñemos juntos el viaje que siempre quisiste hacer.
     </p>
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
       <a routerLink="/contacto"
-         class="inline-block bg-white text-primary-container hover:bg-brand-cream
-                font-label-md text-label-md font-bold px-8 py-3 rounded-btn transition-colors shadow-soft">
+         class="inline-block bg-brand-terracotta hover:bg-white hover:text-primary text-white
+                font-condensed font-bold px-8 py-3 rounded-btn transition-all shadow-lg tracking-[0.15em] text-[12px] uppercase">
         Contáctanos
       </a>
       <a routerLink="/planes"
-         class="inline-block bg-transparent border-2 border-white text-white
-                hover:bg-white hover:text-primary-container
-                font-label-md text-label-md font-bold px-8 py-3 rounded-btn transition-colors">
+         class="inline-block bg-transparent border border-white/50 hover:border-white text-white
+                font-condensed px-8 py-3 rounded-btn transition-colors tracking-[0.15em] text-[12px] uppercase">
         Ver Planes
       </a>
     </div>

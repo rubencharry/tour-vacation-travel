@@ -1,62 +1,66 @@
 <div
-  class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+  class="fixed inset-0 bg-black/70 z-50 flex items-end sm:items-center justify-center sm:p-6 backdrop-blur-sm"
   (click)="close()"
 >
   <div
-    class="relative bg-white rounded-[20px] w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col md:flex-row"
+    class="relative bg-[#f8f5f0] w-full max-w-xl sm:rounded-[24px] rounded-t-[24px] max-h-[94vh] sm:max-h-[90vh] overflow-hidden shadow-2xl flex flex-col"
     (click)="$event.stopPropagation()"
   >
-    <!-- Imagen (izquierda en desktop, arriba en mobile) -->
-    <div class="relative md:w-[42%] shrink-0 h-56 md:h-auto">
+
+    <!-- Hero image full-width -->
+    <div class="relative shrink-0 h-[260px] md:h-[320px]">
       <img
         [src]="plan.imageUrls[0]"
         [alt]="plan.title"
         class="absolute inset-0 w-full h-full object-cover"
       >
-      <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-      @if (plan.departureCity) {
-        <div class="absolute bottom-4 left-4 bg-white/20 text-white font-label-md text-[12px] px-3 py-1.5 rounded-full backdrop-blur-sm flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[14px]">flight_takeoff</span>
-          {{ plan.departureCity }}
+
+      <!-- Gradient overlay -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10"></div>
+
+      <!-- Close -->
+      <button
+        (click)="close()"
+        class="absolute top-4 right-4 bg-black/30 hover:bg-black/55 backdrop-blur-sm rounded-full w-9 h-9 flex items-center justify-center transition-colors"
+      >
+        <span class="material-symbols-outlined text-white" style="font-size: 20px;">close</span>
+      </button>
+
+      <!-- Title / price overlaid -->
+      <div class="absolute bottom-0 left-0 right-0 px-6 pb-5">
+        @if (plan.departureCity) {
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-4 h-[1.5px] bg-brand-terracotta"></div>
+            <span class="text-white/65 uppercase tracking-[0.22em] font-condensed font-bold flex items-center gap-1.5" style="font-size: 10px;">
+              <span class="material-symbols-outlined" style="font-size: 12px;">flight_takeoff</span>
+              Salida desde {{ plan.departureCity }}
+            </span>
+          </div>
+        }
+        <h2 class="font-editorial italic font-normal text-white leading-[1.05] mb-2" style="font-size: clamp(24px, 5vw, 32px);">{{ plan.title }}</h2>
+        <div class="flex items-baseline gap-2">
+          <span class="text-brand-terracotta font-condensed font-bold" style="font-size: 22px;">{{ formatPrice(plan.price, plan.currency) }}</span>
+          @if (plan.priceDetails) {
+            <span class="text-white/45 font-condensed" style="font-size: 11px;">{{ plan.priceDetails }}</span>
+          }
         </div>
-      }
+      </div>
     </div>
 
-    <!-- Contenido (derecha en desktop, abajo en mobile) -->
-    <div class="flex-1 overflow-y-auto">
+    <!-- Scrollable content -->
+    <div class="overflow-y-auto flex-1">
+      <div class="px-6 pt-5 pb-7 space-y-5">
 
-      <!-- Header fijo con X -->
-      <div class="sticky top-0 bg-white z-10 flex items-start justify-between gap-4 px-6 pt-6 pb-4 border-b border-surface-container-high">
-        <div>
-          <h2 class="text-primary-container font-headline-lg text-[22px] font-bold leading-tight">{{ plan.title }}</h2>
-          <div class="flex items-baseline gap-2 mt-1">
-            <span class="text-brand-terracotta font-bold text-2xl">{{ formatPrice(plan.price, plan.currency) }}</span>
-            @if (plan.priceDetails) {
-              <span class="text-outline text-[12px]">{{ plan.priceDetails }}</span>
-            }
-          </div>
-        </div>
-        <button
-          (click)="close()"
-          class="shrink-0 bg-surface-container-high hover:bg-surface-container-highest rounded-full w-9 h-9 flex items-center justify-center transition-colors"
-        >
-          <span class="material-symbols-outlined text-on-surface-variant text-[20px]">close</span>
-        </button>
-      </div>
-
-      <!-- Cuerpo scrolleable -->
-      <div class="px-6 py-5 space-y-5">
-
-        <!-- Pills de info rápida -->
+        <!-- Pills rápidas -->
         <div class="flex flex-wrap gap-2">
-          <span class="flex items-center gap-1.5 bg-surface-container-high text-on-surface-variant font-label-md text-[13px] px-3 py-1.5 rounded-full">
-            <span class="material-symbols-outlined text-[15px] text-brand-teal">schedule</span>
+          <span class="flex items-center gap-1.5 bg-white border border-black/8 text-on-surface-variant font-condensed font-bold uppercase tracking-[0.08em] px-3 py-1.5 rounded-full" style="font-size: 11px;">
+            <span class="material-symbols-outlined text-brand-teal" style="font-size: 14px;">schedule</span>
             {{ formatDuration(plan.durationDays, plan.durationNights) }}
           </span>
           @if (plan.validity) {
-            <span class="flex items-center gap-1.5 bg-surface-container-high text-on-surface-variant font-label-md text-[13px] px-3 py-1.5 rounded-full">
-              <span class="material-symbols-outlined text-[15px] text-brand-teal">calendar_month</span>
-              Salidas: {{ plan.validity }}
+            <span class="flex items-center gap-1.5 bg-white border border-black/8 text-on-surface-variant font-condensed font-bold uppercase tracking-[0.08em] px-3 py-1.5 rounded-full" style="font-size: 11px;">
+              <span class="material-symbols-outlined text-brand-teal" style="font-size: 14px;">calendar_month</span>
+              {{ plan.validity }}
             </span>
           }
         </div>
@@ -64,19 +68,25 @@
         <!-- Descripción -->
         @if (plan.description) {
           <div>
-            <h3 class="text-primary-container font-headline-md font-semibold mb-1.5">Descripción</h3>
-            <p class="text-on-surface-variant font-body-md text-[14px] leading-relaxed">{{ plan.description }}</p>
+            <div class="flex items-center gap-2 mb-2.5">
+              <div class="w-5 h-[1.5px] bg-brand-terracotta"></div>
+              <span class="font-condensed font-bold uppercase tracking-[0.18em] text-brand-terracotta" style="font-size: 10px;">Descripción</span>
+            </div>
+            <p class="text-on-surface-variant font-body-md leading-relaxed" style="font-size: 14px;">{{ plan.description }}</p>
           </div>
         }
 
         <!-- Qué incluye -->
         @if (plan.inclusions?.length) {
           <div>
-            <h3 class="text-primary-container font-headline-md font-semibold mb-2">¿Qué incluye?</h3>
-            <ul class="grid grid-cols-1 gap-y-2">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-5 h-[1.5px] bg-brand-terracotta"></div>
+              <span class="font-condensed font-bold uppercase tracking-[0.18em] text-brand-terracotta" style="font-size: 10px;">¿Qué incluye?</span>
+            </div>
+            <ul class="grid grid-cols-2 gap-x-4 gap-y-2.5">
               @for (item of plan.inclusions; track item) {
-                <li class="flex items-center gap-2.5 text-on-surface-variant font-body-md text-[14px]">
-                  <span class="text-[18px] leading-none shrink-0">{{ getEmoji(item) }}</span>
+                <li class="flex items-center gap-2 text-on-surface-variant font-body-md" style="font-size: 13px;">
+                  <span class="shrink-0 leading-none" style="font-size: 16px;">{{ getEmoji(item) }}</span>
                   {{ getLabel(item) }}
                 </li>
               }
@@ -86,26 +96,32 @@
 
         <!-- Términos -->
         @if (plan.terms) {
-          <div class="p-4 bg-surface-container-high rounded-[12px]">
-            <h3 class="text-primary-container font-headline-md font-semibold mb-1.5 flex items-center gap-2">
-              <span class="material-symbols-outlined text-[17px] text-outline">info</span>
-              Términos y condiciones
-            </h3>
-            <p class="text-on-surface-variant font-body-md text-[13px] leading-relaxed">{{ plan.terms }}</p>
+          <div class="p-4 bg-white rounded-[12px] border border-black/6">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="material-symbols-outlined text-outline" style="font-size: 15px;">info</span>
+              <span class="font-condensed font-bold uppercase tracking-[0.12em] text-on-surface-variant" style="font-size: 10px;">Términos y condiciones</span>
+            </div>
+            <p class="text-on-surface-variant font-body-md leading-relaxed" style="font-size: 12px;">{{ plan.terms }}</p>
           </div>
         }
 
-        <!-- CTA -->
+        <!-- CTA WhatsApp -->
         <a
-          routerLink="/"
-          fragment="contacto"
+          [href]="whatsappUrl()"
+          target="_blank"
+          rel="noopener noreferrer"
           (click)="close()"
-          class="block w-full text-center bg-brand-teal hover:bg-brand-terracotta text-white font-label-md font-bold py-3 rounded-btn transition-colors"
+          class="flex items-center justify-center gap-2.5 w-full bg-brand-terracotta hover:bg-primary-container text-white font-condensed font-bold uppercase tracking-[0.14em] py-3.5 rounded-btn transition-colors duration-200"
+          style="font-size: 13px;"
         >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" class="shrink-0">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
           Consultar este plan
         </a>
 
       </div>
     </div>
+
   </div>
 </div>

@@ -9,6 +9,7 @@ import { Plan } from '../../../core/services/plans.service';
 export class PlanCardComponent {
   @Input({ required: true }) plan!: Plan;
   @Input() showTypeBadge = false;
+  @Input() editorial = false;
   @Output() selected = new EventEmitter<void>();
 
   protected imgError = false;

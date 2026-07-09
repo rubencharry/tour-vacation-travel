@@ -1,7 +1,6 @@
 import { Component, EventEmitter, HostListener, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { catchError, of } from 'rxjs';
-import { RouterLink } from '@angular/router';
 import { Plan } from '../../../core/services/plans.service';
 import { PlanServicesService } from '../../../core/services/plan-services.service';
 
@@ -20,10 +19,12 @@ const INCLUSION_EMOJIS: Record<string, string> = {
   kayak: '🚣',
 };
 
+const WHATSAPP_NUMBER = '573127466554';
+
 @Component({
   selector: 'app-plan-modal',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './plan-modal.component.html',
 })
 export class PlanModalComponent implements OnInit, OnDestroy {
@@ -73,5 +74,10 @@ export class PlanModalComponent implements OnInit, OnDestroy {
 
   protected formatDuration(days: number, nights: number): string {
     return `${days} días / ${nights} noches`;
+  }
+
+  protected whatsappUrl(): string {
+    const msg = `Hola, me gustaría recibir información sobre el plan *${this.plan.title}*. ¿Podrían indicarme disponibilidad y precio?`;
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   }
 }
