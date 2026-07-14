@@ -5,6 +5,7 @@ export interface Lead {
   phone?: string;
   interestedPlanId: string;
   source?: string;
+  message?: string;
   createdAt: string;
   emailSent: boolean;
 }

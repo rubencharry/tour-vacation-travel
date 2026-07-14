@@ -27,6 +27,10 @@ export const adminRoutes: Routes = [
         path: 'planes/:id/editar',
         loadComponent: () => import('./planes/plan-form/plan-form.component').then((m) => m.PlanFormComponent),
       },
+      {
+        path: 'leads',
+        loadComponent: () => import('./leads/leads.component').then((m) => m.LeadsAdminComponent),
+      },
     ],
   },
   {

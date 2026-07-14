@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  DeleteCommand,
+  GetCommand,
   PutCommand,
   QueryCommand,
   ScanCommand,
@@ -45,6 +47,13 @@ export class LeadsRepository {
     return (result.Items ?? []) as Lead[];
   }
 
+  async findById(leadId: string): Promise<Lead | undefined> {
+    const result = await this.db.client.send(
+      new GetCommand({ TableName: this.table, Key: { leadId } }),
+    );
+    return result.Item as Lead | undefined;
+  }
+
   async markEmailSent(leadId: string): Promise<void> {
     await this.db.client.send(
       new UpdateCommand({
@@ -53,6 +62,34 @@ export class LeadsRepository {
         UpdateExpression: 'SET emailSent = :val',
         ExpressionAttributeValues: { ':val': true },
       }),
+    );
+  }
+
+  async update(
+    leadId: string,
+    updates: Partial<Omit<Lead, 'leadId' | 'createdAt'>>,
+  ): Promise<Lead> {
+    const entries = Object.entries(updates);
+    const expression = entries.map((_, i) => `#k${i} = :v${i}`).join(', ');
+    const names = Object.fromEntries(entries.map(([k], i) => [`#k${i}`, k]));
+    const values = Object.fromEntries(entries.map(([, v], i) => [`:v${i}`, v]));
+
+    const result = await this.db.client.send(
+      new UpdateCommand({
+        TableName: this.table,
+        Key: { leadId },
+        UpdateExpression: `SET ${expression}`,
+        ExpressionAttributeNames: names,
+        ExpressionAttributeValues: values,
+        ReturnValues: 'ALL_NEW',
+      }),
+    );
+    return result.Attributes as Lead;
+  }
+
+  async delete(leadId: string): Promise<void> {
+    await this.db.client.send(
+      new DeleteCommand({ TableName: this.table, Key: { leadId } }),
     );
   }
 }

@@ -48,6 +48,9 @@ backend/.dynamodb-data/
 # DynamoDB Local JAR y librerías (binarios descargados, no van al repo)
 dynamodblocal-bin/
 
+# Uploads locales (fallback de FileService cuando no hay S3/MinIO configurado)
+backend/uploads/
+
 # Misc
 *.tmp
 *.swp

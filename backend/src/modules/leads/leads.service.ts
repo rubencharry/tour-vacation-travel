@@ -1,6 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { LeadsRepository } from './leads.repository';
 import { CreateLeadDto } from './dto/create-lead.dto';
+import { UpdateLeadDto } from './dto/update-lead.dto';
 import { Lead } from './entities/lead.entity';
 import { MailService } from '../mail/mail.service';
 import { leadConfirmationTemplate } from '../mail/templates/lead-confirmation.template';
@@ -17,12 +23,14 @@ export class LeadsService {
   ) {}
 
   async create(dto: CreateLeadDto): Promise<Lead> {
-    const existing = await this.findExisting(dto.email, dto.interestedPlanId);
+    const email = dto.email.toLowerCase();
+    const existing = await this.findExisting(email, dto.interestedPlanId);
     if (existing) return existing;
 
     const lead: Lead = {
       leadId: crypto.randomUUID(),
       ...dto,
+      email,
       createdAt: new Date().toISOString(),
       emailSent: false,
     };
@@ -39,6 +47,28 @@ export class LeadsService {
     return this.repo.findAll();
   }
 
+  async findOne(leadId: string): Promise<Lead> {
+    const lead = await this.repo.findById(leadId);
+    if (!lead) throw new NotFoundException(`Lead ${leadId} no encontrado`);
+    return lead;
+  }
+
+  async update(leadId: string, dto: UpdateLeadDto): Promise<Lead> {
+    if (Object.keys(dto).length === 0) {
+      throw new BadRequestException('No hay campos para actualizar');
+    }
+    await this.findOne(leadId);
+    const updates = dto.email
+      ? { ...dto, email: dto.email.toLowerCase() }
+      : dto;
+    return this.repo.update(leadId, updates);
+  }
+
+  async remove(leadId: string): Promise<void> {
+    await this.findOne(leadId);
+    await this.repo.delete(leadId);
+  }
+
   private async sendConfirmation(lead: Lead): Promise<void> {
     const { subject, html } = leadConfirmationTemplate({ name: lead.name });
     await this.mail.send({ to: lead.email, subject, html });
@@ -49,7 +79,7 @@ export class LeadsService {
     email: string,
     planId: string,
   ): Promise<Lead | undefined> {
-    const leads = await this.repo.findByEmail(email);
+    const leads = await this.repo.findByEmail(email.toLowerCase());
     const cutoff = Date.now() - IDEMPOTENCY_WINDOW_MS;
     return leads.find(
       (l) =>
