@@ -32,7 +32,7 @@ export class LandingComponent {
   );
 
   protected readonly stats = [
-    { value: '15+', label: 'Años de Experiencia' },
+    { value: '11+', label: 'Años de Experiencia' },
     { value: '50k', label: 'Viajeros Felices' },
     { value: '120', label: 'Destinos' },
     { value: '4.9', label: 'Calificación Promedio' },
