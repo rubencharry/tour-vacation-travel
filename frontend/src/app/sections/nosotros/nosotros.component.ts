@@ -12,43 +12,43 @@ import { ScrollRevealDirective } from '../../shared/directives/scroll-reveal.dir
 export class NosotrosComponent {
   protected readonly team = [
     {
-      name: 'Blanca',
+      name: 'Blanca Mendoza',
       role: 'Socia Fundadora & Directora Ejecutiva',
       photo: '/team/blanca.webp',
       years: '15 años de experiencia',
     },
     {
-      name: 'José',
+      name: 'José Gómez',
       role: 'Socio Fundador & Director de Operaciones',
       photo: '/team/jose.webp',
       years: '20 años de experiencia',
     },
     {
-      name: 'Rubén',
+      name: 'Rubén Charry',
       role: 'Desarrollador Web & Arquitecto Cloud AWS',
       photo: '/team/ruben.webp',
       years: '3 años de experiencia',
     },
     {
-      name: 'María José',
-      role: 'Directora Creativa & Imagen de Marca',
+      name: 'María José Gómez',
+      role: 'Imagen de Marca y Creativa',
       photo: '/team/maria-jose.webp',
       years: '1 año de experiencia',
     },
     {
-      name: 'Francy',
+      name: 'Francy Reyes',
       role: 'Especialista en Diseño de Producto Turístico',
       photo: '/team/francy.webp',
       years: '7 años en turismo',
     },
     {
-      name: 'Valentina',
+      name: 'Valentina Rodríguez',
       role: 'Directora de Marketing',
       photo: '/team/valentina.webp',
       years: '3 años de experiencia',
     },
     {
-      name: 'Yulieth',
+      name: 'Yulieth Roa',
       role: 'Especialista en Diseño de Producto Turístico',
       photo: '/team/yulieth.webp',
       years: '7 años en turismo',
