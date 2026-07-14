@@ -1,0 +1,471 @@
+<div class="max-w-7xl mx-auto space-y-4">
+
+  <!-- Encabezado -->
+  <div class="flex items-center justify-between">
+    <div>
+      <nav class="flex items-center gap-1 text-caption text-on-surface-variant mb-1">
+        <span>Admin</span>
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <span class="text-primary font-semibold">Leads</span>
+      </nav>
+      <h2 class="font-headline-md text-headline-md text-primary-container">Directorio de Leads</h2>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container shrink-0">
+          <span class="material-symbols-outlined text-[18px]">groups</span>
+        </div>
+        <div>
+          <p class="text-caption text-on-surface-variant leading-none mb-1">Total</p>
+          <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ totalCount() }}</p>
+        </div>
+      </div>
+      <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-full bg-brand-teal/10 flex items-center justify-center text-secondary shrink-0">
+          <span class="material-symbols-outlined text-[18px]">mail</span>
+        </div>
+        <div>
+          <p class="text-caption text-on-surface-variant leading-none mb-1">Email enviado</p>
+          <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ sentCount() }}</p>
+        </div>
+      </div>
+      <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-full bg-brand-terracotta/10 flex items-center justify-center text-brand-terracotta shrink-0">
+          <span class="material-symbols-outlined text-[18px]">pending_actions</span>
+        </div>
+        <div>
+          <p class="text-caption text-on-surface-variant leading-none mb-1">Pendiente</p>
+          <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ pendingCount() }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="px-4 py-3 bg-error-container text-on-error-container rounded-btn font-body-md text-body-md">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Barra de filtros y acciones -->
+  <div class="bg-surface-container-lowest rounded-card border border-surface-variant p-3 flex flex-wrap items-center gap-2.5">
+
+    <!-- Búsqueda -->
+    <div class="relative flex-1 min-w-[200px]">
+      <span class="absolute inset-y-0 left-3 flex items-center text-on-surface-variant pointer-events-none">
+        <span class="material-symbols-outlined text-[18px]">search</span>
+      </span>
+      <input
+        type="text"
+        placeholder="Buscar por nombre o email..."
+        [value]="filterSearch()"
+        (input)="filterSearch.set($any($event.target).value); page.set(1)"
+        class="w-full h-9 bg-surface-container border border-surface-variant rounded-btn pl-9 pr-3 text-on-surface text-sm placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-brand-teal/50 focus:border-brand-teal transition-all"
+      />
+    </div>
+
+    <div class="h-6 w-px bg-outline-variant hidden sm:block"></div>
+
+    <!-- Plan -->
+    <app-select
+      [options]="planOptions()"
+      [ngModel]="filterPlanId()"
+      (ngModelChange)="filterPlanId.set($any($event)); page.set(1)"
+    />
+
+    <!-- Fecha -->
+    <app-select
+      [options]="dateRangeOptions"
+      [ngModel]="filterDateRange()"
+      (ngModelChange)="filterDateRange.set($any($event)); page.set(1)"
+    />
+
+    <!-- Estado de email -->
+    <app-select
+      [options]="emailStatusOptions"
+      [ngModel]="filterEmailStatus()"
+      (ngModelChange)="filterEmailStatus.set($any($event)); page.set(1)"
+    />
+
+    <!-- Limpiar filtros -->
+    @if (hasActiveFilters()) {
+      <button
+        type="button"
+        (click)="clearFilters()"
+        class="h-9 px-3 flex items-center gap-1.5 text-sm text-on-surface-variant hover:text-error hover:bg-error-container rounded-btn transition-colors"
+      >
+        <span class="material-symbols-outlined text-[16px]">filter_list_off</span>
+        Limpiar
+      </button>
+    }
+
+    <!-- Exportar CSV -->
+    <button
+      type="button"
+      (click)="exportCsv()"
+      [disabled]="filteredLeads().length === 0"
+      class="ml-auto h-9 px-4 flex items-center gap-2 border-2 border-brand-terracotta text-primary-container font-label-md text-label-md rounded-btn hover:bg-brand-terracotta/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+    >
+      <span class="material-symbols-outlined text-[18px]">download</span>
+      Exportar CSV
+    </button>
+
+    <!-- Agregar lead -->
+    <button
+      type="button"
+      (click)="openAddModal()"
+      class="h-9 px-4 flex items-center gap-2 bg-brand-teal text-white font-label-md text-label-md rounded-btn hover:shadow-md hover:-translate-y-0.5 transition-all"
+    >
+      <span class="material-symbols-outlined text-[18px]">add</span>
+      Agregar Lead
+    </button>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-surface-container-lowest rounded-card shadow-coastal border border-surface-variant overflow-hidden">
+
+    @if (loading()) {
+      <div class="flex items-center justify-center py-20 text-on-surface-variant">
+        <span class="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+        Cargando leads...
+      </div>
+    } @else if (leads().length === 0) {
+      <div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
+        <span class="material-symbols-outlined text-[48px] opacity-30">group</span>
+        <p class="font-body-md text-body-md">Todavía no hay leads capturados.</p>
+      </div>
+    } @else if (filteredLeads().length === 0) {
+      <div class="flex flex-col items-center justify-center py-16 text-on-surface-variant gap-3">
+        <span class="material-symbols-outlined text-[40px] opacity-30">search_off</span>
+        <p class="font-body-md text-body-md">Ningún lead coincide con los filtros.</p>
+        <button type="button" (click)="clearFilters()" class="text-brand-teal font-label-md text-label-md hover:underline">
+          Limpiar filtros
+        </button>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-left min-w-[900px]">
+          <thead>
+            <tr class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md border-b border-surface-variant">
+              <th class="p-4 pl-6 w-12">
+                <input
+                  type="checkbox"
+                  class="rounded border-outline-variant text-brand-teal focus:ring-brand-teal"
+                  [checked]="allOnPageSelected()"
+                  (change)="toggleSelectAllOnPage()"
+                />
+              </th>
+              <th class="p-4">Nombre</th>
+              <th class="p-4">Contacto</th>
+              <th class="p-4">Plan de interés</th>
+              <th class="p-4">Fecha</th>
+              <th class="p-4">Email</th>
+              <th class="p-4 pr-6 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="font-body-md text-on-surface divide-y divide-surface-variant">
+            @for (lead of pagedLeads(); track lead.leadId) {
+              <tr class="hover:bg-surface/50 transition-colors">
+                <td class="p-4 pl-6">
+                  <input
+                    type="checkbox"
+                    class="rounded border-outline-variant text-brand-teal focus:ring-brand-teal"
+                    [checked]="selectedIds().has(lead.leadId)"
+                    (change)="toggleSelect(lead)"
+                  />
+                </td>
+                <td class="p-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-brand-teal-light text-primary-container flex items-center justify-center font-bold text-xs shrink-0">
+                      {{ initialsFor(lead.name) }}
+                    </div>
+                    <span class="font-semibold text-primary-container">{{ lead.name }}</span>
+                  </div>
+                </td>
+                <td class="p-4">
+                  <div class="flex flex-col">
+                    <span class="text-on-surface">{{ lead.email }}</span>
+                    @if (lead.phone) {
+                      <span class="text-caption text-on-surface-variant">{{ lead.phone }}</span>
+                    }
+                  </div>
+                </td>
+                <td class="p-4">
+                  <div class="flex items-center gap-2">
+                    @if (planFor(lead)?.imageUrls?.[0]) {
+                      <img [src]="planFor(lead)!.imageUrls[0]" class="w-8 h-8 rounded object-cover border border-surface-variant" alt="" />
+                    } @else {
+                      <div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center border border-surface-variant">
+                        <span class="material-symbols-outlined text-[16px] text-on-surface-variant">map</span>
+                      </div>
+                    }
+                    <span class="text-on-surface">{{ planFor(lead)?.title ?? lead.interestedPlanId }}</span>
+                  </div>
+                </td>
+                <td class="p-4 text-on-surface-variant whitespace-nowrap">
+                  {{ formatDate(lead.createdAt) }}
+                </td>
+                <td class="p-4">
+                  @if (lead.emailSent) {
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-brand-teal/10 text-secondary">
+                      Enviado
+                    </span>
+                  } @else {
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-brand-terracotta/10 text-brand-terracotta">
+                      Pendiente
+                    </span>
+                  }
+                </td>
+                <td class="p-4 pr-6 text-right">
+                  <div class="flex items-center justify-end gap-1">
+                    <button
+                      type="button"
+                      (click)="openEditModal(lead)"
+                      class="p-1.5 text-on-surface-variant hover:text-primary-container hover:bg-surface-container rounded transition-colors"
+                      title="Editar"
+                    >
+                      <span class="material-symbols-outlined text-[20px]">edit</span>
+                    </button>
+                    <button
+                      type="button"
+                      (click)="openDuplicateModal(lead)"
+                      class="p-1.5 text-on-surface-variant hover:text-brand-teal hover:bg-brand-teal/10 rounded transition-colors"
+                      title="Duplicar lead"
+                    >
+                      <span class="material-symbols-outlined text-[20px]">content_copy</span>
+                    </button>
+                    <button
+                      type="button"
+                      (click)="deleteLead(lead)"
+                      class="p-1.5 text-on-surface-variant hover:text-error hover:bg-error-container rounded transition-colors"
+                      title="Eliminar"
+                    >
+                      <span class="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
+                    <button
+                      type="button"
+                      (click)="toggleExpand(lead)"
+                      class="p-1.5 text-on-surface-variant hover:text-primary-container hover:bg-surface-container rounded transition-colors"
+                      [title]="expandedId() === lead.leadId ? 'Cerrar detalle' : 'Ver detalle'"
+                    >
+                      <span class="material-symbols-outlined text-[20px] transition-transform"
+                        [class.rotate-180]="expandedId() === lead.leadId">expand_more</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              @if (expandedId() === lead.leadId) {
+                <tr class="bg-surface-container-low border-l-4 border-l-brand-teal">
+                  <td class="p-0" colspan="7">
+                    <div class="px-6 md:px-14 py-4 space-y-4">
+                      @if (lead.message) {
+                        <div>
+                          <h4 class="text-caption text-on-surface-variant mb-1">Mensaje</h4>
+                          <p class="text-sm text-on-surface bg-surface-container-lowest p-3 rounded-btn border border-surface-variant whitespace-pre-line">{{ lead.message }}</p>
+                        </div>
+                      }
+                      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <h4 class="text-caption text-on-surface-variant mb-1">Origen</h4>
+                          <p class="text-sm text-on-surface">{{ lead.source || 'Sin especificar' }}</p>
+                        </div>
+                        <div>
+                          <h4 class="text-caption text-on-surface-variant mb-1">ID del lead</h4>
+                          <p class="text-sm text-on-surface font-mono">{{ lead.leadId }}</p>
+                        </div>
+                        <div>
+                          <h4 class="text-caption text-on-surface-variant mb-1">Plan ID</h4>
+                          <p class="text-sm text-on-surface font-mono">{{ lead.interestedPlanId }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="border-t border-surface-variant p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <span class="text-caption text-on-surface-variant">
+          Mostrando {{ (page() - 1) * pageSize + 1 }}-{{ rangeEnd() }} de {{ filteredLeads().length }} leads
+        </span>
+        <div class="flex items-center gap-1">
+          <button
+            type="button"
+            (click)="goToPage(page() - 1)"
+            [disabled]="page() === 1"
+            class="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+          </button>
+          @for (p of pageNumbers(); track p) {
+            <button
+              type="button"
+              (click)="goToPage(p)"
+              class="w-8 h-8 rounded font-medium text-sm flex items-center justify-center transition-colors"
+              [class]="page() === p ? 'bg-primary-container text-white' : 'text-on-surface hover:bg-surface-container'"
+            >
+              {{ p }}
+            </button>
+          }
+          <button
+            type="button"
+            (click)="goToPage(page() + 1)"
+            [disabled]="page() === totalPages()"
+            class="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Barra de acciones masivas -->
+  @if (selectedCount() > 0) {
+    <div class="fixed bottom-0 left-sidebar right-0 bg-surface-container-lowest border-t border-surface-variant p-4 shadow-coastal-hover flex items-center justify-between z-10">
+      <div class="flex items-center gap-3">
+        <span class="bg-primary-container text-white w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">
+          {{ selectedCount() }}
+        </span>
+        <span class="font-semibold text-primary-container">
+          {{ selectedCount() === 1 ? 'lead seleccionado' : 'leads seleccionados' }}
+        </span>
+      </div>
+      <button
+        type="button"
+        (click)="exportCsv(true)"
+        class="bg-surface-container-lowest border border-surface-variant text-on-surface hover:bg-surface-container font-label-md text-label-md px-4 py-2 rounded-btn transition-colors"
+      >
+        Exportar selección
+      </button>
+    </div>
+  }
+
+  <!-- Modal: Agregar lead -->
+  @if (showModal()) {
+    <div
+      class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:p-6 backdrop-blur-sm"
+      (click)="closeModal()"
+    >
+      <div
+        class="relative bg-surface-container-lowest w-full max-w-lg sm:rounded-card rounded-t-card max-h-[92vh] overflow-y-auto shadow-2xl"
+        (click)="$event.stopPropagation()"
+        [formGroup]="addForm"
+      >
+        <div class="flex items-center justify-between px-6 py-5 border-b border-surface-variant sticky top-0 bg-surface-container-lowest">
+          <h3 class="font-headline-md text-headline-md font-bold text-primary-container">{{ modalTitle() }}</h3>
+          <button type="button" (click)="closeModal()" class="p-1.5 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-5">
+          @if (saveError()) {
+            <div class="px-4 py-3 bg-error-container text-on-error-container rounded-btn font-body-md text-body-md">
+              {{ saveError() }}
+            </div>
+          }
+
+          <div>
+            <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-name">
+              Nombre <span class="text-brand-terracotta">*</span>
+            </label>
+            <input
+              id="lead-name" type="text" formControlName="name"
+              placeholder="Nombre completo"
+              class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+              [class]="isInvalid('name') ? 'border-error' : 'border-brand-teal-light'"
+            />
+            @if (isInvalid('name')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
+          </div>
+
+          <div>
+            <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-email">
+              Email <span class="text-brand-terracotta">*</span>
+            </label>
+            <input
+              id="lead-email" type="email" formControlName="email"
+              placeholder="correo@ejemplo.com"
+              class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+              [class]="isInvalid('email') ? 'border-error' : 'border-brand-teal-light'"
+            />
+            @if (isInvalid('email')) { <p class="text-caption text-error mt-1">Email inválido.</p> }
+          </div>
+
+          <div>
+            <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-phone">Teléfono</label>
+            <input
+              id="lead-phone" type="text" formControlName="phone"
+              placeholder="+57 300 000 0000"
+              class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+            />
+          </div>
+
+          <div>
+            <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-plan">
+              Plan de interés <span class="text-brand-terracotta">*</span>
+            </label>
+            <select
+              id="lead-plan" formControlName="interestedPlanId"
+              class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+              [class]="isInvalid('interestedPlanId') ? 'border-error' : 'border-brand-teal-light'"
+            >
+              <option value="" disabled>Seleccionar plan...</option>
+              @for (opt of planOptions(); track opt.value) {
+                @if (opt.value !== 'all') {
+                  <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              }
+            </select>
+            @if (isInvalid('interestedPlanId')) { <p class="text-caption text-error mt-1">Seleccioná un plan.</p> }
+          </div>
+
+          <div>
+            <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-source">Origen</label>
+            <input
+              id="lead-source" type="text" formControlName="source"
+              placeholder="Ej. Alta manual, WhatsApp, Feria..."
+              class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+            />
+          </div>
+
+          <div>
+            <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-message">Mensaje</label>
+            <textarea
+              id="lead-message" formControlName="message" rows="3"
+              placeholder="Comentario o consulta del lead..."
+              class="w-full bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 py-3 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors resize-none"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-surface-variant sticky bottom-0 bg-surface-container-lowest">
+          <button
+            type="button"
+            (click)="closeModal()"
+            class="h-10 px-4 text-on-surface-variant hover:bg-surface-container rounded-btn font-label-md text-label-md transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            (click)="submitLeadForm()"
+            [disabled]="saving()"
+            class="h-10 px-5 bg-brand-teal text-white font-label-md text-label-md rounded-btn hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            @if (saving()) {
+              <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+            }
+            Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

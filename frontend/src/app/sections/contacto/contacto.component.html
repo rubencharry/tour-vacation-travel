@@ -100,6 +100,25 @@
               />
             </div>
 
+            <!-- Plan de interés (opcional) -->
+            <div class="flex flex-col gap-xs">
+              <label class="font-condensed font-bold text-[13px] text-primary-container tracking-[0.05em]">
+                Plan de interés <span class="text-outline font-normal normal-case tracking-normal">(opcional)</span>
+              </label>
+              <select
+                class="h-12 px-4 rounded-btn border border-outline-variant bg-surface-container-lowest
+                       focus:border-brand-terracotta/70 focus:ring-1 focus:ring-brand-terracotta/30
+                       transition-all font-body-md text-on-surface"
+                [value]="planId()"
+                (change)="planId.set($any($event.target).value)"
+              >
+                <option value="">Ninguno en particular</option>
+                @for (plan of plans(); track plan.planId) {
+                  <option [value]="plan.planId">{{ plan.title }}</option>
+                }
+              </select>
+            </div>
+
             <!-- Mensaje -->
             <div class="flex flex-col gap-xs mt-sm">
               <label class="font-condensed font-bold text-[13px] text-primary-container tracking-[0.05em]">
@@ -116,6 +135,13 @@
                 required
               ></textarea>
             </div>
+
+            @if (formState() === 'error') {
+              <p class="text-brand-terracotta text-[13px] flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px]">error</span>
+                No pudimos enviar tu mensaje. Por favor, intentá de nuevo.
+              </p>
+            }
 
             <!-- Submit -->
             <div class="pt-sm">
