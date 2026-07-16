@@ -1,4 +1,12 @@
-import { IsEmail, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsEmail,
+  IsIn,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+import { LEAD_SOURCES } from '../entities/lead.entity';
+import type { LeadSource } from '../entities/lead.entity';
 
 export class CreateLeadDto {
   @IsEmail()
@@ -19,9 +27,8 @@ export class CreateLeadDto {
   interestedPlanId!: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  source?: string;
+  @IsIn(LEAD_SOURCES)
+  source?: LeadSource;
 
   @IsOptional()
   @IsString()

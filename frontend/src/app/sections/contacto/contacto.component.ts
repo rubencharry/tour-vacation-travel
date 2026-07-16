@@ -47,7 +47,7 @@ export class ContactoComponent {
         email: this.email().trim(),
         phone: this.telefono().trim() || undefined,
         interestedPlanId: this.planId() || GENERAL_INQUIRY_PLAN_ID,
-        source: 'contacto-mensaje',
+        source: 'web',
         message: this.mensaje().trim(),
       })
       .subscribe({

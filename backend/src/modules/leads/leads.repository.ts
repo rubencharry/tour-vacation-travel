@@ -9,7 +9,7 @@ import {
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { DynamoDbService } from '../dynamodb/dynamodb.service';
-import { Lead } from './entities/lead.entity';
+import { Lead, LeadActivity, LeadStatus } from './entities/lead.entity';
 
 @Injectable()
 export class LeadsRepository {
@@ -42,7 +42,23 @@ export class LeadsRepository {
 
   async findAll(): Promise<Lead[]> {
     const result = await this.db.client.send(
-      new ScanCommand({ TableName: this.table }),
+      new ScanCommand({
+        TableName: this.table,
+        ProjectionExpression:
+          '#leadId, #email, #name, #phone, #interestedPlanId, #source, #message, #createdAt, #emailSent, #status',
+        ExpressionAttributeNames: {
+          '#leadId': 'leadId',
+          '#email': 'email',
+          '#name': 'name',
+          '#phone': 'phone',
+          '#interestedPlanId': 'interestedPlanId',
+          '#source': 'source',
+          '#message': 'message',
+          '#createdAt': 'createdAt',
+          '#emailSent': 'emailSent',
+          '#status': 'status',
+        },
+      }),
     );
     return (result.Items ?? []) as Lead[];
   }
@@ -79,6 +95,38 @@ export class LeadsRepository {
         TableName: this.table,
         Key: { leadId },
         UpdateExpression: `SET ${expression}`,
+        ExpressionAttributeNames: names,
+        ExpressionAttributeValues: values,
+        ReturnValues: 'ALL_NEW',
+      }),
+    );
+    return result.Attributes as Lead;
+  }
+
+  async addActivity(
+    leadId: string,
+    activity: LeadActivity,
+    newStatus?: LeadStatus,
+  ): Promise<Lead> {
+    const names: Record<string, string> = { '#activities': 'activities' };
+    const values: Record<string, unknown> = {
+      ':activity': [activity],
+      ':empty': [],
+    };
+    let expression =
+      'SET #activities = list_append(if_not_exists(#activities, :empty), :activity)';
+
+    if (newStatus) {
+      names['#status'] = 'status';
+      values[':status'] = newStatus;
+      expression += ', #status = :status';
+    }
+
+    const result = await this.db.client.send(
+      new UpdateCommand({
+        TableName: this.table,
+        Key: { leadId },
+        UpdateExpression: expression,
         ExpressionAttributeNames: names,
         ExpressionAttributeValues: values,
         ReturnValues: 'ALL_NEW',

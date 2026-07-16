@@ -44,7 +44,10 @@ export interface SelectOption {
       </button>
 
       @if (open()) {
-        <div class="absolute top-full mt-1.5 left-0 bg-surface-container-lowest border border-surface-variant rounded-card shadow-coastal z-30 min-w-full py-1.5 overflow-hidden">
+        <div
+          [style]="panelStyle()"
+          class="fixed bg-surface-container-lowest border border-surface-variant rounded-card shadow-coastal z-30 py-1.5 overflow-y-auto max-h-[60vh]"
+        >
           @for (opt of options; track opt.value) {
             <button
               type="button"
@@ -76,6 +79,7 @@ export class AppSelectComponent implements ControlValueAccessor {
   protected readonly value = signal('');
   protected readonly open = signal(false);
   protected readonly disabled = signal(false);
+  protected readonly panelStyle = signal<Record<string, string>>({});
 
   protected readonly selectedLabel = computed(
     () => this.options.find((o) => o.value === this.value())?.label ?? '',
@@ -101,6 +105,14 @@ export class AppSelectComponent implements ControlValueAccessor {
   }
 
   protected toggle(): void {
+    if (!this.open()) {
+      const rect = this.el.nativeElement.getBoundingClientRect();
+      this.panelStyle.set({
+        top: `${rect.bottom + 6}px`,
+        left: `${rect.left}px`,
+        'min-width': `${rect.width}px`,
+      });
+    }
     this.open.update((v) => !v);
     this.onTouched();
   }
@@ -116,5 +128,10 @@ export class AppSelectComponent implements ControlValueAccessor {
     if (!this.el.nativeElement.contains(event.target as Node)) {
       this.open.set(false);
     }
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    this.open.set(false);
   }
 }

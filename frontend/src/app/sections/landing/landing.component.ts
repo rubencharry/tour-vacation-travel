@@ -106,7 +106,7 @@ export class LandingComponent {
         email: this.formEmail().trim(),
         phone: this.formPhone().trim() || undefined,
         interestedPlanId: GENERAL_INQUIRY_PLAN_ID,
-        source: 'landing-contacto',
+        source: 'web',
       })
       .subscribe({
         next: () => {
