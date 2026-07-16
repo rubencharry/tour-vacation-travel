@@ -31,6 +31,10 @@ export const adminRoutes: Routes = [
         path: 'leads',
         loadComponent: () => import('./leads/leads.component').then((m) => m.LeadsAdminComponent),
       },
+      {
+        path: 'proveedores',
+        loadComponent: () => import('./proveedores/proveedores.component').then((m) => m.ProveedoresAdminComponent),
+      },
     ],
   },
   {

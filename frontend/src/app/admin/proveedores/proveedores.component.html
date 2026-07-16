@@ -1,0 +1,909 @@
+<div class="max-w-7xl mx-auto space-y-4">
+
+  <!-- Encabezado -->
+  <div class="flex items-center justify-between flex-wrap gap-4">
+    <div>
+      <nav class="flex items-center gap-1 text-caption text-on-surface-variant mb-1">
+        <span>Admin</span>
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <span class="text-primary font-semibold">Proveedores</span>
+      </nav>
+      <h2 class="font-headline-md text-headline-md text-primary-container">Directorio de Proveedores</h2>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container shrink-0">
+          <span class="material-symbols-outlined text-[18px]">handshake</span>
+        </div>
+        <div>
+          <p class="text-caption text-on-surface-variant leading-none mb-1">Total</p>
+          <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ totalCount() }}</p>
+        </div>
+      </div>
+      <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-full bg-brand-teal/10 flex items-center justify-center text-secondary shrink-0">
+          <span class="material-symbols-outlined text-[18px]">store</span>
+        </div>
+        <div>
+          <p class="text-caption text-on-surface-variant leading-none mb-1">Mayoristas</p>
+          <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ mayoristaCount() }}</p>
+        </div>
+      </div>
+      <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-full bg-brand-terracotta/10 flex items-center justify-center text-brand-terracotta shrink-0">
+          <span class="material-symbols-outlined text-[18px]">tour</span>
+        </div>
+        <div>
+          <p class="text-caption text-on-surface-variant leading-none mb-1">Operadores</p>
+          <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ operadorCount() }}</p>
+        </div>
+      </div>
+      <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-full bg-brand-teal/10 flex items-center justify-center text-secondary shrink-0">
+          <span class="material-symbols-outlined text-[18px]">check_circle</span>
+        </div>
+        <div>
+          <p class="text-caption text-on-surface-variant leading-none mb-1">Activos</p>
+          <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ activeCount() }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="px-4 py-3 bg-error-container text-on-error-container rounded-btn font-body-md text-body-md">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Barra de filtros y acciones -->
+  <div class="bg-surface-container-lowest rounded-card border border-surface-variant p-3 flex flex-wrap items-center gap-2.5">
+
+    <!-- Búsqueda -->
+    <div class="relative flex-1 min-w-[200px]">
+      <span class="absolute inset-y-0 left-3 flex items-center text-on-surface-variant pointer-events-none">
+        <span class="material-symbols-outlined text-[18px]">search</span>
+      </span>
+      <input
+        type="text"
+        placeholder="Buscar por empresa, contacto, email o NIT..."
+        [value]="filterSearch()"
+        (input)="filterSearch.set($any($event.target).value); page.set(1)"
+        class="w-full h-9 bg-surface-container border border-surface-variant rounded-btn pl-9 pr-3 text-on-surface text-sm placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-brand-teal/50 focus:border-brand-teal transition-all"
+      />
+    </div>
+
+    <div class="h-6 w-px bg-outline-variant hidden sm:block"></div>
+
+    <!-- Tipo -->
+    <app-select
+      [options]="typeOptions"
+      [ngModel]="filterType()"
+      (ngModelChange)="filterType.set($any($event)); page.set(1)"
+    />
+
+    <!-- Estado -->
+    <app-select
+      [options]="statusOptions"
+      [ngModel]="filterStatus()"
+      (ngModelChange)="filterStatus.set($any($event)); page.set(1)"
+    />
+
+    <!-- Limpiar filtros -->
+    @if (hasActiveFilters()) {
+      <button
+        type="button"
+        (click)="clearFilters()"
+        class="h-9 px-3 flex items-center gap-1.5 text-sm text-on-surface-variant hover:text-error hover:bg-error-container rounded-btn transition-colors"
+      >
+        <span class="material-symbols-outlined text-[16px]">filter_list_off</span>
+        Limpiar
+      </button>
+    }
+
+    <!-- Exportar CSV -->
+    <button
+      type="button"
+      (click)="exportCsv()"
+      [disabled]="filteredProviders().length === 0"
+      class="ml-auto h-9 px-4 flex items-center gap-2 border-2 border-brand-terracotta text-primary-container font-label-md text-label-md rounded-btn hover:bg-brand-terracotta/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+    >
+      <span class="material-symbols-outlined text-[18px]">download</span>
+      Exportar CSV
+    </button>
+
+    <!-- Nuevo proveedor -->
+    <button
+      type="button"
+      (click)="openAddModal()"
+      class="h-9 px-4 flex items-center gap-2 bg-brand-teal text-white font-label-md text-label-md rounded-btn hover:shadow-md hover:-translate-y-0.5 transition-all"
+    >
+      <span class="material-symbols-outlined text-[18px]">add</span>
+      Nuevo Proveedor
+    </button>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-surface-container-lowest rounded-card shadow-coastal border border-surface-variant overflow-hidden">
+
+    @if (loading()) {
+      <div class="flex items-center justify-center py-20 text-on-surface-variant">
+        <span class="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+        Cargando proveedores...
+      </div>
+    } @else if (providers().length === 0) {
+      <div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
+        <span class="material-symbols-outlined text-[48px] opacity-30">handshake</span>
+        <p class="font-body-md text-body-md">Todavía no hay proveedores registrados.</p>
+        <button
+          type="button"
+          (click)="openAddModal()"
+          class="mt-1 h-9 px-4 flex items-center gap-2 bg-brand-teal text-white font-label-md text-label-md rounded-btn hover:shadow-md transition-all"
+        >
+          <span class="material-symbols-outlined text-[18px]">add</span>
+          Agregar el primero
+        </button>
+      </div>
+    } @else if (filteredProviders().length === 0) {
+      <div class="flex flex-col items-center justify-center py-16 text-on-surface-variant gap-3">
+        <span class="material-symbols-outlined text-[40px] opacity-30">search_off</span>
+        <p class="font-body-md text-body-md">Ningún proveedor coincide con los filtros.</p>
+        <button type="button" (click)="clearFilters()" class="text-brand-teal font-label-md text-label-md hover:underline">
+          Limpiar filtros
+        </button>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-left min-w-[1000px]">
+          <thead>
+            <tr class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md border-b border-surface-variant">
+              <th class="p-4 pl-6">Proveedor</th>
+              <th class="p-4">Contacto</th>
+              <th class="p-4">Comisión</th>
+              <th class="p-4">Servicios</th>
+              <th class="p-4">Estado</th>
+              <th class="p-4 pr-6 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="font-body-md text-on-surface divide-y divide-surface-variant">
+            @for (provider of pagedProviders(); track provider.providerId) {
+              <tr class="hover:bg-surface/50 transition-colors">
+
+                <!-- Proveedor -->
+                <td class="p-4 pl-6">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center font-bold text-white text-xs shrink-0">
+                      {{ initialsFor(provider.businessName) }}
+                    </div>
+                    <div class="min-w-0">
+                      <p class="font-semibold text-primary-container truncate max-w-[180px]">{{ provider.businessName }}</p>
+                      <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="text-caption text-on-surface-variant">{{ provider.nit }}</span>
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
+                          [class]="provider.operatorType === 'mayorista'
+                            ? 'bg-brand-teal/10 text-secondary'
+                            : 'bg-brand-terracotta/10 text-brand-terracotta'">
+                          {{ provider.operatorType }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Contacto -->
+                <td class="p-4">
+                  <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-full bg-brand-teal-light text-primary-container flex items-center justify-center font-bold text-[10px] shrink-0">
+                      {{ initialsFor(provider.mainContact) }}
+                    </div>
+                    <div class="min-w-0">
+                      <p class="text-sm font-medium text-on-surface truncate">{{ provider.mainContact }}</p>
+                      <p class="text-caption text-on-surface-variant truncate">{{ provider.contactRole }}</p>
+                      <p class="text-caption text-on-surface-variant truncate">{{ provider.email }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Comisión -->
+                <td class="p-4">
+                  @if (provider.commissionPct != null) {
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-bold bg-brand-teal/10 text-secondary">
+                      {{ provider.commissionPct }}%
+                    </span>
+                  } @else {
+                    <span class="text-caption text-on-surface-variant">—</span>
+                  }
+                </td>
+
+                <!-- Servicios -->
+                <td class="p-4">
+                  @if (provider.services.length === 0) {
+                    <span class="text-caption text-on-surface-variant">Sin servicios</span>
+                  } @else {
+                    <div class="flex flex-wrap gap-1">
+                      @for (svc of provider.services.slice(0, 2); track svc) {
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-surface-container-low text-on-surface-variant border border-surface-variant">
+                          {{ svc }}
+                        </span>
+                      }
+                      @if (provider.services.length > 2) {
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-surface-container text-on-surface-variant">
+                          +{{ provider.services.length - 2 }}
+                        </span>
+                      }
+                    </div>
+                  }
+                </td>
+
+                <!-- Estado -->
+                <td class="p-4">
+                  <button
+                    type="button"
+                    (click)="toggleStatus(provider)"
+                    [title]="provider.status === 'activo' ? 'Clic para desactivar' : 'Clic para activar'"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all hover:shadow-sm"
+                    [class]="provider.status === 'activo'
+                      ? 'bg-brand-teal/10 text-secondary hover:bg-brand-teal/20'
+                      : 'bg-surface-container text-on-surface-variant hover:bg-surface-variant'"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full"
+                      [class]="provider.status === 'activo' ? 'bg-secondary' : 'bg-on-surface-variant'">
+                    </span>
+                    {{ provider.status === 'activo' ? 'Activo' : 'Inactivo' }}
+                  </button>
+                </td>
+
+                <!-- Acciones -->
+                <td class="p-4 pr-6 text-right">
+                  <div class="flex items-center justify-end gap-1">
+                    <button
+                      type="button"
+                      (click)="openDetailModal(provider)"
+                      class="p-1.5 text-on-surface-variant hover:text-brand-teal hover:bg-brand-teal/10 rounded transition-colors"
+                      title="Ver detalle"
+                    >
+                      <span class="material-symbols-outlined text-[20px]">visibility</span>
+                    </button>
+                    <button
+                      type="button"
+                      (click)="openEditModal(provider)"
+                      class="p-1.5 text-on-surface-variant hover:text-primary-container hover:bg-surface-container rounded transition-colors"
+                      title="Editar proveedor"
+                    >
+                      <span class="material-symbols-outlined text-[20px]">edit</span>
+                    </button>
+                    <button
+                      type="button"
+                      (click)="deleteProvider(provider)"
+                      class="p-1.5 text-on-surface-variant hover:text-error hover:bg-error-container rounded transition-colors"
+                      title="Eliminar proveedor"
+                    >
+                      <span class="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
+                  </div>
+                </td>
+
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      @if (totalPages() > 1) {
+        <div class="border-t border-surface-variant p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span class="text-caption text-on-surface-variant">
+            Mostrando {{ (page() - 1) * pageSize + 1 }}-{{ rangeEnd() }} de {{ filteredProviders().length }} proveedores
+          </span>
+          <div class="flex items-center gap-1">
+            <button
+              type="button"
+              (click)="goToPage(page() - 1)"
+              [disabled]="page() === 1"
+              class="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+            </button>
+            @for (p of pageNumbers(); track p) {
+              <button
+                type="button"
+                (click)="goToPage(p)"
+                class="w-8 h-8 rounded font-medium text-sm flex items-center justify-center transition-colors"
+                [class]="page() === p ? 'bg-primary-container text-white' : 'text-on-surface hover:bg-surface-container'"
+              >
+                {{ p }}
+              </button>
+            }
+            <button
+              type="button"
+              (click)="goToPage(page() + 1)"
+              [disabled]="page() === totalPages()"
+              class="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+</div>
+
+<!-- Modal: Detalle de proveedor -->
+@if (showDetailModal() && detailProvider(); as provider) {
+  <div
+    class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:p-6 backdrop-blur-sm"
+    (click)="closeDetailModal()"
+  >
+    <div
+      class="relative bg-surface-container-lowest w-full max-w-2xl sm:rounded-card rounded-t-card max-h-[94vh] overflow-y-auto shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+
+      <!-- Header -->
+      <div class="flex items-start justify-between px-6 py-5 border-b border-surface-variant sticky top-0 bg-surface-container-lowest z-10">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-primary-container flex items-center justify-center font-bold text-white text-base shrink-0">
+            {{ initialsFor(provider.businessName) }}
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="font-bold text-primary-container text-lg leading-tight">{{ provider.businessName }}</h3>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
+                [class]="provider.operatorType === 'mayorista'
+                  ? 'bg-brand-teal/10 text-secondary'
+                  : 'bg-brand-terracotta/10 text-brand-terracotta'">
+                {{ provider.operatorType }}
+              </span>
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
+                [class]="provider.status === 'activo'
+                  ? 'bg-brand-teal/10 text-secondary'
+                  : 'bg-surface-container text-on-surface-variant'">
+                <span class="w-1.5 h-1.5 rounded-full"
+                  [class]="provider.status === 'activo' ? 'bg-secondary' : 'bg-on-surface-variant'">
+                </span>
+                {{ provider.status === 'activo' ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+            <p class="text-sm text-on-surface-variant mt-0.5">NIT: {{ provider.nit }}</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          (click)="closeDetailModal()"
+          class="p-1.5 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors shrink-0"
+        >
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-6">
+
+        <!-- Empresa -->
+        <div class="space-y-3">
+          <h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest text-[10px] border-b border-surface-variant pb-2">
+            Datos de la empresa
+          </h4>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div>
+              <p class="text-caption text-on-surface-variant mb-0.5">Comisión</p>
+              <p class="text-sm font-semibold text-on-surface">
+                {{ provider.commissionPct != null ? provider.commissionPct + '%' : '—' }}
+              </p>
+            </div>
+            <div>
+              <p class="text-caption text-on-surface-variant mb-0.5">Método de pago</p>
+              <p class="text-sm text-on-surface">{{ provider.paymentMethod || '—' }}</p>
+            </div>
+            <div>
+              <p class="text-caption text-on-surface-variant mb-0.5">Fecha de registro</p>
+              <p class="text-sm text-on-surface">{{ formatDate(provider.registrationDate) }}</p>
+            </div>
+          </div>
+          @if (provider.website) {
+            <div>
+              <p class="text-caption text-on-surface-variant mb-0.5">Sitio web</p>
+              <a
+                [href]="provider.website"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-sm text-brand-teal hover:underline inline-flex items-center gap-1"
+              >
+                {{ provider.website }}
+                <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+              </a>
+            </div>
+          }
+        </div>
+
+        <!-- Contacto -->
+        <div class="space-y-3">
+          <h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest text-[10px] border-b border-surface-variant pb-2">
+            Datos de contacto
+          </h4>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-brand-teal-light text-primary-container flex items-center justify-center font-bold text-xs shrink-0">
+              {{ initialsFor(provider.mainContact) }}
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-on-surface">{{ provider.mainContact }}</p>
+              <p class="text-caption text-on-surface-variant">{{ provider.contactRole }}</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-[18px] text-on-surface-variant mt-0.5">call</span>
+              <div>
+                <p class="text-caption text-on-surface-variant mb-0.5">Teléfono</p>
+                <p class="text-sm text-on-surface">{{ provider.phone }}</p>
+              </div>
+            </div>
+            @if (provider.whatsapp) {
+              <div class="flex items-start gap-2.5">
+                <span class="material-symbols-outlined text-[18px] text-on-surface-variant mt-0.5">chat</span>
+                <div>
+                  <p class="text-caption text-on-surface-variant mb-0.5">WhatsApp</p>
+                  <p class="text-sm text-on-surface">{{ provider.whatsapp }}</p>
+                </div>
+              </div>
+            }
+            <div class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-[18px] text-on-surface-variant mt-0.5">mail</span>
+              <div>
+                <p class="text-caption text-on-surface-variant mb-0.5">Email</p>
+                <a [href]="'mailto:' + provider.email" class="text-sm text-brand-teal hover:underline">{{ provider.email }}</a>
+              </div>
+            </div>
+            @if (provider.city || provider.country) {
+              <div class="flex items-start gap-2.5">
+                <span class="material-symbols-outlined text-[18px] text-on-surface-variant mt-0.5">location_on</span>
+                <div>
+                  <p class="text-caption text-on-surface-variant mb-0.5">Ubicación</p>
+                  <p class="text-sm text-on-surface">
+                    {{ locationFor(provider) }}
+                  </p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Servicios -->
+        <div class="space-y-3">
+          <h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest text-[10px] border-b border-surface-variant pb-2">
+            Servicios ofrecidos
+          </h4>
+          @if (provider.services.length === 0) {
+            <p class="text-sm text-on-surface-variant">Sin servicios registrados.</p>
+          } @else {
+            <div class="flex flex-wrap gap-2">
+              @for (svc of provider.services; track svc) {
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-surface-container-low text-on-surface border border-surface-variant">
+                  {{ svc }}
+                </span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Notas -->
+        @if (provider.notes) {
+          <div class="space-y-2">
+            <h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest text-[10px] border-b border-surface-variant pb-2">
+              Notas internas
+            </h4>
+            <p class="text-sm text-on-surface bg-surface-container-low p-4 rounded-btn border border-surface-variant whitespace-pre-line leading-relaxed">
+              {{ provider.notes }}
+            </p>
+          </div>
+        }
+
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-surface-variant sticky bottom-0 bg-surface-container-lowest">
+        <button
+          type="button"
+          (click)="closeDetailModal(); openEditModal(provider)"
+          class="h-10 px-4 flex items-center gap-2 border-2 border-outline-variant text-on-surface font-label-md text-label-md rounded-btn hover:bg-surface-container transition-colors"
+        >
+          <span class="material-symbols-outlined text-[18px]">edit</span>
+          Editar
+        </button>
+        <button
+          type="button"
+          (click)="closeDetailModal()"
+          class="h-10 px-5 bg-primary-container text-white font-label-md text-label-md rounded-btn hover:shadow-md transition-all"
+        >
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- Modal: Crear / Editar proveedor -->
+@if (showModal()) {
+  <div
+    class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:p-6 backdrop-blur-sm"
+    (click)="closeModal()"
+  >
+    <div
+      class="relative bg-surface-container-lowest w-full max-w-2xl sm:rounded-card rounded-t-card max-h-[94vh] overflow-y-auto shadow-2xl"
+      (click)="$event.stopPropagation()"
+      [formGroup]="form"
+    >
+
+      <!-- Header sticky -->
+      <div class="flex items-center justify-between px-6 py-5 border-b border-surface-variant sticky top-0 bg-surface-container-lowest z-10">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-primary-container/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary-container text-[18px]" style="font-variation-settings:'FILL' 1">handshake</span>
+          </div>
+          <h3 class="font-headline-md text-headline-md font-bold text-primary-container">{{ modalTitle() }}</h3>
+        </div>
+        <button
+          type="button"
+          (click)="closeModal()"
+          class="p-1.5 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors"
+        >
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-6">
+
+        <!-- Error -->
+        @if (saveError()) {
+          <div class="px-4 py-3 bg-error-container text-on-error-container rounded-btn font-body-md text-body-md">
+            {{ saveError() }}
+          </div>
+        }
+
+        <!-- Sección: Datos de la empresa -->
+        <div class="space-y-4">
+          <h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest text-[10px] border-b border-surface-variant pb-2">
+            Datos de la empresa
+          </h4>
+
+          <!-- Tipo de operador -->
+          <div>
+            <label class="block font-label-md text-label-md text-primary-container mb-2">
+              Tipo de operador <span class="text-brand-terracotta">*</span>
+            </label>
+            <div class="flex gap-2">
+              @for (opt of [{v: 'mayorista', l: 'Mayorista', icon: 'store'}, {v: 'operador', l: 'Operador', icon: 'tour'}]; track opt.v) {
+                <button
+                  type="button"
+                  (click)="form.get('operatorType')?.setValue(opt.v)"
+                  class="flex-1 h-11 rounded-btn text-sm font-semibold border-2 flex items-center justify-center gap-2 transition-all"
+                  [class]="form.get('operatorType')?.value === opt.v
+                    ? 'border-brand-teal bg-brand-teal/10 text-primary-container'
+                    : 'border-outline-variant text-on-surface-variant hover:border-brand-teal/50'"
+                >
+                  <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">{{ opt.icon }}</span>
+                  {{ opt.l }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Razón social + NIT -->
+          <div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
+            <div class="sm:col-span-3">
+              <label class="block font-label-md text-label-md text-primary-container mb-1" for="p-businessName">
+                Razón social <span class="text-brand-terracotta">*</span>
+              </label>
+              <input
+                id="p-businessName" type="text" formControlName="businessName"
+                placeholder="Nombre de la empresa"
+                class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+                [class]="isInvalid('businessName') ? 'border-error' : 'border-brand-teal-light'"
+              />
+              @if (isInvalid('businessName')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block font-label-md text-label-md text-primary-container mb-1" for="p-nit">
+                NIT <span class="text-brand-terracotta">*</span>
+              </label>
+              <input
+                id="p-nit" type="text" formControlName="nit"
+                placeholder="900.000.000-1"
+                class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+                [class]="isInvalid('nit') ? 'border-error' : 'border-brand-teal-light'"
+              />
+              @if (isInvalid('nit')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
+            </div>
+          </div>
+
+          <!-- Estado + Comisión + Método de pago -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+            <div>
+              <label class="block font-label-md text-label-md text-primary-container mb-2">
+                Estado <span class="text-brand-terracotta">*</span>
+              </label>
+              <div class="flex gap-2">
+                @for (opt of [{v: 'activo', l: 'Activo'}, {v: 'inactivo', l: 'Inactivo'}]; track opt.v) {
+                  <button
+                    type="button"
+                    (click)="form.get('status')?.setValue(opt.v)"
+                    class="flex-1 h-9 rounded-btn text-sm font-semibold border-2 transition-all"
+                    [class]="form.get('status')?.value === opt.v
+                      ? (opt.v === 'activo' ? 'border-brand-teal bg-brand-teal/10 text-primary-container' : 'border-outline-variant bg-surface-container text-on-surface-variant')
+                      : 'border-outline-variant text-on-surface-variant hover:border-brand-teal/50'"
+                  >
+                    {{ opt.l }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-label-md text-label-md text-primary-container mb-1" for="p-commission">
+                Comisión %
+              </label>
+              <div class="relative">
+                <input
+                  id="p-commission" type="number" formControlName="commissionPct"
+                  min="0" max="100" step="0.5"
+                  placeholder="0"
+                  class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn pl-4 pr-8 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+                />
+                <span class="absolute inset-y-0 right-3 flex items-center text-on-surface-variant text-sm pointer-events-none">%</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-label-md text-label-md text-primary-container mb-1" for="p-paymentMethod">
+                Método de pago
+              </label>
+              <input
+                id="p-paymentMethod" type="text" formControlName="paymentMethod"
+                placeholder="Ej. Transferencia, Cheque..."
+                class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+              />
+            </div>
+          </div>
+
+          <!-- Sitio web -->
+          <div>
+            <label class="block font-label-md text-label-md text-primary-container mb-1" for="p-website">Sitio web</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-3 flex items-center text-on-surface-variant pointer-events-none">
+                <span class="material-symbols-outlined text-[16px]">language</span>
+              </span>
+              <input
+                id="p-website" type="url" formControlName="website"
+                placeholder="https://www.empresa.com"
+                class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn pl-9 pr-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección: Datos de contacto -->
+        <div class="space-y-4">
+          <h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest text-[10px] border-b border-surface-variant pb-2">
+            Datos de contacto
+          </h4>
+
+          <!-- Contacto + Cargo -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-label-md text-label-md text-primary-container mb-1" for="p-mainContact">
+                Contacto principal <span class="text-brand-terracotta">*</span>
+              </label>
+              <input
+                id="p-mainContact" type="text" formControlName="mainContact"
+                placeholder="Nombre completo"
+                class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+                [class]="isInvalid('mainContact') ? 'border-error' : 'border-brand-teal-light'"
+              />
+              @if (isInvalid('mainContact')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
+            </div>
+            <div>
+              <label class="block font-label-md text-label-md text-primary-container mb-1" for="p-contactRole">
+                Cargo <span class="text-brand-terracotta">*</span>
+              </label>
+              <input
+                id="p-contactRole" type="text" formControlName="contactRole"
+                placeholder="Ej. Gerente Comercial"
+                class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+                [class]="isInvalid('contactRole') ? 'border-error' : 'border-brand-teal-light'"
+              />
+              @if (isInvalid('contactRole')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
+            </div>
+          </div>
+
+          <!-- Teléfono + WhatsApp -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-label-md text-label-md text-primary-container mb-1" for="p-phone">
+                Teléfono <span class="text-brand-terracotta">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-3 flex items-center text-on-surface-variant pointer-events-none">
+                  <span class="material-symbols-outlined text-[16px]">call</span>
+                </span>
+                <input
+                  id="p-phone" type="tel" formControlName="phone"
+                  placeholder="+57 1 000 0000"
+                  class="w-full h-11 bg-surface-container-lowest border rounded-btn pl-9 pr-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+                  [class]="isInvalid('phone') ? 'border-error' : 'border-brand-teal-light'"
+                />
+              </div>
+              @if (isInvalid('phone')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
+            </div>
+            <div>
+              <label class="block font-label-md text-label-md text-primary-container mb-1" for="p-whatsapp">WhatsApp</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-3 flex items-center text-on-surface-variant pointer-events-none">
+                  <span class="material-symbols-outlined text-[16px]">chat</span>
+                </span>
+                <input
+                  id="p-whatsapp" type="tel" formControlName="whatsapp"
+                  placeholder="+57 300 000 0000"
+                  class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn pl-9 pr-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label class="block font-label-md text-label-md text-primary-container mb-1" for="p-email">
+              Email <span class="text-brand-terracotta">*</span>
+            </label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-3 flex items-center text-on-surface-variant pointer-events-none">
+                <span class="material-symbols-outlined text-[16px]">mail</span>
+              </span>
+              <input
+                id="p-email" type="email" formControlName="email"
+                placeholder="contacto@empresa.com"
+                class="w-full h-11 bg-surface-container-lowest border rounded-btn pl-9 pr-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+                [class]="isInvalid('email') ? 'border-error' : 'border-brand-teal-light'"
+              />
+            </div>
+            @if (isInvalid('email')) { <p class="text-caption text-error mt-1">Email inválido.</p> }
+          </div>
+
+          <!-- Ciudad + País -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-label-md text-label-md text-primary-container mb-1" for="p-city">Ciudad</label>
+              <input
+                id="p-city" type="text" formControlName="city"
+                placeholder="Ej. Bogotá"
+                class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+              />
+            </div>
+            <div>
+              <label class="block font-label-md text-label-md text-primary-container mb-1" for="p-country">País</label>
+              <input
+                id="p-country" type="text" formControlName="country"
+                placeholder="Ej. Colombia"
+                class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección: Servicios -->
+        <div class="space-y-3">
+          <h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest text-[10px] border-b border-surface-variant pb-2">
+            Servicios ofrecidos
+          </h4>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            @for (svc of availableServices; track svc) {
+              <label
+                class="flex items-center gap-2.5 p-2.5 rounded-btn border cursor-pointer transition-all select-none"
+                [class]="selectedServices().includes(svc)
+                  ? 'border-brand-teal bg-brand-teal/5 text-primary-container'
+                  : 'border-surface-variant text-on-surface-variant hover:border-brand-teal/40 hover:bg-surface-container'"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="selectedServices().includes(svc)"
+                  (change)="toggleService(svc)"
+                  class="w-4 h-4 rounded border-outline-variant text-brand-teal focus:ring-brand-teal shrink-0"
+                />
+                <span class="text-sm leading-tight">{{ svc }}</span>
+              </label>
+            }
+          </div>
+          <!-- Servicios personalizados -->
+          <div class="flex gap-2 mt-1">
+            <div class="relative flex-1">
+              <span class="absolute inset-y-0 left-3 flex items-center text-on-surface-variant pointer-events-none">
+                <span class="material-symbols-outlined text-[16px]">add_circle</span>
+              </span>
+              <input
+                type="text"
+                placeholder="Agregar servicio personalizado..."
+                [value]="customServiceInput()"
+                (input)="customServiceInput.set($any($event.target).value)"
+                (keydown)="onCustomServiceKeydown($event)"
+                class="w-full h-9 bg-surface-container-lowest border border-outline-variant rounded-btn pl-8 pr-3 text-on-surface text-sm placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-brand-teal/50 focus:border-brand-teal transition-all"
+              />
+            </div>
+            <button
+              type="button"
+              (click)="addCustomService()"
+              [disabled]="!customServiceInput().trim()"
+              class="h-9 px-3 flex items-center gap-1.5 text-sm font-medium border-2 border-brand-teal text-primary-container rounded-btn hover:bg-brand-teal/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <span class="material-symbols-outlined text-[16px]">add</span>
+              Agregar
+            </button>
+          </div>
+
+          @if (customServices().length > 0) {
+            <div class="flex flex-wrap gap-2 mt-1">
+              @for (svc of customServices(); track svc) {
+                <span class="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1 rounded-full text-sm font-medium bg-primary-container/10 text-primary-container border border-primary-container/20">
+                  {{ svc }}
+                  <button
+                    type="button"
+                    (click)="removeCustomService(svc)"
+                    class="w-4 h-4 rounded-full flex items-center justify-center hover:bg-primary-container/20 transition-colors"
+                    title="Quitar"
+                  >
+                    <span class="material-symbols-outlined text-[12px]">close</span>
+                  </button>
+                </span>
+              }
+            </div>
+          }
+
+          @if (selectedServices().length > 0) {
+            <p class="text-caption text-on-surface-variant">
+              {{ selectedServices().length }} {{ selectedServices().length === 1 ? 'servicio seleccionado' : 'servicios seleccionados' }}
+            </p>
+          }
+        </div>
+
+        <!-- Sección: Notas -->
+        <div>
+          <h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest text-[10px] border-b border-surface-variant pb-2 mb-3">
+            Notas internas
+          </h4>
+          <textarea
+            formControlName="notes"
+            rows="3"
+            placeholder="Observaciones, acuerdos especiales, historial de contacto..."
+            class="w-full bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 py-3 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors resize-none"
+          ></textarea>
+        </div>
+
+      </div>
+
+      <!-- Footer sticky -->
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-surface-variant sticky bottom-0 bg-surface-container-lowest">
+        <button
+          type="button"
+          (click)="closeModal()"
+          class="h-10 px-4 text-on-surface-variant hover:bg-surface-container rounded-btn font-label-md text-label-md transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          (click)="submitForm()"
+          [disabled]="saving()"
+          class="h-10 px-6 bg-brand-teal text-white font-label-md text-label-md rounded-btn hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          @if (saving()) {
+            <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+          }
+          {{ modalMode() === 'edit' ? 'Guardar cambios' : 'Crear proveedor' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

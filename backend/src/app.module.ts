@@ -6,6 +6,7 @@ import { PlansModule } from './modules/plans/plans.module';
 import { LeadsModule } from './modules/leads/leads.module';
 import { ProvidersModule } from './modules/providers/providers.module';
 import { MailModule } from './modules/mail/mail.module';
+import { AdminMailModule } from './modules/admin-mail/admin-mail.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ServicesModule } from './modules/services/services.module';
 
@@ -18,6 +19,7 @@ import { ServicesModule } from './modules/services/services.module';
     LeadsModule,
     ProvidersModule,
     MailModule,
+    AdminMailModule,
     AuthModule,
     ServicesModule,
   ],
