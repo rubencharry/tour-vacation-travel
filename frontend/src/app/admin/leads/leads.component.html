@@ -1,7 +1,7 @@
 <div class="max-w-7xl mx-auto space-y-4">
 
   <!-- Encabezado -->
-  <div class="flex items-center justify-between">
+  <div class="flex flex-wrap items-center justify-between gap-3">
     <div>
       <nav class="flex items-center gap-1 text-caption text-on-surface-variant mb-1">
         <span>Admin</span>
@@ -10,33 +10,54 @@
       </nav>
       <h2 class="font-headline-md text-headline-md text-primary-container">Directorio de Leads</h2>
     </div>
-    <div class="flex flex-wrap gap-3">
-      <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
-        <div class="w-8 h-8 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container shrink-0">
-          <span class="material-symbols-outlined text-[18px]">groups</span>
-        </div>
-        <div>
-          <p class="text-caption text-on-surface-variant leading-none mb-1">Total</p>
-          <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ totalCount() }}</p>
-        </div>
+    <div class="flex items-center gap-3">
+      <button
+        type="button"
+        (click)="exportCsv()"
+        [disabled]="filteredLeads().length === 0"
+        class="h-10 px-4 flex items-center gap-2 border-2 border-brand-terracotta text-primary-container font-label-md text-label-md rounded-btn hover:bg-brand-terracotta/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <span class="material-symbols-outlined text-[18px]">download</span>
+        Exportar CSV
+      </button>
+      <button
+        type="button"
+        (click)="openAddModal()"
+        class="h-10 px-4 flex items-center gap-2 bg-brand-teal text-white font-label-md text-label-md rounded-btn hover:shadow-md hover:-translate-y-0.5 transition-all"
+      >
+        <span class="material-symbols-outlined text-[18px]">add</span>
+        Agregar Lead
+      </button>
+    </div>
+  </div>
+
+  <!-- Contadores -->
+  <div class="flex flex-wrap gap-3">
+    <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
+      <div class="w-8 h-8 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container shrink-0">
+        <span class="material-symbols-outlined text-[18px]">groups</span>
       </div>
-      <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
-        <div class="w-8 h-8 rounded-full bg-brand-teal/10 flex items-center justify-center text-secondary shrink-0">
-          <span class="material-symbols-outlined text-[18px]">mail</span>
-        </div>
-        <div>
-          <p class="text-caption text-on-surface-variant leading-none mb-1">Email enviado</p>
-          <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ sentCount() }}</p>
-        </div>
+      <div>
+        <p class="text-caption text-on-surface-variant leading-none mb-1">Total</p>
+        <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ totalCount() }}</p>
       </div>
-      <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
-        <div class="w-8 h-8 rounded-full bg-brand-terracotta/10 flex items-center justify-center text-brand-terracotta shrink-0">
-          <span class="material-symbols-outlined text-[18px]">pending_actions</span>
-        </div>
-        <div>
-          <p class="text-caption text-on-surface-variant leading-none mb-1">Pendiente</p>
-          <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ pendingCount() }}</p>
-        </div>
+    </div>
+    <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
+      <div class="w-8 h-8 rounded-full bg-brand-teal/10 flex items-center justify-center text-secondary shrink-0">
+        <span class="material-symbols-outlined text-[18px]">mail</span>
+      </div>
+      <div>
+        <p class="text-caption text-on-surface-variant leading-none mb-1">Email enviado</p>
+        <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ sentCount() }}</p>
+      </div>
+    </div>
+    <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
+      <div class="w-8 h-8 rounded-full bg-brand-terracotta/10 flex items-center justify-center text-brand-terracotta shrink-0">
+        <span class="material-symbols-outlined text-[18px]">pending_actions</span>
+      </div>
+      <div>
+        <p class="text-caption text-on-surface-variant leading-none mb-1">Pendiente</p>
+        <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ pendingCount() }}</p>
       </div>
     </div>
   </div>
@@ -81,11 +102,36 @@
       (ngModelChange)="filterDateRange.set($any($event)); page.set(1)"
     />
 
-    <!-- Estado de email -->
+    @if (filterDateRange() === 'custom') {
+      <div class="flex items-center gap-1.5">
+        <input
+          type="date"
+          [value]="filterDateFrom()"
+          (change)="filterDateFrom.set($any($event.target).value); page.set(1)"
+          class="h-9 bg-surface-container-lowest border border-surface-variant rounded-btn px-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 focus:border-brand-teal transition-all"
+        />
+        <span class="text-on-surface-variant text-sm">–</span>
+        <input
+          type="date"
+          [value]="filterDateTo()"
+          (change)="filterDateTo.set($any($event.target).value); page.set(1)"
+          class="h-9 bg-surface-container-lowest border border-surface-variant rounded-btn px-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 focus:border-brand-teal transition-all"
+        />
+      </div>
+    }
+
+    <!-- Estado del pipeline -->
     <app-select
-      [options]="emailStatusOptions"
-      [ngModel]="filterEmailStatus()"
-      (ngModelChange)="filterEmailStatus.set($any($event)); page.set(1)"
+      [options]="statusFilterOptions"
+      [ngModel]="filterStatus()"
+      (ngModelChange)="filterStatus.set($any($event)); page.set(1)"
+    />
+
+    <!-- Origen -->
+    <app-select
+      [options]="sourceFilterOptions"
+      [ngModel]="filterSource()"
+      (ngModelChange)="filterSource.set($any($event)); page.set(1)"
     />
 
     <!-- Limpiar filtros -->
@@ -99,27 +145,6 @@
         Limpiar
       </button>
     }
-
-    <!-- Exportar CSV -->
-    <button
-      type="button"
-      (click)="exportCsv()"
-      [disabled]="filteredLeads().length === 0"
-      class="ml-auto h-9 px-4 flex items-center gap-2 border-2 border-brand-terracotta text-primary-container font-label-md text-label-md rounded-btn hover:bg-brand-terracotta/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-    >
-      <span class="material-symbols-outlined text-[18px]">download</span>
-      Exportar CSV
-    </button>
-
-    <!-- Agregar lead -->
-    <button
-      type="button"
-      (click)="openAddModal()"
-      class="h-9 px-4 flex items-center gap-2 bg-brand-teal text-white font-label-md text-label-md rounded-btn hover:shadow-md hover:-translate-y-0.5 transition-all"
-    >
-      <span class="material-symbols-outlined text-[18px]">add</span>
-      Agregar Lead
-    </button>
   </div>
 
   <!-- Tabla -->
@@ -156,11 +181,36 @@
                   (change)="toggleSelectAllOnPage()"
                 />
               </th>
-              <th class="p-4">Nombre</th>
-              <th class="p-4">Contacto</th>
-              <th class="p-4">Plan de interés</th>
-              <th class="p-4">Fecha</th>
-              <th class="p-4">Email</th>
+              <th class="p-4">
+                <button type="button" (click)="toggleSort('name')" class="flex items-center gap-1 hover:text-primary-container transition-colors">
+                  Nombre
+                  <span class="material-symbols-outlined text-[16px]" [class.text-brand-teal]="sortField() === 'name'">{{ sortIcon('name') }}</span>
+                </button>
+              </th>
+              <th class="p-4">
+                <button type="button" (click)="toggleSort('email')" class="flex items-center gap-1 hover:text-primary-container transition-colors">
+                  Contacto
+                  <span class="material-symbols-outlined text-[16px]" [class.text-brand-teal]="sortField() === 'email'">{{ sortIcon('email') }}</span>
+                </button>
+              </th>
+              <th class="p-4">
+                <button type="button" (click)="toggleSort('plan')" class="flex items-center gap-1 hover:text-primary-container transition-colors">
+                  Plan de interés
+                  <span class="material-symbols-outlined text-[16px]" [class.text-brand-teal]="sortField() === 'plan'">{{ sortIcon('plan') }}</span>
+                </button>
+              </th>
+              <th class="p-4">
+                <button type="button" (click)="toggleSort('status')" class="flex items-center gap-1 hover:text-primary-container transition-colors">
+                  Estado
+                  <span class="material-symbols-outlined text-[16px]" [class.text-brand-teal]="sortField() === 'status'">{{ sortIcon('status') }}</span>
+                </button>
+              </th>
+              <th class="p-4">
+                <button type="button" (click)="toggleSort('createdAt')" class="flex items-center gap-1 hover:text-primary-container transition-colors">
+                  Fecha
+                  <span class="material-symbols-outlined text-[16px]" [class.text-brand-teal]="sortField() === 'createdAt'">{{ sortIcon('createdAt') }}</span>
+                </button>
+              </th>
               <th class="p-4 pr-6 text-right">Acciones</th>
             </tr>
           </thead>
@@ -203,26 +253,23 @@
                     <span class="text-on-surface">{{ planFor(lead)?.title ?? lead.interestedPlanId }}</span>
                   </div>
                 </td>
+                <td class="p-4">
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+                    [class]="statusBadgeClass(lead.status)"
+                  >
+                    {{ leadStatusLabel(lead.status) }}
+                  </span>
+                </td>
                 <td class="p-4 text-on-surface-variant whitespace-nowrap">
                   {{ formatDate(lead.createdAt) }}
-                </td>
-                <td class="p-4">
-                  @if (lead.emailSent) {
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-brand-teal/10 text-secondary">
-                      Enviado
-                    </span>
-                  } @else {
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-brand-terracotta/10 text-brand-terracotta">
-                      Pendiente
-                    </span>
-                  }
                 </td>
                 <td class="p-4 pr-6 text-right">
                   <div class="flex items-center justify-end gap-1">
                     <button
                       type="button"
                       (click)="openEditModal(lead)"
-                      class="p-1.5 text-on-surface-variant hover:text-primary-container hover:bg-surface-container rounded transition-colors"
+                      class="p-1.5 inline-flex items-center justify-center text-primary-container/70 hover:text-primary-container hover:bg-primary-container/10 rounded transition-colors"
                       title="Editar"
                     >
                       <span class="material-symbols-outlined text-[20px]">edit</span>
@@ -230,56 +277,58 @@
                     <button
                       type="button"
                       (click)="openDuplicateModal(lead)"
-                      class="p-1.5 text-on-surface-variant hover:text-brand-teal hover:bg-brand-teal/10 rounded transition-colors"
+                      class="p-1.5 inline-flex items-center justify-center text-secondary/70 hover:text-secondary hover:bg-brand-teal/10 rounded transition-colors"
                       title="Duplicar lead"
                     >
                       <span class="material-symbols-outlined text-[20px]">content_copy</span>
                     </button>
                     <button
                       type="button"
+                      (click)="contactWhatsapp(lead)"
+                      [disabled]="!lead.phone"
+                      class="p-1.5 inline-flex items-center justify-center text-brand-teal hover:text-secondary hover:bg-brand-teal/10 rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      title="Contactar por WhatsApp"
+                    >
+                      <app-whatsapp-icon [size]="18" />
+                    </button>
+                    <button
+                      type="button"
+                      (click)="contactEmail(lead)"
+                      class="p-1.5 inline-flex items-center justify-center text-brand-terracotta/80 hover:text-brand-terracotta hover:bg-brand-terracotta/10 rounded transition-colors"
+                      title="Contactar por correo"
+                    >
+                      <span class="material-symbols-outlined text-[20px]">mail</span>
+                    </button>
+                    <button
+                      type="button"
                       (click)="deleteLead(lead)"
-                      class="p-1.5 text-on-surface-variant hover:text-error hover:bg-error-container rounded transition-colors"
+                      class="p-1.5 inline-flex items-center justify-center text-error/70 hover:text-error hover:bg-error-container rounded transition-colors"
                       title="Eliminar"
                     >
                       <span class="material-symbols-outlined text-[20px]">delete</span>
                     </button>
                     <button
                       type="button"
-                      (click)="toggleExpand(lead)"
-                      class="p-1.5 text-on-surface-variant hover:text-primary-container hover:bg-surface-container rounded transition-colors"
-                      [title]="expandedId() === lead.leadId ? 'Cerrar detalle' : 'Ver detalle'"
+                      (click)="toggleDetail(lead)"
+                      class="p-1.5 inline-flex items-center justify-center text-on-surface-variant hover:text-primary-container hover:bg-surface-container rounded transition-colors"
+                      [title]="selectedLead()?.leadId === lead.leadId ? 'Cerrar detalle' : 'Ver detalle'"
                     >
                       <span class="material-symbols-outlined text-[20px] transition-transform"
-                        [class.rotate-180]="expandedId() === lead.leadId">expand_more</span>
+                        [class.rotate-180]="selectedLead()?.leadId === lead.leadId">expand_more</span>
                     </button>
                   </div>
                 </td>
               </tr>
-              @if (expandedId() === lead.leadId) {
+              @if (selectedLead()?.leadId === lead.leadId) {
                 <tr class="bg-surface-container-low border-l-4 border-l-brand-teal">
                   <td class="p-0" colspan="7">
-                    <div class="px-6 md:px-14 py-4 space-y-4">
-                      @if (lead.message) {
-                        <div>
-                          <h4 class="text-caption text-on-surface-variant mb-1">Mensaje</h4>
-                          <p class="text-sm text-on-surface bg-surface-container-lowest p-3 rounded-btn border border-surface-variant whitespace-pre-line">{{ lead.message }}</p>
-                        </div>
-                      }
-                      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                          <h4 class="text-caption text-on-surface-variant mb-1">Origen</h4>
-                          <p class="text-sm text-on-surface">{{ lead.source || 'Sin especificar' }}</p>
-                        </div>
-                        <div>
-                          <h4 class="text-caption text-on-surface-variant mb-1">ID del lead</h4>
-                          <p class="text-sm text-on-surface font-mono">{{ lead.leadId }}</p>
-                        </div>
-                        <div>
-                          <h4 class="text-caption text-on-surface-variant mb-1">Plan ID</h4>
-                          <p class="text-sm text-on-surface font-mono">{{ lead.interestedPlanId }}</p>
-                        </div>
-                      </div>
-                    </div>
+                    <app-lead-detail
+                      [lead]="selectedLead()!"
+                      [plan]="planFor(lead)"
+                      [loadingActivities]="loadingActivities()"
+                      (statusChange)="onStatusChange($event)"
+                      (addNote)="onAddNote($event)"
+                    />
                   </td>
                 </tr>
               }
@@ -336,13 +385,23 @@
           {{ selectedCount() === 1 ? 'lead seleccionado' : 'leads seleccionados' }}
         </span>
       </div>
-      <button
-        type="button"
-        (click)="exportCsv(true)"
-        class="bg-surface-container-lowest border border-surface-variant text-on-surface hover:bg-surface-container font-label-md text-label-md px-4 py-2 rounded-btn transition-colors"
-      >
-        Exportar selección
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          (click)="sendBulkEmail()"
+          class="flex items-center gap-2 bg-brand-teal text-white font-label-md text-label-md px-4 py-2 rounded-btn hover:shadow-md transition-all"
+        >
+          <span class="material-symbols-outlined text-[18px]">mail</span>
+          Enviar correo a seleccionados
+        </button>
+        <button
+          type="button"
+          (click)="exportCsv(true)"
+          class="bg-surface-container-lowest border border-surface-variant text-on-surface hover:bg-surface-container font-label-md text-label-md px-4 py-2 rounded-btn transition-colors"
+        >
+          Exportar selección
+        </button>
+      </div>
     </div>
   }
 
@@ -353,94 +412,111 @@
       (click)="closeModal()"
     >
       <div
-        class="relative bg-surface-container-lowest w-full max-w-lg sm:rounded-card rounded-t-card max-h-[92vh] overflow-y-auto shadow-2xl"
+        class="relative bg-surface-container-lowest w-full max-w-xl sm:rounded-card rounded-t-card max-h-[92vh] overflow-y-auto shadow-2xl"
         (click)="$event.stopPropagation()"
         [formGroup]="addForm"
       >
-        <div class="flex items-center justify-between px-6 py-5 border-b border-surface-variant sticky top-0 bg-surface-container-lowest">
-          <h3 class="font-headline-md text-headline-md font-bold text-primary-container">{{ modalTitle() }}</h3>
-          <button type="button" (click)="closeModal()" class="p-1.5 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors">
+        <div class="flex items-center gap-3 px-6 py-5 border-b border-surface-variant sticky top-0 bg-surface-container-lowest z-10">
+          <div class="w-10 h-10 rounded-full bg-brand-teal/10 text-secondary flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[20px]">person_add</span>
+          </div>
+          <h3 class="flex-1 font-headline-md text-headline-md font-bold text-primary-container">{{ modalTitle() }}</h3>
+          <button type="button" (click)="closeModal()" class="p-1.5 inline-flex items-center justify-center text-on-surface-variant hover:bg-surface-container rounded-full transition-colors">
             <span class="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
 
-        <div class="p-6 space-y-5">
+        <div class="p-6 space-y-6">
           @if (saveError()) {
             <div class="px-4 py-3 bg-error-container text-on-error-container rounded-btn font-body-md text-body-md">
               {{ saveError() }}
             </div>
           }
 
-          <div>
-            <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-name">
-              Nombre <span class="text-brand-terracotta">*</span>
-            </label>
-            <input
-              id="lead-name" type="text" formControlName="name"
-              placeholder="Nombre completo"
-              class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
-              [class]="isInvalid('name') ? 'border-error' : 'border-brand-teal-light'"
-            />
-            @if (isInvalid('name')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
+          <div class="bg-surface-container-lowest border border-surface-variant rounded-card p-4 space-y-4">
+            <h4 class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-primary-container">
+              <span class="material-symbols-outlined text-[15px]">contact_page</span>
+              Datos de contacto
+            </h4>
+
+            <div>
+              <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-name">
+                Nombre <span class="text-brand-terracotta">*</span>
+              </label>
+              <input
+                id="lead-name" type="text" formControlName="name"
+                placeholder="Nombre completo"
+                class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+                [class]="isInvalid('name') ? 'border-error' : 'border-brand-teal-light'"
+              />
+              @if (isInvalid('name')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-email">
+                  Email <span class="text-brand-terracotta">*</span>
+                </label>
+                <input
+                  id="lead-email" type="email" formControlName="email"
+                  placeholder="correo@ejemplo.com"
+                  class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+                  [class]="isInvalid('email') ? 'border-error' : 'border-brand-teal-light'"
+                />
+                @if (isInvalid('email')) { <p class="text-caption text-error mt-1">Email inválido.</p> }
+              </div>
+
+              <div>
+                <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-phone">Teléfono</label>
+                <input
+                  id="lead-phone" type="text" formControlName="phone"
+                  placeholder="+57 300 000 0000"
+                  class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+                />
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-email">
-              Email <span class="text-brand-terracotta">*</span>
-            </label>
-            <input
-              id="lead-email" type="email" formControlName="email"
-              placeholder="correo@ejemplo.com"
-              class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
-              [class]="isInvalid('email') ? 'border-error' : 'border-brand-teal-light'"
-            />
-            @if (isInvalid('email')) { <p class="text-caption text-error mt-1">Email inválido.</p> }
-          </div>
+          <div class="bg-surface-container-lowest border border-surface-variant rounded-card p-4 space-y-4">
+            <h4 class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-primary-container">
+              <span class="material-symbols-outlined text-[15px]">flight_takeoff</span>
+              Detalles del lead
+            </h4>
 
-          <div>
-            <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-phone">Teléfono</label>
-            <input
-              id="lead-phone" type="text" formControlName="phone"
-              placeholder="+57 300 000 0000"
-              class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
-            />
-          </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-plan">
+                  Plan de interés <span class="text-brand-terracotta">*</span>
+                </label>
+                <select
+                  id="lead-plan" formControlName="interestedPlanId"
+                  class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+                  [class]="isInvalid('interestedPlanId') ? 'border-error' : 'border-brand-teal-light'"
+                >
+                  <option value="" disabled>Seleccionar plan...</option>
+                  @for (opt of planOptions(); track opt.value) {
+                    @if (opt.value !== 'all') {
+                      <option [value]="opt.value">{{ opt.label }}</option>
+                    }
+                  }
+                </select>
+                @if (isInvalid('interestedPlanId')) { <p class="text-caption text-error mt-1">Seleccioná un plan.</p> }
+              </div>
 
-          <div>
-            <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-plan">
-              Plan de interés <span class="text-brand-terracotta">*</span>
-            </label>
-            <select
-              id="lead-plan" formControlName="interestedPlanId"
-              class="w-full h-11 bg-surface-container-lowest border rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
-              [class]="isInvalid('interestedPlanId') ? 'border-error' : 'border-brand-teal-light'"
-            >
-              <option value="" disabled>Seleccionar plan...</option>
-              @for (opt of planOptions(); track opt.value) {
-                @if (opt.value !== 'all') {
-                  <option [value]="opt.value">{{ opt.label }}</option>
-                }
-              }
-            </select>
-            @if (isInvalid('interestedPlanId')) { <p class="text-caption text-error mt-1">Seleccioná un plan.</p> }
-          </div>
+              <div>
+                <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-source">Origen</label>
+                <app-select id="lead-source" [block]="true" [options]="sourceOptions" formControlName="source" />
+              </div>
+            </div>
 
-          <div>
-            <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-source">Origen</label>
-            <input
-              id="lead-source" type="text" formControlName="source"
-              placeholder="Ej. Alta manual, WhatsApp, Feria..."
-              class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
-            />
-          </div>
-
-          <div>
-            <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-message">Mensaje</label>
-            <textarea
-              id="lead-message" formControlName="message" rows="3"
-              placeholder="Comentario o consulta del lead..."
-              class="w-full bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 py-3 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors resize-none"
-            ></textarea>
+            <div>
+              <label class="block font-label-md text-label-md text-primary-container mb-1" for="lead-message">Mensaje</label>
+              <textarea
+                id="lead-message" formControlName="message" rows="3"
+                placeholder="Comentario o consulta del lead..."
+                class="w-full bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 py-3 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors resize-none"
+              ></textarea>
+            </div>
           </div>
         </div>
 

@@ -1,18 +1,34 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Lead, LeadsService } from '../../core/services/leads.service';
+import {
+  CreateLeadActivityPayload,
+  Lead,
+  LEAD_SOURCES,
+  LEAD_STATUSES,
+  LeadsService,
+  LeadSource,
+  LeadStatus,
+  leadSourceLabel,
+  leadStatusColorClass,
+  leadStatusLabel,
+} from '../../core/services/leads.service';
 import { Plan, PlansService } from '../../core/services/plans.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AppSelectComponent, SelectOption } from '../../shared/components/app-select/app-select.component';
+import { WhatsappIconComponent } from '../../shared/components/whatsapp-icon/whatsapp-icon.component';
+import { LeadDetailComponent } from './lead-detail.component';
 
-type EmailStatusFilter = 'all' | 'sent' | 'pending';
-type DateRangeFilter = 'all' | '7d' | '30d';
+type DateRangeFilter = 'all' | '7d' | '30d' | 'custom';
+type StatusFilter = 'all' | LeadStatus;
+type SourceFilter = 'all' | LeadSource;
 type ModalMode = 'create' | 'edit' | 'duplicate';
+type SortField = 'name' | 'email' | 'plan' | 'status' | 'createdAt';
+type SortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-leads-admin',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, AppSelectComponent],
+  imports: [FormsModule, ReactiveFormsModule, AppSelectComponent, WhatsappIconComponent, LeadDetailComponent],
   templateUrl: './leads.component.html',
 })
 export class LeadsAdminComponent implements OnInit {
@@ -29,10 +45,17 @@ export class LeadsAdminComponent implements OnInit {
   protected readonly filterSearch = signal('');
   protected readonly filterPlanId = signal('all');
   protected readonly filterDateRange = signal<DateRangeFilter>('all');
-  protected readonly filterEmailStatus = signal<EmailStatusFilter>('all');
+  protected readonly filterDateFrom = signal('');
+  protected readonly filterDateTo = signal('');
+  protected readonly filterStatus = signal<StatusFilter>('all');
+  protected readonly filterSource = signal<SourceFilter>('all');
+
+  protected readonly sortField = signal<SortField>('createdAt');
+  protected readonly sortDirection = signal<SortDirection>('desc');
 
   protected readonly selectedIds = signal<Set<string>>(new Set());
-  protected readonly expandedId = signal<string | null>(null);
+  protected readonly selectedLead = signal<Lead | null>(null);
+  protected readonly loadingActivities = signal(false);
   protected readonly page = signal(1);
   protected readonly pageSize = 20;
 
@@ -55,7 +78,7 @@ export class LeadsAdminComponent implements OnInit {
     email: ['', [Validators.required, Validators.email]],
     phone: [''],
     interestedPlanId: ['', [Validators.required]],
-    source: ['Alta manual'],
+    source: ['manual'],
     message: [''],
   });
 
@@ -63,13 +86,23 @@ export class LeadsAdminComponent implements OnInit {
     { value: 'all', label: 'Todas las fechas' },
     { value: '7d', label: 'Últimos 7 días' },
     { value: '30d', label: 'Últimos 30 días' },
+    { value: 'custom', label: 'Personalizado...' },
   ];
 
-  protected readonly emailStatusOptions: SelectOption[] = [
-    { value: 'all', label: 'Email: Todos' },
-    { value: 'sent', label: 'Email: Enviado' },
-    { value: 'pending', label: 'Email: Pendiente' },
+  protected readonly sourceOptions: SelectOption[] = LEAD_SOURCES;
+
+  protected readonly statusFilterOptions: SelectOption[] = [
+    { value: 'all', label: 'Estado: Todos' },
+    ...LEAD_STATUSES,
   ];
+
+  protected readonly sourceFilterOptions: SelectOption[] = [
+    { value: 'all', label: 'Origen: Todos' },
+    ...LEAD_SOURCES,
+  ];
+
+  protected readonly leadStatusLabel = leadStatusLabel;
+  protected readonly leadSourceLabel = leadSourceLabel;
 
   protected readonly planOptions = computed<SelectOption[]>(() => [
     { value: 'all', label: 'Todos los planes' },
@@ -93,18 +126,47 @@ export class LeadsAdminComponent implements OnInit {
     const planId = this.filterPlanId();
     if (planId !== 'all') result = result.filter((l) => l.interestedPlanId === planId);
 
-    const status = this.filterEmailStatus();
-    if (status === 'sent') result = result.filter((l) => l.emailSent);
-    else if (status === 'pending') result = result.filter((l) => !l.emailSent);
+    const status = this.filterStatus();
+    if (status !== 'all') result = result.filter((l) => (l.status ?? 'nuevo') === status);
+
+    const source = this.filterSource();
+    if (source !== 'all') result = result.filter((l) => l.source === source);
 
     const range = this.filterDateRange();
-    if (range !== 'all') {
+    if (range === 'custom') {
+      const from = this.filterDateFrom();
+      const to = this.filterDateTo();
+      if (from) {
+        const fromTime = new Date(`${from}T00:00:00`).getTime();
+        result = result.filter((l) => new Date(l.createdAt).getTime() >= fromTime);
+      }
+      if (to) {
+        const toTime = new Date(`${to}T23:59:59.999`).getTime();
+        result = result.filter((l) => new Date(l.createdAt).getTime() <= toTime);
+      }
+    } else if (range !== 'all') {
       const days = range === '7d' ? 7 : 30;
       const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
       result = result.filter((l) => new Date(l.createdAt).getTime() >= cutoff);
     }
 
-    return result.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const field = this.sortField();
+    const dir = this.sortDirection() === 'asc' ? 1 : -1;
+    return result.sort((a, b) => {
+      let cmp = 0;
+      switch (field) {
+        case 'name': cmp = a.name.localeCompare(b.name); break;
+        case 'email': cmp = a.email.localeCompare(b.email); break;
+        case 'plan':
+          cmp = (this.planFor(a)?.title ?? a.interestedPlanId).localeCompare(
+            this.planFor(b)?.title ?? b.interestedPlanId,
+          );
+          break;
+        case 'status': cmp = leadStatusLabel(a.status).localeCompare(leadStatusLabel(b.status)); break;
+        case 'createdAt': cmp = a.createdAt.localeCompare(b.createdAt); break;
+      }
+      return cmp * dir;
+    });
   });
 
   protected readonly hasActiveFilters = computed(
@@ -112,7 +174,8 @@ export class LeadsAdminComponent implements OnInit {
       this.filterSearch() !== '' ||
       this.filterPlanId() !== 'all' ||
       this.filterDateRange() !== 'all' ||
-      this.filterEmailStatus() !== 'all',
+      this.filterStatus() !== 'all' ||
+      this.filterSource() !== 'all',
   );
 
   protected readonly totalPages = computed(() => Math.max(1, Math.ceil(this.filteredLeads().length / this.pageSize)));
@@ -156,6 +219,22 @@ export class LeadsAdminComponent implements OnInit {
     return name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2);
   }
 
+  protected toggleSort(field: SortField): void {
+    if (this.sortField() === field) {
+      this.sortDirection.update((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      this.sortField.set(field);
+      this.sortDirection.set(field === 'createdAt' ? 'desc' : 'asc');
+    }
+  }
+
+  protected sortIcon(field: SortField): string {
+    if (this.sortField() !== field) return 'unfold_more';
+    return this.sortDirection() === 'asc' ? 'arrow_upward' : 'arrow_downward';
+  }
+
+  protected readonly statusBadgeClass = leadStatusColorClass;
+
   protected formatDate(iso: string): string {
     return new Date(iso).toLocaleDateString('es-CO', {
       day: 'numeric',
@@ -170,11 +249,94 @@ export class LeadsAdminComponent implements OnInit {
     this.filterSearch.set('');
     this.filterPlanId.set('all');
     this.filterDateRange.set('all');
-    this.filterEmailStatus.set('all');
+    this.filterDateFrom.set('');
+    this.filterDateTo.set('');
+    this.filterStatus.set('all');
+    this.filterSource.set('all');
   }
 
-  protected toggleExpand(lead: Lead): void {
-    this.expandedId.update((id) => (id === lead.leadId ? null : lead.leadId));
+  protected toggleDetail(lead: Lead): void {
+    if (this.selectedLead()?.leadId === lead.leadId) {
+      this.selectedLead.set(null);
+      return;
+    }
+
+    this.selectedLead.set(lead);
+    this.loadingActivities.set(true);
+    this.leadsSvc.getLead(lead.leadId).subscribe({
+      next: (full) => {
+        this.selectedLead.set(full);
+        this.loadingActivities.set(false);
+      },
+      error: () => {
+        this.loadingActivities.set(false);
+        this.toast.error('Error al cargar el detalle del lead.');
+      },
+    });
+  }
+
+  protected onStatusChange(status: LeadStatus): void {
+    const lead = this.selectedLead();
+    if (lead) this.submitActivity(lead.leadId, { type: 'status_changed', status });
+  }
+
+  protected onAddNote(note: string): void {
+    const lead = this.selectedLead();
+    if (lead) this.submitActivity(lead.leadId, { type: 'note', note });
+  }
+
+  protected contactWhatsapp(lead: Lead): void {
+    if (!lead.phone) return;
+    const message = this.buildWhatsappMessage(lead);
+
+    navigator.clipboard?.writeText(message).then(
+      () => this.toast.success('Texto copiado al portapapeles.'),
+      () => this.toast.error('No se pudo copiar el mensaje al portapapeles.'),
+    );
+    this.submitActivity(lead.leadId, { type: 'contacted', channel: 'whatsapp' }, false);
+  }
+
+  private buildWhatsappMessage(lead: Lead): string {
+    const firstName = lead.name.trim().split(' ')[0];
+    const planTitle = this.planFor(lead)?.title;
+    const planLine = planTitle ? ` en el plan *${planTitle}*` : '';
+    return `¡Hola ${firstName}! Te escribo de Tour Vacation Travel 👋. Vi tu interés${planLine} y me encantaría ayudarte a armar el viaje perfecto. ¿Charlamos los detalles?`;
+  }
+
+  protected contactEmail(lead: Lead): void {
+    const planTitle = this.planFor(lead)?.title;
+    this.leadsSvc.sendContactEmail(lead.leadId, planTitle).subscribe({
+      next: (updated) => this.applyLeadUpdate(updated, 'Correo enviado.'),
+      error: () => this.toast.error('Error al enviar el correo.'),
+    });
+  }
+
+  protected sendBulkEmail(): void {
+    const selected = this.leads().filter((l) => this.selectedIds().has(l.leadId));
+    if (selected.length === 0) return;
+
+    const items = selected.map((l) => ({ leadId: l.leadId, planTitle: this.planFor(l)?.title }));
+    this.leadsSvc.sendBulkContactEmail(items).subscribe({
+      next: (result) => {
+        this.toast.success(`Correos enviados: ${result.sent} de ${result.total}${result.failed ? ` (${result.failed} fallaron)` : ''}.`);
+      },
+      error: () => this.toast.error('Error al enviar los correos masivos.'),
+    });
+  }
+
+  private submitActivity(leadId: string, payload: CreateLeadActivityPayload, showToast = true): void {
+    this.leadsSvc.addActivity(leadId, payload).subscribe({
+      next: (updated) => this.applyLeadUpdate(updated, showToast ? 'Traza actualizada.' : undefined),
+      error: () => this.toast.error('Error al registrar la actividad.'),
+    });
+  }
+
+  private applyLeadUpdate(updated: Lead, successMessage?: string): void {
+    if (this.selectedLead()?.leadId === updated.leadId) this.selectedLead.set(updated);
+    this.leads.update((list) =>
+      list.map((l) => (l.leadId === updated.leadId ? { ...l, status: updated.status } : l)),
+    );
+    if (successMessage) this.toast.success(successMessage);
   }
 
   protected toggleSelect(lead: Lead): void {
@@ -207,7 +369,7 @@ export class LeadsAdminComponent implements OnInit {
   protected openAddModal(): void {
     this.modalMode.set('create');
     this.editingLeadId.set(null);
-    this.addForm.reset({ name: '', email: '', phone: '', interestedPlanId: '', source: 'Alta manual', message: '' });
+    this.addForm.reset({ name: '', email: '', phone: '', interestedPlanId: '', source: 'manual', message: '' });
     this.saveError.set('');
     this.showModal.set(true);
   }
@@ -220,7 +382,7 @@ export class LeadsAdminComponent implements OnInit {
       email: lead.email,
       phone: lead.phone ?? '',
       interestedPlanId: lead.interestedPlanId,
-      source: lead.source ?? '',
+      source: lead.source ?? 'manual',
       message: lead.message ?? '',
     });
     this.saveError.set('');
@@ -235,7 +397,7 @@ export class LeadsAdminComponent implements OnInit {
       email: '',
       phone: lead.phone ?? '',
       interestedPlanId: lead.interestedPlanId,
-      source: lead.source ?? '',
+      source: lead.source ?? 'manual',
       message: lead.message ?? '',
     });
     this.saveError.set('');
@@ -262,7 +424,7 @@ export class LeadsAdminComponent implements OnInit {
       email: value.email!,
       phone: value.phone || undefined,
       interestedPlanId: value.interestedPlanId!,
-      source: value.source || undefined,
+      source: (value.source || undefined) as LeadSource | undefined,
       message: value.message || undefined,
     };
 
@@ -323,13 +485,14 @@ export class LeadsAdminComponent implements OnInit {
       return;
     }
 
-    const headers = ['Nombre', 'Email', 'Teléfono', 'Plan de interés', 'Origen', 'Mensaje', 'Fecha', 'Email enviado'];
+    const headers = ['Nombre', 'Email', 'Teléfono', 'Plan de interés', 'Origen', 'Estado', 'Mensaje', 'Fecha', 'Email enviado'];
     const rows = source.map((l) => [
       l.name,
       l.email,
       l.phone ?? '',
       this.planFor(l)?.title ?? l.interestedPlanId,
-      l.source ?? '',
+      leadSourceLabel(l.source),
+      leadStatusLabel(l.status),
       l.message ?? '',
       l.createdAt,
       l.emailSent ? 'Sí' : 'No',

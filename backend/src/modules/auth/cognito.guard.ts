@@ -31,29 +31,43 @@ export class CognitoGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user?: { email: string } }>();
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
-    if (isPublic) return true;
 
-    // Bypass local de desarrollo
-    if (this.config.get<string>('BYPASS_AUTH') === 'true') return true;
+    // Bypass local de desarrollo: igual setea request.user para poder probar
+    // la atribución de actividades (@CurrentUser()) sin Cognito real.
+    if (this.config.get<string>('BYPASS_AUTH') === 'true') {
+      request.user = { email: 'dev-local@tourvacation.com' };
+      return true;
+    }
+
+    const token = this.extractToken(request);
+    if (token && this.verifier) {
+      try {
+        const payload = await this.verifier.verify(token);
+        request.user = {
+          email:
+            (payload.email as string) ??
+            (payload['cognito:username'] as string),
+        };
+      } catch {
+        if (!isPublic)
+          throw new UnauthorizedException('Token inválido o expirado');
+      }
+    }
+
+    if (isPublic) return true;
 
     if (!this.verifier) {
       throw new UnauthorizedException('Auth no configurado');
     }
-
-    const request = context.switchToHttp().getRequest<Request>();
-    const token = this.extractToken(request);
-    if (!token) throw new UnauthorizedException('Token requerido');
-
-    try {
-      await this.verifier.verify(token);
-      return true;
-    } catch {
-      throw new UnauthorizedException('Token inválido o expirado');
-    }
+    if (!request.user) throw new UnauthorizedException('Token requerido');
+    return true;
   }
 
   private extractToken(request: Request): string | null {
