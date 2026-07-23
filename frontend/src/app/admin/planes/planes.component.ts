@@ -2,7 +2,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Plan, PlansService } from '../../core/services/plans.service';
+import { Plan, PlansService, PromotionType } from '../../core/services/plans.service';
 import { AppSelectComponent, SelectOption } from '../../shared/components/app-select/app-select.component';
 
 type SortField = 'displayOrder' | 'price' | 'title' | 'createdAt';
@@ -108,5 +108,18 @@ export class PlanesAdminComponent implements OnInit {
       next: () => this.plans.update((list) => list.filter((p) => p.planId !== plan.planId)),
       error: () => this.error.set('Error al eliminar el plan.'),
     });
+  }
+
+  protected promoDisplay(plan: Plan): { label: string; icon: string; color: string; bg: string } | null {
+    if (!plan.promotion?.active) return null;
+    const { type, label } = plan.promotion;
+    const shortLabel = label.length > 14 ? `${label.slice(0, 13)}…` : label;
+    const map: Record<PromotionType, { label: string; icon: string; color: string; bg: string }> = {
+      dos_x_uno:       { label: '2 × 1',       icon: '🎯', color: '#92400e', bg: '#fef3c7' },
+      precio_especial: { label: 'Precio esp.',  icon: '💰', color: '#065f46', bg: '#d1fae5' },
+      cupos_limitados: { label: 'Cupos lim.',   icon: '🔥', color: '#991b1b', bg: '#fee2e2' },
+      texto_libre:     { label: shortLabel,     icon: '✨', color: '#9a3412', bg: '#fef0eb' },
+    };
+    return map[type as PromotionType] ?? map.texto_libre;
   }
 }

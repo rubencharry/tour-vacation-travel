@@ -12,8 +12,7 @@ import { LeadsService } from './leads.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
 import { CreateLeadActivityDto } from './dto/create-lead-activity.dto';
-import { ContactEmailDto } from './dto/contact-email.dto';
-import { BulkContactEmailDto } from './dto/bulk-contact-email.dto';
+import { SendCampaignDto } from './dto/send-campaign.dto';
 import { Public } from '../auth/public.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 
@@ -51,21 +50,12 @@ export class LeadsController {
     return this.service.addActivity(id, dto, actorEmail);
   }
 
-  @Post(':id/contact-email')
-  sendContactEmail(
-    @Param('id') id: string,
-    @Body() dto: ContactEmailDto,
+  @Post('send-campaign')
+  sendCampaign(
+    @Body() dto: SendCampaignDto,
     @CurrentUser() actorEmail?: string,
   ) {
-    return this.service.sendContactEmail(id, dto, actorEmail);
-  }
-
-  @Post('bulk-contact-email')
-  sendBulkContactEmail(
-    @Body() dto: BulkContactEmailDto,
-    @CurrentUser() actorEmail?: string,
-  ) {
-    return this.service.sendBulkContactEmail(dto, actorEmail);
+    return this.service.sendCampaign(dto, actorEmail);
   }
 
   @Delete(':id')

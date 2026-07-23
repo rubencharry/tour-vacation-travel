@@ -3,6 +3,7 @@ import { PlansRepository } from './plans.repository';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 import { GetPlansQueryDto } from './dto/get-plans-query.dto';
+import { SetPromotionDto } from './dto/set-promotion.dto';
 import { Plan, PlanType } from './entities/plan.entity';
 import { FileService } from '../file/file.service';
 
@@ -98,6 +99,29 @@ export class PlansService {
   async remove(planId: string): Promise<void> {
     await this.findOne(planId);
     await this.repo.delete(planId);
+  }
+
+  async setPromotion(planId: string, dto: SetPromotionDto): Promise<Plan> {
+    await this.findOne(planId);
+    const updated = await this.repo.setPromotion(planId, {
+      type: dto.type,
+      label: dto.label,
+      expiresAt: dto.expiresAt,
+      active: dto.active,
+    });
+    return {
+      ...updated,
+      imageUrls: await this.fileService.presignImageUrls(updated.imageUrls ?? []),
+    };
+  }
+
+  async clearPromotion(planId: string): Promise<Plan> {
+    await this.findOne(planId);
+    const updated = await this.repo.clearPromotion(planId);
+    return {
+      ...updated,
+      imageUrls: await this.fileService.presignImageUrls(updated.imageUrls ?? []),
+    };
   }
 
   async uploadImage(

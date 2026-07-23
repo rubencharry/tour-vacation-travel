@@ -37,9 +37,9 @@ export class NosotrosComponent {
     },
     {
       name: 'Francy Reyes',
-      role: 'Especialista en Diseño de Producto Turístico',
+      role: 'Directora de Desarrollo de Negocios y Producto',
       photo: '/team/francy.webp',
-      years: '7 años en turismo',
+      years: '8 años en turismo',
     },
     {
       name: 'Valentina Rodríguez',
@@ -49,9 +49,9 @@ export class NosotrosComponent {
     },
     {
       name: 'Yulieth Roa',
-      role: 'Especialista en Diseño de Producto Turístico',
+      role: 'Directora de Producto y Alianzas Estratégicas',
       photo: '/team/yulieth.webp',
-      years: '7 años en turismo',
+      years: '10 años en turismo',
     },
   ];
 

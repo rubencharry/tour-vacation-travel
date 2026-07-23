@@ -65,6 +65,12 @@ export class LeadsAdminComponent implements OnInit {
   protected readonly saving = signal(false);
   protected readonly saveError = signal('');
 
+  protected readonly showCampaignModal = signal(false);
+  protected readonly campaignLeadIds = signal<string[]>([]);
+  protected readonly campaignPlanId = signal('');
+  protected readonly campaignSending = signal(false);
+  protected readonly campaignError = signal('');
+
   protected readonly modalTitle = computed(() => {
     switch (this.modalMode()) {
       case 'edit': return 'Editar Lead';
@@ -108,6 +114,19 @@ export class LeadsAdminComponent implements OnInit {
     { value: 'all', label: 'Todos los planes' },
     ...Object.values(this.plansById()).map((p) => ({ value: p.planId, label: p.title })),
   ]);
+
+  protected readonly campaignLeadCount = computed(() => this.campaignLeadIds().length);
+
+  protected readonly campaignPlan = computed(() => {
+    const id = this.campaignPlanId();
+    return id ? this.plansById()[id] : undefined;
+  });
+
+  protected readonly campaignPlanPromoExpiry = computed(() => {
+    const exp = this.campaignPlan()?.promotion?.expiresAt;
+    if (!exp) return null;
+    return new Date(exp).toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+  });
 
   protected readonly totalCount = computed(() => this.leads().length);
   protected readonly sentCount = computed(() => this.leads().filter((l) => l.emailSent).length);
@@ -303,27 +322,6 @@ export class LeadsAdminComponent implements OnInit {
     return `¡Hola ${firstName}! Te escribo de Tour Vacation Travel 👋. Vi tu interés${planLine} y me encantaría ayudarte a armar el viaje perfecto. ¿Charlamos los detalles?`;
   }
 
-  protected contactEmail(lead: Lead): void {
-    const planTitle = this.planFor(lead)?.title;
-    this.leadsSvc.sendContactEmail(lead.leadId, planTitle).subscribe({
-      next: (updated) => this.applyLeadUpdate(updated, 'Correo enviado.'),
-      error: () => this.toast.error('Error al enviar el correo.'),
-    });
-  }
-
-  protected sendBulkEmail(): void {
-    const selected = this.leads().filter((l) => this.selectedIds().has(l.leadId));
-    if (selected.length === 0) return;
-
-    const items = selected.map((l) => ({ leadId: l.leadId, planTitle: this.planFor(l)?.title }));
-    this.leadsSvc.sendBulkContactEmail(items).subscribe({
-      next: (result) => {
-        this.toast.success(`Correos enviados: ${result.sent} de ${result.total}${result.failed ? ` (${result.failed} fallaron)` : ''}.`);
-      },
-      error: () => this.toast.error('Error al enviar los correos masivos.'),
-    });
-  }
-
   private submitActivity(leadId: string, payload: CreateLeadActivityPayload, showToast = true): void {
     this.leadsSvc.addActivity(leadId, payload).subscribe({
       next: (updated) => this.applyLeadUpdate(updated, showToast ? 'Traza actualizada.' : undefined),
@@ -473,6 +471,53 @@ export class LeadsAdminComponent implements OnInit {
         this.toast.success('Lead eliminado.');
       },
       error: () => this.toast.error('Error al eliminar el lead.'),
+    });
+  }
+
+  protected openCampaignModal(): void {
+    if (this.selectedCount() === 0) return;
+    this.campaignLeadIds.set([...this.selectedIds()]);
+    this.campaignPlanId.set('');
+    this.campaignError.set('');
+    this.showCampaignModal.set(true);
+  }
+
+  protected openCampaignModalForLead(lead: Lead): void {
+    this.campaignLeadIds.set([lead.leadId]);
+    this.campaignPlanId.set('');
+    this.campaignError.set('');
+    this.showCampaignModal.set(true);
+  }
+
+  protected closeCampaignModal(): void {
+    this.showCampaignModal.set(false);
+  }
+
+  protected sendCampaign(): void {
+    const planId = this.campaignPlanId();
+    if (!planId) {
+      this.campaignError.set('Selecciona un plan para la campaña.');
+      return;
+    }
+    const leadIds = this.campaignLeadIds();
+    if (leadIds.length === 0) return;
+
+    this.campaignSending.set(true);
+    this.campaignError.set('');
+
+    this.leadsSvc.sendCampaign(leadIds, planId).subscribe({
+      next: (result) => {
+        this.campaignSending.set(false);
+        this.showCampaignModal.set(false);
+        this.selectedIds.set(new Set());
+        this.campaignLeadIds.set([]);
+        const msg = `Campaña enviada: ${result.sent} de ${result.total}${result.failed ? ` (${result.failed} fallaron)` : ''}.`;
+        this.toast.success(msg);
+      },
+      error: () => {
+        this.campaignSending.set(false);
+        this.campaignError.set('Error al enviar la campaña. Inténtalo de nuevo.');
+      },
     });
   }
 

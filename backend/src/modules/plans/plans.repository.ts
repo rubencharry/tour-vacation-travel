@@ -8,7 +8,7 @@ import {
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { DynamoDbService } from '../dynamodb/dynamodb.service';
-import { Plan } from './entities/plan.entity';
+import { Plan, Promotion } from './entities/plan.entity';
 
 @Injectable()
 export class PlansRepository {
@@ -67,5 +67,31 @@ export class PlansRepository {
     await this.db.client.send(
       new DeleteCommand({ TableName: this.table, Key: { planId } }),
     );
+  }
+
+  async setPromotion(planId: string, promotion: Promotion): Promise<Plan> {
+    return this.update(planId, {
+      promotion,
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  async clearPromotion(planId: string): Promise<Plan> {
+    const result = await this.db.client.send(
+      new UpdateCommand({
+        TableName: this.table,
+        Key: { planId },
+        UpdateExpression: 'REMOVE #promo SET #updatedAt = :now',
+        ExpressionAttributeNames: {
+          '#promo': 'promotion',
+          '#updatedAt': 'updatedAt',
+        },
+        ExpressionAttributeValues: {
+          ':now': new Date().toISOString(),
+        },
+        ReturnValues: 'ALL_NEW',
+      }),
+    );
+    return result.Attributes as Plan;
   }
 }

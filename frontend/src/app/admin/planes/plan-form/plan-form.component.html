@@ -397,6 +397,108 @@
       @if (isInvalid('terms')) { <p class="text-caption text-error mt-1">Campo obligatorio.</p> }
     </section>
 
+    <!-- 7. Promoción (solo en edición) -->
+    @if (isEdit()) {
+    <section class="bg-surface-container-lowest rounded-card p-6 md:p-8 shadow-coastal border border-surface-variant">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="font-headline-md text-headline-md font-bold text-primary-container flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary">local_offer</span>
+          Promoción especial
+        </h3>
+        <button type="button"
+          class="flex items-center gap-2 rounded-full h-7 px-3 text-xs font-bold uppercase tracking-wider transition-colors border"
+          [class]="promoActive()
+            ? 'bg-brand-teal/10 text-brand-teal border-brand-teal/30 hover:bg-brand-teal/20'
+            : 'bg-surface-container text-on-surface-variant border-surface-variant hover:bg-surface-container-highest'"
+          (click)="promoActive.set(!promoActive())">
+          <span class="w-2 h-2 rounded-full" [class]="promoActive() ? 'bg-brand-teal' : 'bg-surface-container-highest border border-on-surface-variant/30'"></span>
+          {{ promoActive() ? 'Activa' : 'Sin promoción' }}
+        </button>
+      </div>
+
+      @if (currentPlanPromo() && !promoActive()) {
+        <div class="mb-6 flex items-center gap-3 p-3 bg-surface-container rounded-card border border-surface-variant">
+          <span class="material-symbols-outlined text-on-surface-variant text-[18px]">info</span>
+          <p class="text-body-sm text-on-surface-variant flex-1">
+            Este plan tiene una promoción configurada: <strong class="text-on-surface">{{ currentPlanPromo()?.label }}</strong>
+          </p>
+          <button type="button" (click)="promoActive.set(true)"
+            class="text-xs text-brand-teal font-semibold hover:underline">
+            Editar
+          </button>
+        </div>
+      }
+
+      @if (promoActive()) {
+      <div class="space-y-5">
+        <!-- Tipo -->
+        <div>
+          <label class="block font-label-md text-label-md text-primary-container mb-1">
+            Tipo de promoción <span class="text-brand-terracotta">*</span>
+          </label>
+          <select
+            [value]="promoType()"
+            (change)="promoType.set($any($event.target).value)"
+            class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors">
+            @for (opt of promoTypeOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Descripción / Texto libre -->
+        <div>
+          <label class="block font-label-md text-label-md text-primary-container mb-1">
+            {{ promoType() === 'texto_libre' ? 'Texto de la promoción' : 'Descripción de la oferta' }}
+            <span class="text-brand-terracotta">*</span>
+          </label>
+          <input type="text"
+            [value]="promoLabel()"
+            (input)="promoLabel.set($any($event.target).value)"
+            [placeholder]="promoType() === 'texto_libre'
+              ? 'Ej. BLACK FRIDAY · Solo este fin de semana'
+              : 'Ej. Trae un amigo gratis · Solo hasta el 31 de julio'"
+            maxlength="300"
+            class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors" />
+          <p class="text-caption text-on-surface-variant mt-1">
+            @if (promoType() === 'texto_libre') {
+              Este texto aparecerá como badge principal en el email de campaña. &nbsp;·&nbsp;
+            } @else {
+              Contexto adicional junto al badge (ej. "30% de descuento", "Solo 5 cupos"). &nbsp;·&nbsp;
+            }
+            {{ promoLabel().length }}/300
+          </p>
+        </div>
+
+        <!-- Fecha de vencimiento -->
+        <div>
+          <label class="block font-label-md text-label-md text-primary-container mb-1">
+            Válido hasta <span class="text-on-surface-variant text-caption">(opcional)</span>
+          </label>
+          <input type="date"
+            [value]="promoExpiresAt()"
+            (change)="promoExpiresAt.set($any($event.target).value)"
+            class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors" />
+        </div>
+      </div>
+      }
+
+      @if (promoError()) {
+        <p class="mt-4 text-caption text-error">{{ promoError() }}</p>
+      }
+
+      @if (currentPlanPromo()) {
+        <div class="mt-6 flex justify-end">
+          <button type="button" (click)="clearPromotionAction()" [disabled]="saving()"
+            class="px-4 py-2 rounded-btn border border-error text-error font-label-md text-label-md hover:bg-error/5 transition-colors disabled:opacity-50 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">delete</span>
+            Quitar promoción
+          </button>
+        </div>
+      }
+    </section>
+    }
+
   </div>
 </div>
 
@@ -406,10 +508,6 @@
     class="px-6 py-2 rounded-btn border border-primary-container text-primary-container font-label-md text-label-md hover:bg-surface-variant/20 transition-colors">
     Cancelar
   </a>
-  <button type="button" (click)="submit(false)" [disabled]="saving()"
-    class="px-6 py-2 rounded-btn border border-primary-container text-primary-container font-label-md text-label-md hover:bg-surface-variant/20 transition-colors disabled:opacity-50">
-    Guardar borrador
-  </button>
   <button type="button" (click)="submit(true)" [disabled]="saving()"
     class="px-6 py-2 rounded-btn bg-brand-teal text-white font-label-md text-label-md shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center gap-2 disabled:opacity-50 disabled:transform-none">
     @if (saving()) {
