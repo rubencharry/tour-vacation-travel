@@ -186,9 +186,7 @@ export class LeadsService {
         if (result.status === 'fulfilled') sent++;
         else {
           failed++;
-          this.logger.error(
-            `Campaign email failed: ${String(result.reason)}`,
-          );
+          this.logger.error(`Campaign email failed: ${String(result.reason)}`);
         }
       }
 

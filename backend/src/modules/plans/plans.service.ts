@@ -111,7 +111,9 @@ export class PlansService {
     });
     return {
       ...updated,
-      imageUrls: await this.fileService.presignImageUrls(updated.imageUrls ?? []),
+      imageUrls: await this.fileService.presignImageUrls(
+        updated.imageUrls ?? [],
+      ),
     };
   }
 
@@ -120,7 +122,9 @@ export class PlansService {
     const updated = await this.repo.clearPromotion(planId);
     return {
       ...updated,
-      imageUrls: await this.fileService.presignImageUrls(updated.imageUrls ?? []),
+      imageUrls: await this.fileService.presignImageUrls(
+        updated.imageUrls ?? [],
+      ),
     };
   }
 

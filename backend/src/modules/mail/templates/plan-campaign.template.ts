@@ -140,29 +140,29 @@ export function planCampaignTemplate(data: PlanCampaignData): {
         <p style="margin:0;font-family:${F.condensed};font-size:22px;font-weight:700;
           color:${promoConf.textColor};letter-spacing:0.1em;text-transform:uppercase">
           ${promoConf.icon}&nbsp;&nbsp;${promoBadgeLabel}
-          ${promo!.type !== 'texto_libre' && promo!.label
-            ? `&nbsp;<span style="font-size:16px;font-weight:600;opacity:0.85">— ${promo!.label}</span>`
-            : ''}
+          ${
+            promo!.type !== 'texto_libre' && promo!.label
+              ? `&nbsp;<span style="font-size:16px;font-weight:600;opacity:0.85">— ${promo!.label}</span>`
+              : ''
+          }
         </p>
       </td></tr>`
     : '';
 
-  const expiryLine =
-    promo?.expiresAt
-      ? `<p style="margin:10px 0 0;font-family:${F.sans};font-size:13px;color:${C.textMuted}">
+  const expiryLine = promo?.expiresAt
+    ? `<p style="margin:10px 0 0;font-family:${F.sans};font-size:13px;color:${C.textMuted}">
           ⏰&nbsp;Válido hasta:&nbsp;<strong style="color:${C.textBody}">
             ${new Date(promo.expiresAt).toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' })}
           </strong>
         </p>`
-      : '';
+    : '';
 
   // For typed promos: show "TIPO: custom label". For texto_libre: show just the label.
-  const calloutTitle =
-    promo
-      ? promo.type === 'texto_libre'
-        ? promo.label
-        : promoConf!.badgeLabel
-      : '';
+  const calloutTitle = promo
+    ? promo.type === 'texto_libre'
+      ? promo.label
+      : promoConf!.badgeLabel
+    : '';
   const calloutSubtitle =
     promo && promo.type !== 'texto_libre' && promo.label
       ? `<p style="margin:8px 0 0;font-family:${F.sans};font-size:14px;color:${C.textBody};line-height:1.5">
@@ -325,9 +325,11 @@ export function planCampaignTemplate(data: PlanCampaignData): {
                           <span style="font-family:${F.sans};font-size:12px;font-weight:400;
                             color:${C.textMuted}"> p/p</span>
                         </p>
-                        ${plan.priceDetails
-                          ? `<p style="margin:4px 0 0;font-family:${F.sans};font-size:11px;color:${C.textMuted}">${plan.priceDetails}</p>`
-                          : ''}
+                        ${
+                          plan.priceDetails
+                            ? `<p style="margin:4px 0 0;font-family:${F.sans};font-size:11px;color:${C.textMuted}">${plan.priceDetails}</p>`
+                            : ''
+                        }
                       </td>
                       <td valign="bottom" align="right">
                         <a href="${siteUrl}/planes"
