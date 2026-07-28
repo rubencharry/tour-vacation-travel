@@ -60,7 +60,7 @@ export class CognitoAdminService {
       }),
     );
 
-    const sub = result.User?.Attributes?.find((a) => a.Name === 'sub')?.Value;
+    const sub = result.User?.Attributes?.find((a: { Name?: string }) => a.Name === 'sub')?.Value;
     if (!sub) {
       throw new Error('Cognito no devolvió el sub del usuario creado');
     }
