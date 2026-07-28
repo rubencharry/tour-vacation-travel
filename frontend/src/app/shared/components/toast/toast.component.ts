@@ -7,7 +7,7 @@ import { ToastService } from '../../../core/services/toast.service';
   template: `
     @if (svc.current(); as t) {
       <div
-        class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3.5 rounded-card shadow-coastal-hover max-w-sm"
+        class="fixed bottom-20 right-6 z-50 flex items-center gap-3 px-4 py-3.5 rounded-card shadow-coastal-hover max-w-sm"
         [class]="styles[t.type]"
       >
         <span

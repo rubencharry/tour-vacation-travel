@@ -293,9 +293,9 @@
                     </button>
                     <button
                       type="button"
-                      (click)="contactEmail(lead)"
+                      (click)="openCampaignModalForLead(lead)"
                       class="p-1.5 inline-flex items-center justify-center text-brand-terracotta/80 hover:text-brand-terracotta hover:bg-brand-terracotta/10 rounded transition-colors"
-                      title="Contactar por correo"
+                      title="Enviar email de campaña"
                     >
                       <span class="material-symbols-outlined text-[20px]">mail</span>
                     </button>
@@ -388,11 +388,11 @@
       <div class="flex items-center gap-2">
         <button
           type="button"
-          (click)="sendBulkEmail()"
-          class="flex items-center gap-2 bg-brand-teal text-white font-label-md text-label-md px-4 py-2 rounded-btn hover:shadow-md transition-all"
+          (click)="openCampaignModal()"
+          class="flex items-center gap-2 bg-secondary text-white font-label-md text-label-md px-4 py-2 rounded-btn hover:shadow-md transition-all"
         >
-          <span class="material-symbols-outlined text-[18px]">mail</span>
-          Enviar correo a seleccionados
+          <span class="material-symbols-outlined text-[18px]">campaign</span>
+          Lanzar campaña
         </button>
         <button
           type="button"
@@ -538,6 +538,105 @@
               <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
             }
             Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ── MODAL CAMPAÑA ── -->
+  @if (showCampaignModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      (click)="closeCampaignModal()">
+      <div class="bg-surface-container-lowest rounded-card shadow-[0_8px_40px_rgba(3,31,65,0.18)] w-full max-w-md"
+        (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-surface-variant">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary">campaign</span>
+            <h3 class="font-headline-sm text-headline-sm font-bold text-primary-container">Lanzar campaña de email</h3>
+          </div>
+          <button type="button" (click)="closeCampaignModal()"
+            class="text-on-surface-variant hover:text-on-surface transition-colors">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="px-6 py-5 space-y-5">
+
+          <!-- Resumen de leads -->
+          <div class="flex items-center gap-3 p-3 bg-secondary/8 rounded-card border border-secondary/20">
+            <span class="bg-secondary text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
+              {{ campaignLeadCount() }}
+            </span>
+            <p class="font-body-md text-body-md text-on-surface">
+              <strong>{{ campaignLeadCount() }}</strong> {{ campaignLeadCount() === 1 ? 'lead seleccionado' : 'leads seleccionados' }} recibirán el email de esta campaña.
+            </p>
+          </div>
+
+          <!-- Selector de plan -->
+          <div>
+            <label class="block font-label-md text-label-md text-primary-container mb-1">
+              Plan a incluir en el email <span class="text-brand-terracotta">*</span>
+            </label>
+            <select
+              [value]="campaignPlanId()"
+              (change)="campaignPlanId.set($any($event.target).value)"
+              class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors">
+              <option value="" disabled>Seleccionar plan...</option>
+              @for (opt of planOptions(); track opt.value) {
+                @if (opt.value !== 'all') {
+                  <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              }
+            </select>
+          </div>
+
+          <!-- Badge de promoción si el plan la tiene -->
+          @if (campaignPlan()?.promotion?.active) {
+            <div class="flex items-center gap-2 p-3 rounded-card border"
+              style="background: #fef3c720; border-color: #f59e0b40">
+              <span class="material-symbols-outlined text-[18px]" style="color: #f59e0b">local_offer</span>
+              <div class="flex-1">
+                <p class="text-xs font-bold uppercase tracking-wide" style="color: #b45309">Promoción activa en este plan</p>
+                <p class="text-sm text-on-surface font-medium">{{ campaignPlan()!.promotion!.label }}</p>
+                @if (campaignPlanPromoExpiry()) {
+                  <p class="text-xs text-on-surface-variant mt-0.5">
+                    Válido hasta {{ campaignPlanPromoExpiry() }}
+                  </p>
+                }
+              </div>
+              <span class="text-xs font-bold px-2 py-1 rounded-full text-white" style="background: #f59e0b">
+                Se destacará en el email
+              </span>
+            </div>
+          }
+
+          @if (campaignError()) {
+            <p class="text-caption text-error flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">error</span>
+              {{ campaignError() }}
+            </p>
+          }
+        </div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-surface-variant">
+          <button type="button" (click)="closeCampaignModal()"
+            class="h-10 px-4 text-on-surface-variant hover:bg-surface-container rounded-btn font-label-md text-label-md transition-colors">
+            Cancelar
+          </button>
+          <button type="button" (click)="sendCampaign()" [disabled]="campaignSending()"
+            class="h-10 px-5 bg-secondary text-white font-label-md text-label-md rounded-btn hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            @if (campaignSending()) {
+              <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+              Enviando...
+            } @else {
+              <span class="material-symbols-outlined text-[18px]">send</span>
+              Lanzar campaña
+            }
           </button>
         </div>
       </div>

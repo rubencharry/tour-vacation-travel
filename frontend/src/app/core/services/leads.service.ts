@@ -55,11 +55,6 @@ export type CreateLeadActivityPayload =
   | { type: 'contacted'; channel: 'whatsapp' | 'email'; note?: string }
   | { type: 'note'; note: string };
 
-export interface BulkContactEmailItem {
-  leadId: string;
-  planTitle?: string;
-}
-
 export interface BulkMailResult {
   sent: number;
   failed: number;
@@ -132,11 +127,7 @@ export class LeadsService {
     return this.http.post<Lead>(`/api/leads/${leadId}/activities`, dto);
   }
 
-  sendContactEmail(leadId: string, planTitle?: string): Observable<Lead> {
-    return this.http.post<Lead>(`/api/leads/${leadId}/contact-email`, { planTitle });
-  }
-
-  sendBulkContactEmail(leads: BulkContactEmailItem[]): Observable<BulkMailResult> {
-    return this.http.post<BulkMailResult>('/api/leads/bulk-contact-email', { leads });
+  sendCampaign(leadIds: string[], planId: string): Observable<BulkMailResult> {
+    return this.http.post<BulkMailResult>('/api/leads/send-campaign', { leadIds, planId });
   }
 }

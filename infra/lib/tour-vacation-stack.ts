@@ -9,6 +9,7 @@ import * as apigatewayv2Integrations from 'aws-cdk-lib/aws-apigatewayv2-integrat
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as path from 'path';
 
 export class TourVacationStack extends cdk.Stack {
@@ -118,6 +119,8 @@ export class TourVacationStack extends cdk.Stack {
         MEDIA_BUCKET_NAME: mediaBucket.bucketName,
         COGNITO_USER_POOL_ID: userPool.userPoolId,
         COGNITO_CLIENT_ID: userPoolClient.userPoolClientId,
+        SES_FROM_ADDRESS: process.env.SES_FROM_ADDRESS ?? '',
+        APP_URL: 'https://tourvacationtravel.com',
       },
     });
 
@@ -140,6 +143,13 @@ export class TourVacationStack extends cdk.Stack {
           'cognito-idp:AdminEnableUser',
         ],
         resources: [userPool.userPoolArn],
+      }),
+    );
+
+    backendLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+        resources: ['*'],
       }),
     );
 
@@ -176,7 +186,15 @@ export class TourVacationStack extends cdk.Stack {
 
     const apiOriginHostname = `${api.apiId}.execute-api.${this.region}.amazonaws.com`;
 
+    const certificate = acm.Certificate.fromCertificateArn(
+      this,
+      'CustomDomainCert',
+      'arn:aws:acm:us-east-1:507744946224:certificate/a23df631-6eb6-4228-aa73-4ce933c75b96',
+    );
+
     const distribution = new cloudfront.Distribution(this, 'Distribution', {
+      domainNames: ['tourvacationtravel.com', 'www.tourvacationtravel.com'],
+      certificate,
       defaultBehavior: {
         origin: origins.S3BucketOrigin.withOriginAccessControl(frontendBucket, {
           originAccessControl: oac,
@@ -210,11 +228,6 @@ export class TourVacationStack extends cdk.Stack {
       ],
       defaultRootObject: 'index.html',
     });
-
-    backendLambda.addEnvironment(
-      'FRONTEND_URL',
-      `https://${distribution.distributionDomainName}`,
-    );
 
     // ── Outputs ───────────────────────────────────────────────────────────────
 

@@ -168,7 +168,7 @@ export class UsersService {
     user: User,
     temporaryPassword: string,
   ): Promise<void> {
-    const loginUrl = `${this.config.get<string>('FRONTEND_URL', '')}/admin/login`;
+    const loginUrl = `${this.config.get<string>('APP_URL', '')}/admin/login`;
     const { subject, html } = temporaryCredentialsTemplate({
       name: user.name,
       email: user.email,

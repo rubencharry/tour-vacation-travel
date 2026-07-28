@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, catchError, of, startWith } from 'rxjs';
-import { Plan, PlansService } from '../../core/services/plans.service';
+import { Plan, PlansService, PromotionType } from '../../core/services/plans.service';
 import { LeadsService } from '../../core/services/leads.service';
 import { ScrollRevealDirective } from '../../shared/directives/scroll-reveal.directive';
 import { RouterLink } from '@angular/router';
@@ -92,6 +92,17 @@ export class LandingComponent {
 
   protected formatDuration(days: number, nights: number): string {
     return `${days} días / ${nights} noches`;
+  }
+
+  protected promoRibbon(plan: Plan): { label: string; bg: string; color: string } | null {
+    if (!plan.promotion?.active) return null;
+    const map: Record<PromotionType, { label: string; bg: string; color: string }> = {
+      dos_x_uno:       { label: '2 × 1',   bg: '#f59e0b', color: '#1a1200' },
+      precio_especial: { label: 'OFERTA',   bg: '#059669', color: '#ffffff' },
+      cupos_limitados: { label: 'LIMITADO', bg: '#dc2626', color: '#ffffff' },
+      texto_libre:     { label: 'PROMO',    bg: '#c46b48', color: '#ffffff' },
+    };
+    return map[plan.promotion.type as PromotionType] ?? { label: 'PROMO', bg: '#c46b48', color: '#ffffff' };
   }
 
   submitForm(event: Event) {
