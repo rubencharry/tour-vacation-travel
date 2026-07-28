@@ -2,6 +2,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Plan, PlansService, PromotionType } from '../../core/services/plans.service';
 import { AppSelectComponent, SelectOption } from '../../shared/components/app-select/app-select.component';
 
@@ -11,7 +12,7 @@ type SortDir = 'asc' | 'desc';
 @Component({
   selector: 'app-planes-admin',
   standalone: true,
-  imports: [RouterLink, DecimalPipe, FormsModule, AppSelectComponent],
+  imports: [RouterLink, DecimalPipe, FormsModule, AppSelectComponent, CdkDropList, CdkDrag, CdkDragHandle],
   templateUrl: './planes.component.html',
 })
 export class PlanesAdminComponent implements OnInit {
@@ -20,6 +21,7 @@ export class PlanesAdminComponent implements OnInit {
   protected readonly plans = signal<Plan[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
+  protected readonly savingOrder = signal(false);
 
   protected readonly filterSearch = signal('');
   protected readonly filterStatus = signal<'all' | 'active' | 'inactive'>('all');
@@ -70,6 +72,11 @@ export class PlanesAdminComponent implements OnInit {
     () => this.filterSearch() !== '' || this.filterStatus() !== 'all' || this.filterType() !== 'all',
   );
 
+  // El drag solo está activo cuando se muestra el orden natural (sin filtros de texto ni sort alternativo)
+  protected readonly dragEnabled = computed(
+    () => this.sortBy() === 'displayOrder' && this.sortDir() === 'asc' && !this.filterSearch(),
+  );
+
   ngOnInit(): void {
     this.load();
   }
@@ -107,6 +114,46 @@ export class PlanesAdminComponent implements OnInit {
     this.svc.deletePlan(plan.planId).subscribe({
       next: () => this.plans.update((list) => list.filter((p) => p.planId !== plan.planId)),
       error: () => this.error.set('Error al eliminar el plan.'),
+    });
+  }
+
+  protected onDrop(event: CdkDragDrop<Plan[]>): void {
+    if (event.previousIndex === event.currentIndex) return;
+
+    const reordered = [...this.filteredPlans()];
+    moveItemInArray(reordered, event.previousIndex, event.currentIndex);
+
+    // Asigna displayOrder consecutivo (1-based) según la nueva posición
+    const updated = reordered.map((p, i) => ({ ...p, displayOrder: i + 1 }));
+
+    // Aplica el nuevo orden a la lista maestra
+    this.plans.update((all) => {
+      const orderMap = new Map(updated.map((p) => [p.planId, p.displayOrder]));
+      return all.map((p) => orderMap.has(p.planId) ? { ...p, displayOrder: orderMap.get(p.planId)! } : p);
+    });
+
+    this.persistOrder(updated);
+  }
+
+  private persistOrder(plans: Plan[]): void {
+    this.savingOrder.set(true);
+    this.error.set('');
+
+    let pending = plans.length;
+    let hasError = false;
+
+    plans.forEach((p) => {
+      this.svc.updatePlan(p.planId, { displayOrder: p.displayOrder }).subscribe({
+        next: () => {
+          pending--;
+          if (pending === 0 && !hasError) this.savingOrder.set(false);
+        },
+        error: () => {
+          hasError = true;
+          this.savingOrder.set(false);
+          this.error.set('Error al guardar el orden. Recarga la página para ver el estado real.');
+        },
+      });
     });
   }
 
