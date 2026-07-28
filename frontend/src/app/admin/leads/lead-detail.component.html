@@ -1,0 +1,127 @@
+<div class="px-6 md:px-14 py-5 space-y-5">
+
+  @if (lead.message) {
+    <div>
+      <h4 class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-primary-container mb-1.5">
+        <span class="material-symbols-outlined text-[15px]">chat_bubble</span>
+        Mensaje
+      </h4>
+      <p class="text-sm text-on-surface bg-surface-container-lowest p-3 rounded-btn border border-surface-variant whitespace-pre-line">{{ lead.message }}</p>
+    </div>
+  }
+
+  <div class="bg-surface-container-lowest border border-surface-variant rounded-card overflow-hidden">
+    <div class="grid grid-cols-1 sm:grid-cols-3 divide-x divide-y sm:divide-y-0 divide-surface-variant">
+      <div class="p-3.5">
+        <h4 class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-primary-container mb-1.5">
+          <span class="material-symbols-outlined text-[15px]">map</span>
+          Plan de interés
+        </h4>
+        <div class="flex items-center gap-2">
+          @if (plan?.imageUrls?.[0]) {
+            <img [src]="plan!.imageUrls[0]" class="w-6 h-6 rounded object-cover border border-surface-variant shrink-0" alt="" />
+          }
+          <p class="text-sm font-medium text-on-surface truncate">{{ plan?.title ?? lead.interestedPlanId }}</p>
+        </div>
+      </div>
+      <div class="p-3.5">
+        <h4 class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-primary-container mb-1.5">
+          <span class="material-symbols-outlined text-[15px]">campaign</span>
+          Origen
+        </h4>
+        <p class="text-sm font-medium text-on-surface">{{ leadSourceLabel(lead.source) }}</p>
+      </div>
+      <div class="p-3.5">
+        <h4 class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-primary-container mb-1.5">
+          <span class="material-symbols-outlined text-[15px]">flag</span>
+          Estado
+        </h4>
+        <app-select
+          [block]="true"
+          [options]="statusOptions"
+          [ngModel]="lead.status ?? 'nuevo'"
+          (ngModelChange)="onStatusChange($any($event))"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h4 class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-primary-container mb-1.5">
+      <span class="material-symbols-outlined text-[15px]">edit_note</span>
+      Agregar nota
+    </h4>
+    <div class="flex flex-col sm:flex-row gap-2">
+      <textarea
+        rows="1"
+        [ngModel]="noteText()"
+        (ngModelChange)="noteText.set($any($event))"
+        placeholder="Ej. Cliente pide cotización para 4 personas..."
+        class="flex-1 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors resize-none"
+      ></textarea>
+      <button
+        type="button"
+        (click)="submitNote()"
+        [disabled]="!noteText().trim()"
+        class="h-10 px-4 bg-brand-teal text-white font-label-md text-label-md rounded-btn hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+      >
+        Agregar nota
+      </button>
+    </div>
+  </div>
+
+  <div>
+    <h4 class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-primary-container mb-3">
+      <span class="material-symbols-outlined text-[15px]">history</span>
+      Traza de actividad
+    </h4>
+    @if (loadingActivities) {
+      <div class="flex items-center justify-center py-8 text-on-surface-variant">
+        <span class="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+        Cargando...
+      </div>
+    } @else if (!lead.activities?.length) {
+      <p class="text-sm text-on-surface-variant py-4">Todavía no hay actividad registrada.</p>
+    } @else {
+      <ol>
+        @for (a of sortedActivities; track a.id; let last = $last) {
+          <li class="flex gap-3">
+            <div class="flex flex-col items-center shrink-0">
+              <div
+                class="w-7 h-7 rounded-full flex items-center justify-center ring-4 ring-surface-container-low"
+                [class]="activityColorClass(a)"
+              >
+                @if (a.type === 'contacted' && a.channel === 'whatsapp') {
+                  <app-whatsapp-icon [size]="14" />
+                } @else {
+                  <span class="material-symbols-outlined text-[16px]">{{ activityIcon(a.type, a.channel) }}</span>
+                }
+              </div>
+              @if (!last) {
+                <div class="w-px flex-1 bg-surface-variant my-1"></div>
+              }
+            </div>
+            <div class="flex-1 min-w-0" [class]="last ? 'pb-0' : 'pb-4'">
+              <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-3.5 py-2.5">
+                <p class="text-sm font-semibold text-on-surface">{{ activityTitle(a) }}</p>
+                @if (a.note) {
+                  <p class="text-sm text-on-surface-variant mt-0.5 whitespace-pre-line">{{ a.note }}</p>
+                }
+                <p class="text-caption text-on-surface-variant mt-1 flex items-center gap-1 flex-wrap">
+                  <span class="material-symbols-outlined text-[13px]">schedule</span>
+                  {{ formatDateTime(a.createdAt) }}
+                  @if (a.actorEmail) {
+                    <span class="text-outline-variant">·</span>
+                    <span class="material-symbols-outlined text-[13px]">person</span>
+                    {{ a.actorEmail }}
+                  }
+                </p>
+              </div>
+            </div>
+          </li>
+        }
+      </ol>
+    }
+  </div>
+
+</div>

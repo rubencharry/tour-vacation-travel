@@ -1,0 +1,300 @@
+<div class="max-w-7xl mx-auto space-y-4">
+
+  <!-- Encabezado -->
+  <div class="flex items-center justify-between flex-wrap gap-4">
+    <div>
+      <nav class="flex items-center gap-1 text-caption text-on-surface-variant mb-1">
+        <span>Admin</span>
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <span class="text-primary font-semibold">Usuarios</span>
+      </nav>
+      <h2 class="font-headline-md text-headline-md text-primary-container">Gestión de Usuarios</h2>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container shrink-0">
+          <span class="material-symbols-outlined text-[18px]">group</span>
+        </div>
+        <div>
+          <p class="text-caption text-on-surface-variant leading-none mb-1">Total</p>
+          <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ totalCount() }}</p>
+        </div>
+      </div>
+      <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-full bg-brand-teal/10 flex items-center justify-center text-secondary shrink-0">
+          <span class="material-symbols-outlined text-[18px]">support_agent</span>
+        </div>
+        <div>
+          <p class="text-caption text-on-surface-variant leading-none mb-1">Asesores</p>
+          <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ asesoresCount() }}</p>
+        </div>
+      </div>
+      <div class="bg-surface-container-lowest border border-surface-variant rounded-btn px-4 py-2 flex items-center gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-full bg-brand-teal/10 flex items-center justify-center text-secondary shrink-0">
+          <span class="material-symbols-outlined text-[18px]">check_circle</span>
+        </div>
+        <div>
+          <p class="text-caption text-on-surface-variant leading-none mb-1">Activos</p>
+          <p class="font-headline-md text-[18px] font-bold text-on-surface leading-none">{{ activeCount() }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="px-4 py-3 bg-error-container text-on-error-container rounded-btn font-body-md text-body-md">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Barra de filtros y acciones -->
+  <div class="bg-surface-container-lowest rounded-card border border-surface-variant p-3 flex flex-wrap items-center gap-2.5">
+    <div class="relative flex-1 min-w-[200px]">
+      <span class="absolute inset-y-0 left-3 flex items-center text-on-surface-variant pointer-events-none">
+        <span class="material-symbols-outlined text-[18px]">search</span>
+      </span>
+      <input
+        type="text"
+        placeholder="Buscar por nombre o correo..."
+        [value]="filterSearch()"
+        (input)="filterSearch.set($any($event.target).value)"
+        class="w-full h-9 bg-surface-container border border-surface-variant rounded-btn pl-9 pr-3 text-on-surface text-sm placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-brand-teal/50 focus:border-brand-teal transition-all"
+      />
+    </div>
+
+    <div class="h-6 w-px bg-outline-variant hidden sm:block"></div>
+
+    <app-select
+      [options]="roleOptions"
+      [ngModel]="filterRole()"
+      (ngModelChange)="filterRole.set($any($event))"
+    />
+    <app-select
+      [options]="statusOptions"
+      [ngModel]="filterStatus()"
+      (ngModelChange)="filterStatus.set($any($event))"
+    />
+
+    @if (canCreate()) {
+      <button
+        type="button"
+        (click)="openAddModal()"
+        class="ml-auto h-9 px-4 flex items-center gap-2 bg-brand-teal text-white font-label-md text-label-md rounded-btn hover:shadow-md hover:-translate-y-0.5 transition-all"
+      >
+        <span class="material-symbols-outlined text-[18px]">person_add</span>
+        Nuevo Asesor
+      </button>
+    }
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-surface-container-lowest rounded-card shadow-coastal border border-surface-variant overflow-hidden">
+    @if (loading()) {
+      <div class="flex items-center justify-center py-20 text-on-surface-variant">
+        <span class="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+        Cargando usuarios...
+      </div>
+    } @else if (filteredUsers().length === 0) {
+      <div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
+        <span class="material-symbols-outlined text-[48px] opacity-30">group</span>
+        <p class="font-body-md text-body-md">No hay usuarios que coincidan con la búsqueda.</p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-surface-variant text-left text-caption text-on-surface-variant">
+              <th class="px-4 py-3 font-medium">Usuario</th>
+              <th class="px-4 py-3 font-medium">Rol</th>
+              <th class="px-4 py-3 font-medium">Cargo/Área</th>
+              <th class="px-4 py-3 font-medium">Teléfono</th>
+              <th class="px-4 py-3 font-medium">Estado</th>
+              <th class="px-4 py-3 font-medium">Alta</th>
+              <th class="px-4 py-3 font-medium text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of filteredUsers(); track user.userId) {
+              <tr class="border-b border-surface-variant last:border-0 hover:bg-surface-container/50 transition-colors">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container text-xs font-bold shrink-0">
+                      {{ initialsFor(user.name) }}
+                    </div>
+                    <div>
+                      <p class="font-medium text-on-surface leading-tight">{{ user.name }}</p>
+                      <p class="text-caption text-on-surface-variant leading-tight">{{ user.email }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-on-surface-variant">{{ roleLabels[user.role] }}</td>
+                <td class="px-4 py-3 text-on-surface-variant">{{ user.area || '—' }}</td>
+                <td class="px-4 py-3 text-on-surface-variant">{{ user.phone || '—' }}</td>
+                <td class="px-4 py-3">
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-caption font-medium"
+                    [class]="user.status === 'active' ? 'bg-brand-teal/10 text-secondary' : 'bg-surface-container text-on-surface-variant'"
+                  >
+                    {{ user.status === 'active' ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-on-surface-variant">{{ formatDate(user.createdAt) }}</td>
+                <td class="px-4 py-3">
+                  @if (canManage(user)) {
+                    <div class="flex items-center justify-end gap-1">
+                      <button
+                        type="button"
+                        (click)="openResetPasswordModal(user)"
+                        title="Resetear contraseña"
+                        class="w-8 h-8 flex items-center justify-center rounded-btn text-on-surface-variant hover:text-primary hover:bg-primary-container/10 transition-colors"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">key</span>
+                      </button>
+                      <button
+                        type="button"
+                        (click)="toggleActive(user)"
+                        [title]="user.status === 'active' ? 'Desactivar' : 'Activar'"
+                        class="w-8 h-8 flex items-center justify-center rounded-btn text-on-surface-variant hover:text-error hover:bg-error-container transition-colors"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">
+                          {{ user.status === 'active' ? 'block' : 'check_circle' }}
+                        </span>
+                      </button>
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <!-- Modal nuevo asesor -->
+  @if (showModal()) {
+    <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" (click)="closeModal()">
+      <div class="bg-surface-container-lowest rounded-card shadow-xl max-w-md w-full p-6 space-y-5" (click)="$event.stopPropagation()">
+        <div class="flex items-center justify-between">
+          <h3 class="font-headline-md text-title-lg text-primary-container">Nuevo Asesor</h3>
+          <button type="button" (click)="closeModal()" class="text-on-surface-variant hover:text-error">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        @if (saveError()) {
+          <div class="px-4 py-3 bg-error-container text-on-error-container rounded-btn text-sm">
+            {{ saveError() }}
+          </div>
+        }
+
+        <p class="text-caption text-on-surface-variant">
+          Se le va a enviar una clave temporal por correo. Deberá cambiarla en su primer ingreso.
+        </p>
+
+        <form [formGroup]="form" (ngSubmit)="submitForm()" class="space-y-4">
+          <div class="space-y-1">
+            <label class="text-label-md font-label-md text-primary block">Correo electrónico</label>
+            <input
+              type="email"
+              formControlName="email"
+              class="w-full h-10 bg-surface-container border border-surface-variant rounded-btn px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/50 focus:border-brand-teal"
+            />
+          </div>
+          <div class="space-y-1">
+            <label class="text-label-md font-label-md text-primary block">Nombre completo</label>
+            <input
+              type="text"
+              formControlName="name"
+              class="w-full h-10 bg-surface-container border border-surface-variant rounded-btn px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/50 focus:border-brand-teal"
+            />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label class="text-label-md font-label-md text-primary block">Teléfono</label>
+              <input
+                type="text"
+                formControlName="phone"
+                class="w-full h-10 bg-surface-container border border-surface-variant rounded-btn px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/50 focus:border-brand-teal"
+              />
+            </div>
+            <div class="space-y-1">
+              <label class="text-label-md font-label-md text-primary block">Cargo/Área</label>
+              <input
+                type="text"
+                formControlName="area"
+                class="w-full h-10 bg-surface-container border border-surface-variant rounded-btn px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/50 focus:border-brand-teal"
+              />
+            </div>
+          </div>
+          <div class="space-y-1">
+            <label class="text-label-md font-label-md text-primary block">Notas internas</label>
+            <textarea
+              formControlName="notes"
+              rows="2"
+              class="w-full bg-surface-container border border-surface-variant rounded-btn px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/50 focus:border-brand-teal"
+            ></textarea>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button type="button" (click)="closeModal()" class="h-10 px-4 rounded-btn text-on-surface-variant hover:bg-surface-container transition-colors">
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              [disabled]="saving()"
+              class="h-10 px-5 flex items-center gap-2 bg-brand-teal text-white font-label-md text-label-md rounded-btn hover:shadow-md transition-all disabled:opacity-60"
+            >
+              @if (saving()) {
+                <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+              }
+              Crear asesor
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Modal confirmar reseteo de contraseña -->
+  @if (resetTarget(); as user) {
+    <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" (click)="closeResetPasswordModal()">
+      <div class="bg-surface-container-lowest rounded-card shadow-xl max-w-sm w-full p-6 space-y-5" (click)="$event.stopPropagation()">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container shrink-0">
+            <span class="material-symbols-outlined text-[20px]">key</span>
+          </div>
+          <h3 class="font-headline-md text-title-lg text-primary-container">Resetear contraseña</h3>
+        </div>
+
+        <p class="text-sm text-on-surface-variant">
+          Se le va a generar una clave temporal nueva a <strong class="text-on-surface">{{ user.name }}</strong> ({{ user.email }}) y se la vamos a enviar por correo. Va a tener que cambiarla en su próximo ingreso.
+        </p>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            (click)="closeResetPasswordModal()"
+            [disabled]="resettingPassword()"
+            class="h-10 px-4 rounded-btn text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-60"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            (click)="confirmResetPassword()"
+            [disabled]="resettingPassword()"
+            class="h-10 px-5 flex items-center gap-2 bg-brand-teal text-white font-label-md text-label-md rounded-btn hover:shadow-md transition-all disabled:opacity-60"
+          >
+            @if (resettingPassword()) {
+              <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+            }
+            Resetear contraseña
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

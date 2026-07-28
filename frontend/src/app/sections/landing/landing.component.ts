@@ -1,11 +1,14 @@
 import { Component, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, catchError, of, startWith } from 'rxjs';
-import { Plan, PlansService } from '../../core/services/plans.service';
+import { Plan, PlansService, PromotionType } from '../../core/services/plans.service';
+import { LeadsService } from '../../core/services/leads.service';
 import { ScrollRevealDirective } from '../../shared/directives/scroll-reveal.directive';
 import { RouterLink } from '@angular/router';
 import { PlanCardComponent } from '../../shared/components/plan-card/plan-card.component';
 import { PlanModalComponent } from '../../shared/components/plan-modal/plan-modal.component';
+
+const GENERAL_INQUIRY_PLAN_ID = 'general';
 
 @Component({
   selector: 'app-landing',
@@ -16,11 +19,15 @@ import { PlanModalComponent } from '../../shared/components/plan-modal/plan-moda
 })
 export class LandingComponent {
   private plansService = inject(PlansService);
+  private leadsService = inject(LeadsService);
 
   protected formName = signal('');
   protected formEmail = signal('');
   protected formPhone = signal('');
   protected selectedPlan = signal<Plan | null>(null);
+
+  protected formSubmitting = signal(false);
+  protected formStatus = signal<'idle' | 'success' | 'error'>('idle');
 
   protected readonly plansState = toSignal(
     this.plansService.getPlans({ active: true, limit: 3 }).pipe(
@@ -32,7 +39,7 @@ export class LandingComponent {
   );
 
   protected readonly stats = [
-    { value: '15+', label: 'Años de Experiencia' },
+    { value: '11+', label: 'Años de Experiencia' },
     { value: '50k', label: 'Viajeros Felices' },
     { value: '120', label: 'Destinos' },
     { value: '4.9', label: 'Calificación Promedio' },
@@ -87,9 +94,43 @@ export class LandingComponent {
     return `${days} días / ${nights} noches`;
   }
 
+  protected promoRibbon(plan: Plan): { label: string; bg: string; color: string } | null {
+    if (!plan.promotion?.active) return null;
+    const map: Record<PromotionType, { label: string; bg: string; color: string }> = {
+      dos_x_uno:       { label: '2 × 1',   bg: '#f59e0b', color: '#1a1200' },
+      precio_especial: { label: 'OFERTA',   bg: '#059669', color: '#ffffff' },
+      cupos_limitados: { label: 'LIMITADO', bg: '#dc2626', color: '#ffffff' },
+      texto_libre:     { label: 'PROMO',    bg: '#c46b48', color: '#ffffff' },
+    };
+    return map[plan.promotion.type as PromotionType] ?? { label: 'PROMO', bg: '#c46b48', color: '#ffffff' };
+  }
+
   submitForm(event: Event) {
     event.preventDefault();
-    // TODO Fase 5: conectar a POST /api/leads
-    console.log('Lead:', { name: this.formName(), email: this.formEmail(), phone: this.formPhone() });
+    if (!this.formName().trim() || !this.formEmail().trim() || this.formSubmitting()) return;
+
+    this.formSubmitting.set(true);
+    this.formStatus.set('idle');
+    this.leadsService
+      .createLead({
+        name: this.formName().trim(),
+        email: this.formEmail().trim(),
+        phone: this.formPhone().trim() || undefined,
+        interestedPlanId: GENERAL_INQUIRY_PLAN_ID,
+        source: 'web',
+      })
+      .subscribe({
+        next: () => {
+          this.formSubmitting.set(false);
+          this.formStatus.set('success');
+          this.formName.set('');
+          this.formEmail.set('');
+          this.formPhone.set('');
+        },
+        error: () => {
+          this.formSubmitting.set(false);
+          this.formStatus.set('error');
+        },
+      });
   }
 }

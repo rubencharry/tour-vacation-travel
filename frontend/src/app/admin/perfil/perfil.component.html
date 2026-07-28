@@ -1,0 +1,67 @@
+<div class="max-w-2xl mx-auto space-y-4">
+
+  <div>
+    <nav class="flex items-center gap-1 text-caption text-on-surface-variant mb-1">
+      <span>Admin</span>
+      <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+      <span class="text-primary font-semibold">Mi perfil</span>
+    </nav>
+    <h2 class="font-headline-md text-headline-md text-primary-container">Mi perfil</h2>
+  </div>
+
+  @if (loading()) {
+    <div class="flex items-center justify-center py-20 text-on-surface-variant">
+      <span class="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+      Cargando tu perfil...
+    </div>
+  } @else if (error()) {
+    <div class="px-4 py-3 bg-error-container text-on-error-container rounded-btn font-body-md text-body-md">
+      {{ error() }}
+    </div>
+  } @else if (profile(); as user) {
+    <div class="bg-surface-container-lowest rounded-card shadow-coastal border border-surface-variant p-6 space-y-6">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container text-lg font-bold shrink-0">
+          {{ initials() }}
+        </div>
+        <div>
+          <p class="font-headline-md text-title-lg text-on-surface leading-tight">{{ user.name }}</p>
+          <p class="text-caption text-on-surface-variant">{{ user.email }} · {{ roleLabels[user.role] }}</p>
+        </div>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submitForm()" class="space-y-4">
+        <div class="space-y-1">
+          <label class="text-label-md font-label-md text-primary block">Nombre completo</label>
+          <input
+            type="text"
+            formControlName="name"
+            class="w-full h-10 bg-surface-container border border-surface-variant rounded-btn px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/50 focus:border-brand-teal"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-label-md font-label-md text-primary block">Teléfono</label>
+          <input
+            type="text"
+            formControlName="phone"
+            class="w-full h-10 bg-surface-container border border-surface-variant rounded-btn px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/50 focus:border-brand-teal"
+          />
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button
+            type="submit"
+            [disabled]="saving()"
+            class="h-10 px-5 flex items-center gap-2 bg-brand-teal text-white font-label-md text-label-md rounded-btn hover:shadow-md transition-all disabled:opacity-60"
+          >
+            @if (saving()) {
+              <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+            }
+            Guardar cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+</div>

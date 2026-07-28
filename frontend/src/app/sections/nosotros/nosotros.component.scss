@@ -1,1 +1,53 @@
-// Styles handled globally via Tailwind (styles.scss)
+.team-marquee-wrap {
+  overflow: hidden;
+  width: 100%;
+  padding: 16px 0;
+  position: relative;
+
+  // Optional: subtle horizontal fade edges
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 60px;
+    z-index: 5;
+    pointer-events: none;
+  }
+  &::before {
+    left: 0;
+    background: linear-gradient(to right, var(--brand-cream, #fefdfb) 0%, transparent 100%);
+  }
+  &::after {
+    right: 0;
+    background: linear-gradient(to left, var(--brand-cream, #fefdfb) 0%, transparent 100%);
+  }
+
+  &:hover .team-track {
+    animation-play-state: paused;
+  }
+}
+
+.team-track {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+  animation: team-marquee 40s linear infinite;
+  will-change: transform;
+}
+
+.team-card {
+  width: 280px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+@keyframes team-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

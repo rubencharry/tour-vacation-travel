@@ -3,9 +3,10 @@ import { LeadsController } from './leads.controller';
 import { LeadsService } from './leads.service';
 import { LeadsRepository } from './leads.repository';
 import { MailModule } from '../mail/mail.module';
+import { PlansModule } from '../plans/plans.module';
 
 @Module({
-  imports: [MailModule],
+  imports: [MailModule, PlansModule],
   controllers: [LeadsController],
   providers: [LeadsService, LeadsRepository],
   exports: [LeadsService],

@@ -42,6 +42,22 @@ const tables = [
     ],
     KeySchema: [{ AttributeName: 'providerId', KeyType: 'HASH' }],
   },
+  {
+    TableName: 'Users',
+    BillingMode: 'PAY_PER_REQUEST',
+    AttributeDefinitions: [
+      { AttributeName: 'userId', AttributeType: 'S' },
+      { AttributeName: 'email', AttributeType: 'S' },
+    ],
+    KeySchema: [{ AttributeName: 'userId', KeyType: 'HASH' }],
+    GlobalSecondaryIndexes: [
+      {
+        IndexName: 'email-index',
+        KeySchema: [{ AttributeName: 'email', KeyType: 'HASH' }],
+        Projection: { ProjectionType: 'ALL' },
+      },
+    ],
+  },
 ];
 
 for (const def of tables) {

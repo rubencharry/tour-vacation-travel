@@ -37,6 +37,9 @@ Thumbs.db
 # Claude Code
 .claude/
 
+# Serena (herramienta de análisis de código)
+.serena/
+
 # Tests / coverage
 coverage/
 .nyc_output/
@@ -47,6 +50,9 @@ backend/.dynamodb-data/
 
 # DynamoDB Local JAR y librerías (binarios descargados, no van al repo)
 dynamodblocal-bin/
+
+# Uploads locales (fallback de FileService cuando no hay S3/MinIO configurado)
+backend/uploads/
 
 # Misc
 *.tmp

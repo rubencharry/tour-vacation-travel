@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  DeleteCommand,
+  GetCommand,
   PutCommand,
   QueryCommand,
   ScanCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { DynamoDbService } from '../dynamodb/dynamodb.service';
-import { Lead } from './entities/lead.entity';
+import { Lead, LeadActivity, LeadStatus } from './entities/lead.entity';
 
 @Injectable()
 export class LeadsRepository {
@@ -40,9 +42,32 @@ export class LeadsRepository {
 
   async findAll(): Promise<Lead[]> {
     const result = await this.db.client.send(
-      new ScanCommand({ TableName: this.table }),
+      new ScanCommand({
+        TableName: this.table,
+        ProjectionExpression:
+          '#leadId, #email, #name, #phone, #interestedPlanId, #source, #message, #createdAt, #emailSent, #status',
+        ExpressionAttributeNames: {
+          '#leadId': 'leadId',
+          '#email': 'email',
+          '#name': 'name',
+          '#phone': 'phone',
+          '#interestedPlanId': 'interestedPlanId',
+          '#source': 'source',
+          '#message': 'message',
+          '#createdAt': 'createdAt',
+          '#emailSent': 'emailSent',
+          '#status': 'status',
+        },
+      }),
     );
     return (result.Items ?? []) as Lead[];
+  }
+
+  async findById(leadId: string): Promise<Lead | undefined> {
+    const result = await this.db.client.send(
+      new GetCommand({ TableName: this.table, Key: { leadId } }),
+    );
+    return result.Item as Lead | undefined;
   }
 
   async markEmailSent(leadId: string): Promise<void> {
@@ -53,6 +78,66 @@ export class LeadsRepository {
         UpdateExpression: 'SET emailSent = :val',
         ExpressionAttributeValues: { ':val': true },
       }),
+    );
+  }
+
+  async update(
+    leadId: string,
+    updates: Partial<Omit<Lead, 'leadId' | 'createdAt'>>,
+  ): Promise<Lead> {
+    const entries = Object.entries(updates);
+    const expression = entries.map((_, i) => `#k${i} = :v${i}`).join(', ');
+    const names = Object.fromEntries(entries.map(([k], i) => [`#k${i}`, k]));
+    const values = Object.fromEntries(entries.map(([, v], i) => [`:v${i}`, v]));
+
+    const result = await this.db.client.send(
+      new UpdateCommand({
+        TableName: this.table,
+        Key: { leadId },
+        UpdateExpression: `SET ${expression}`,
+        ExpressionAttributeNames: names,
+        ExpressionAttributeValues: values,
+        ReturnValues: 'ALL_NEW',
+      }),
+    );
+    return result.Attributes as Lead;
+  }
+
+  async addActivity(
+    leadId: string,
+    activity: LeadActivity,
+    newStatus?: LeadStatus,
+  ): Promise<Lead> {
+    const names: Record<string, string> = { '#activities': 'activities' };
+    const values: Record<string, unknown> = {
+      ':activity': [activity],
+      ':empty': [],
+    };
+    let expression =
+      'SET #activities = list_append(if_not_exists(#activities, :empty), :activity)';
+
+    if (newStatus) {
+      names['#status'] = 'status';
+      values[':status'] = newStatus;
+      expression += ', #status = :status';
+    }
+
+    const result = await this.db.client.send(
+      new UpdateCommand({
+        TableName: this.table,
+        Key: { leadId },
+        UpdateExpression: expression,
+        ExpressionAttributeNames: names,
+        ExpressionAttributeValues: values,
+        ReturnValues: 'ALL_NEW',
+      }),
+    );
+    return result.Attributes as Lead;
+  }
+
+  async delete(leadId: string): Promise<void> {
+    await this.db.client.send(
+      new DeleteCommand({ TableName: this.table, Key: { leadId } }),
     );
   }
 }
