@@ -21,7 +21,7 @@
 
       <p class="text-[10px] font-bold text-white/30 uppercase tracking-widest px-3 mb-2 mt-1">Principal</p>
 
-      @for (item of mainNavItems; track item.path) {
+      @for (item of mainNavItems(); track item.path) {
         <a
           [routerLink]="item.path"
           routerLinkActive="bg-brand-teal text-white shadow-sm"
@@ -35,7 +35,7 @@
 
       <p class="text-[10px] font-bold text-white/30 uppercase tracking-widest px-3 mb-2 mt-4">Gestión</p>
 
-      @for (item of settingsNavItems; track item.path) {
+      @for (item of settingsNavItems(); track item.path) {
         <a
           [routerLink]="item.path"
           routerLinkActive="bg-brand-teal text-white shadow-sm"
@@ -56,12 +56,12 @@
         </div>
         <div class="flex-1 min-w-0">
           <div class="font-semibold text-white text-sm truncate">{{ auth.currentUser().name }}</div>
-          <div class="text-[11px] text-white/40 truncate">Super Admin</div>
+          <div class="text-[11px] text-white/40 truncate">{{ roleLabel }}</div>
         </div>
         <button
           (click)="auth.signOut()"
           title="Cerrar sesión"
-          class="p-1.5 text-white/40 hover:text-white hover:bg-white/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+          class="p-1.5 text-white/40 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
         >
           <span class="material-symbols-outlined text-[18px]">logout</span>
         </button>
@@ -80,12 +80,68 @@
         <p class="text-xs text-on-surface-variant">{{ today }}</p>
       </div>
       <div class="flex items-center gap-2">
-        <button class="relative p-2 text-on-surface-variant hover:bg-surface-container hover:text-primary-container rounded-xl transition-colors">
-          <span class="material-symbols-outlined text-[20px]">notifications</span>
-          <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-teal rounded-full"></span>
-        </button>
-        <div class="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center ml-1">
-          <span class="font-bold text-white text-sm">{{ initials }}</span>
+        <div class="relative">
+          <button
+            (click)="toggleNotifications()"
+            class="relative p-2 text-on-surface-variant hover:bg-surface-container hover:text-primary-container rounded-xl transition-colors"
+          >
+            <span class="material-symbols-outlined text-[20px]">notifications</span>
+            @if (notifications.unseenCount() > 0) {
+              <span class="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center bg-brand-teal text-white text-[10px] font-bold rounded-full">
+                {{ notifications.unseenCount() > 9 ? '9+' : notifications.unseenCount() }}
+              </span>
+            }
+          </button>
+
+          @if (showNotifications()) {
+            <div class="fixed inset-0 z-30" (click)="closeNotifications()"></div>
+            <div
+              class="absolute right-0 top-full mt-2 w-80 bg-surface-container-lowest rounded-card shadow-xl border border-surface-variant z-40 overflow-hidden"
+              (click)="$event.stopPropagation()"
+            >
+              <div class="flex items-center justify-between px-4 py-3 border-b border-surface-variant">
+                <p class="font-semibold text-sm text-on-surface">Nuevos leads</p>
+                @if (notifications.unseenCount() > 0) {
+                  <button
+                    (click)="markNotificationsSeen()"
+                    class="text-caption text-primary hover:text-brand-teal transition-colors"
+                  >
+                    Marcar como vistos
+                  </button>
+                }
+              </div>
+
+              @if (notifications.recentLeads().length === 0) {
+                <div class="px-4 py-8 text-center text-on-surface-variant text-sm">
+                  No hay leads nuevos.
+                </div>
+              } @else {
+                <div class="max-h-80 overflow-y-auto divide-y divide-surface-variant">
+                  @for (lead of notifications.recentLeads(); track lead.leadId) {
+                    <a
+                      [routerLink]="['/admin/leads']"
+                      (click)="closeNotifications()"
+                      class="flex items-start gap-3 px-4 py-3 hover:bg-surface-container/50 transition-colors"
+                    >
+                      <span class="material-symbols-outlined text-brand-teal text-[18px] mt-0.5">person_add</span>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-on-surface truncate">{{ lead.name }}</p>
+                        <p class="text-caption text-on-surface-variant">{{ timeAgo(lead.createdAt) }}</p>
+                      </div>
+                    </a>
+                  }
+                </div>
+              }
+
+              <a
+                [routerLink]="['/admin/leads']"
+                (click)="closeNotifications()"
+                class="block text-center px-4 py-2.5 text-caption text-primary hover:text-brand-teal border-t border-surface-variant transition-colors"
+              >
+                Ver todos los leads →
+              </a>
+            </div>
+          }
         </div>
       </div>
     </header>

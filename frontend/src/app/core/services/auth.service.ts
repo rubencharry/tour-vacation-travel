@@ -11,29 +11,47 @@ import { environment } from '../../../environments/environment';
 const TOKEN_KEY = 'tvt_admin_token';
 const DEV_TOKEN_PREFIX = 'dev.';
 
-const DEV_USERS: Record<string, { name: string; password: string }> = {
-  'admin@tourvacation.com': { name: 'Super Admin', password: 'Admin123!' },
+export type UserRole = 'admin' | 'gerente' | 'asesor';
+
+const DEV_USERS: Record<
+  string,
+  { name: string; password: string; role: UserRole }
+> = {
+  'admin@tourvacation.com': {
+    name: 'Super Admin',
+    password: 'Admin123!',
+    role: 'admin',
+  },
 };
+
+export interface PendingNewPasswordChallenge {
+  cognitoUser: CognitoUser;
+  email: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly router = inject(Router);
   readonly isAuthenticated = signal(this.hasValidToken());
+  readonly pendingNewPasswordChallenge =
+    signal<PendingNewPasswordChallenge | null>(null);
 
   readonly currentUser = computed(() => {
     const token = this.getToken();
-    if (!token) return { name: 'Admin', email: '' };
+    if (!token) return { name: 'Admin', email: '', role: undefined as UserRole | undefined };
     try {
       const raw = token.startsWith(DEV_TOKEN_PREFIX)
         ? token.slice(DEV_TOKEN_PREFIX.length)
         : token.split('.')[1];
       const payload = JSON.parse(atob(raw));
+      const groups = (payload['cognito:groups'] ?? []) as string[];
       return {
         name: (payload['name'] ?? payload['cognito:username'] ?? payload['email']?.split('@')[0] ?? 'Admin') as string,
         email: (payload['email'] ?? '') as string,
+        role: (payload['role'] ?? groups[0]) as UserRole | undefined,
       };
     } catch {
-      return { name: 'Admin', email: '' };
+      return { name: 'Admin', email: '', role: undefined as UserRole | undefined };
     }
   });
 
@@ -49,7 +67,9 @@ export class AuthService {
       if (!user || user.password !== password) {
         return Promise.reject(new Error('Credenciales inválidas.'));
       }
-      const payload = btoa(JSON.stringify({ email, name: user.name }));
+      const payload = btoa(
+        JSON.stringify({ email, name: user.name, role: user.role }),
+      );
       localStorage.setItem(TOKEN_KEY, `${DEV_TOKEN_PREFIX}${payload}`);
       this.isAuthenticated.set(true);
       return Promise.resolve();
@@ -69,10 +89,40 @@ export class AuthService {
           reject(new Error(err.message ?? 'Error de autenticación'));
         },
         newPasswordRequired: () => {
-          reject(new Error('Se requiere cambio de contraseña. Contactá al administrador.'));
+          this.pendingNewPasswordChallenge.set({ cognitoUser, email });
+          resolve();
         },
       });
     });
+  }
+
+  completeNewPassword(newPassword: string): Promise<void> {
+    const challenge = this.pendingNewPasswordChallenge();
+    if (!challenge) {
+      return Promise.reject(new Error('No hay un cambio de contraseña pendiente.'));
+    }
+
+    return new Promise((resolve, reject) => {
+      challenge.cognitoUser.completeNewPasswordChallenge(
+        newPassword,
+        {},
+        {
+          onSuccess: (session: CognitoUserSession) => {
+            localStorage.setItem(TOKEN_KEY, session.getIdToken().getJwtToken());
+            this.isAuthenticated.set(true);
+            this.pendingNewPasswordChallenge.set(null);
+            resolve();
+          },
+          onFailure: (err: Error) => {
+            reject(new Error(err.message ?? 'No se pudo cambiar la contraseña'));
+          },
+        },
+      );
+    });
+  }
+
+  cancelNewPasswordChallenge(): void {
+    this.pendingNewPasswordChallenge.set(null);
   }
 
   signOut(): void {

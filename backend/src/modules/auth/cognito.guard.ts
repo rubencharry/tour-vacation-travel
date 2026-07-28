@@ -9,6 +9,7 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { CognitoJwtVerifier } from 'aws-jwt-verify';
 import { IS_PUBLIC_KEY } from './public.decorator';
+import { AuthenticatedUser, UserRole } from './authenticated-user';
 
 @Injectable()
 export class CognitoGuard implements CanActivate {
@@ -33,16 +34,21 @@ export class CognitoGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context
       .switchToHttp()
-      .getRequest<Request & { user?: { email: string } }>();
+      .getRequest<Request & { user?: AuthenticatedUser }>();
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    // Bypass local de desarrollo: igual setea request.user para poder probar
-    // la atribución de actividades (@CurrentUser()) sin Cognito real.
+    // Bypass local de desarrollo: igual setea request.user (con rol admin)
+    // para poder probar la atribución de actividades y permisos por rol
+    // (@CurrentUser(), @Roles()) sin Cognito real.
     if (this.config.get<string>('BYPASS_AUTH') === 'true') {
-      request.user = { email: 'dev-local@tourvacation.com' };
+      request.user = {
+        email: 'dev-local@tourvacation.com',
+        role: 'admin',
+        sub: 'dev-local-sub',
+      };
       return true;
     }
 
@@ -50,10 +56,13 @@ export class CognitoGuard implements CanActivate {
     if (token && this.verifier) {
       try {
         const payload = await this.verifier.verify(token);
+        const groups = (payload['cognito:groups'] as string[]) ?? [];
         request.user = {
           email:
             (payload.email as string) ??
             (payload['cognito:username'] as string),
+          role: groups[0] as UserRole | undefined,
+          sub: payload.sub,
         };
       } catch {
         if (!isPublic)

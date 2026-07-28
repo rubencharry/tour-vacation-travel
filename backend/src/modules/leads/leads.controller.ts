@@ -15,6 +15,7 @@ import { CreateLeadActivityDto } from './dto/create-lead-activity.dto';
 import { SendCampaignDto } from './dto/send-campaign.dto';
 import { Public } from '../auth/public.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
+import type { AuthenticatedUser } from '../auth/authenticated-user';
 
 @Controller('leads')
 export class LeadsController {
@@ -22,8 +23,8 @@ export class LeadsController {
 
   @Public()
   @Post()
-  create(@Body() dto: CreateLeadDto, @CurrentUser() actorEmail?: string) {
-    return this.service.create(dto, actorEmail);
+  create(@Body() dto: CreateLeadDto, @CurrentUser() actor?: AuthenticatedUser) {
+    return this.service.create(dto, actor?.email);
   }
 
   @Get()
@@ -45,17 +46,17 @@ export class LeadsController {
   addActivity(
     @Param('id') id: string,
     @Body() dto: CreateLeadActivityDto,
-    @CurrentUser() actorEmail?: string,
+    @CurrentUser() actor?: AuthenticatedUser,
   ) {
-    return this.service.addActivity(id, dto, actorEmail);
+    return this.service.addActivity(id, dto, actor?.email);
   }
 
   @Post('send-campaign')
   sendCampaign(
     @Body() dto: SendCampaignDto,
-    @CurrentUser() actorEmail?: string,
+    @CurrentUser() actor?: AuthenticatedUser,
   ) {
-    return this.service.sendCampaign(dto, actorEmail);
+    return this.service.sendCampaign(dto, actor?.email);
   }
 
   @Delete(':id')
