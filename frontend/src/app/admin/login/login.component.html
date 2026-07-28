@@ -61,99 +61,172 @@
         <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">flight_takeoff</span>
       </div>
 
-      <!-- Encabezado -->
-      <div class="text-center mb-10">
-        <h1 class="font-headline-lg text-headline-lg text-primary mb-2">Bienvenido</h1>
-        <p class="font-body-md text-body-md text-on-surface-variant">Ingresa al panel de administración</p>
-      </div>
-
-      <!-- Error -->
-      @if (error()) {
-        <div class="mb-6 px-4 py-3 bg-error-container text-on-error-container rounded-btn font-body-md text-body-md">
-          {{ error() }}
+      @if (!auth.pendingNewPasswordChallenge()) {
+        <!-- Encabezado -->
+        <div class="text-center mb-10">
+          <h1 class="font-headline-lg text-headline-lg text-primary mb-2">Bienvenido</h1>
+          <p class="font-body-md text-body-md text-on-surface-variant">Ingresa al panel de administración</p>
         </div>
+
+        <!-- Error -->
+        @if (error()) {
+          <div class="mb-6 px-4 py-3 bg-error-container text-on-error-container rounded-btn font-body-md text-body-md">
+            {{ error() }}
+          </div>
+        }
+
+        <!-- Formulario -->
+        <form class="space-y-6" (ngSubmit)="onSubmit($event)">
+
+          <!-- Email -->
+          <div class="space-y-2">
+            <label class="font-label-md text-label-md text-primary block" for="email">
+              Correo electrónico
+            </label>
+            <div class="relative border border-outline-variant rounded-btn bg-surface-container-lowest focus-within:border-brand-teal focus-within:ring-1 focus-within:ring-brand-teal transition-shadow duration-200">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="material-symbols-outlined text-outline text-xl">mail</span>
+              </div>
+              <input
+                id="email"
+                type="email"
+                name="email"
+                required
+                placeholder="admin@tourvacation.com"
+                [value]="email()"
+                (input)="email.set($any($event.target).value)"
+                class="block w-full pl-10 pr-3 py-3 bg-transparent text-on-surface font-body-md text-body-md rounded-btn border-none focus:outline-none focus:ring-0"
+              >
+            </div>
+          </div>
+
+          <!-- Contraseña -->
+          <div class="space-y-2">
+            <label class="font-label-md text-label-md text-primary block" for="password">
+              Contraseña
+            </label>
+            <div class="relative border border-outline-variant rounded-btn bg-surface-container-lowest focus-within:border-brand-teal focus-within:ring-1 focus-within:ring-brand-teal transition-shadow duration-200">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="material-symbols-outlined text-outline text-xl">lock</span>
+              </div>
+              <input
+                id="password"
+                [type]="showPassword() ? 'text' : 'password'"
+                name="password"
+                required
+                placeholder="••••••••"
+                [value]="password()"
+                (input)="password.set($any($event.target).value)"
+                class="block w-full pl-10 pr-10 py-3 bg-transparent text-on-surface font-body-md text-body-md rounded-btn border-none focus:outline-none focus:ring-0"
+              >
+              <button
+                type="button"
+                (click)="togglePassword()"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-primary transition-colors"
+              >
+                <span class="material-symbols-outlined text-xl">
+                  {{ showPassword() ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Opciones -->
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="h-4 w-4 rounded border-outline-variant text-brand-teal focus:ring-brand-teal">
+              <span class="font-label-md text-label-md text-on-surface-variant">Recordarme</span>
+            </label>
+            <a href="#" class="font-label-md text-label-md text-primary hover:text-brand-teal transition-colors">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+
+          <!-- Botón -->
+          <button
+            type="submit"
+            [disabled]="loading()"
+            class="w-full flex justify-center py-3 px-4 rounded-btn shadow-sm font-label-md text-body-lg text-primary bg-brand-teal hover:bg-brand-teal-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-teal transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+          >
+            @if (loading()) {
+              <span class="material-symbols-outlined animate-spin text-xl mr-2">progress_activity</span>
+            }
+            Ingresar
+          </button>
+
+        </form>
+      } @else {
+        <!-- Cambio de contraseña obligatorio (primer ingreso) -->
+        <div class="text-center mb-10">
+          <h1 class="font-headline-lg text-headline-lg text-primary mb-2">Definí tu contraseña</h1>
+          <p class="font-body-md text-body-md text-on-surface-variant">
+            Es tu primer ingreso — elegí una contraseña nueva para continuar.
+          </p>
+        </div>
+
+        @if (newPasswordError()) {
+          <div class="mb-6 px-4 py-3 bg-error-container text-on-error-container rounded-btn font-body-md text-body-md">
+            {{ newPasswordError() }}
+          </div>
+        }
+
+        <form class="space-y-6" (ngSubmit)="onSubmitNewPassword($event)">
+          <div class="space-y-2">
+            <label class="font-label-md text-label-md text-primary block" for="newPassword">
+              Nueva contraseña
+            </label>
+            <div class="relative border border-outline-variant rounded-btn bg-surface-container-lowest focus-within:border-brand-teal focus-within:ring-1 focus-within:ring-brand-teal transition-shadow duration-200">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="material-symbols-outlined text-outline text-xl">lock</span>
+              </div>
+              <input
+                id="newPassword"
+                type="password"
+                name="newPassword"
+                required
+                minlength="8"
+                placeholder="••••••••"
+                [value]="newPassword()"
+                (input)="newPassword.set($any($event.target).value)"
+                class="block w-full pl-10 pr-3 py-3 bg-transparent text-on-surface font-body-md text-body-md rounded-btn border-none focus:outline-none focus:ring-0"
+              >
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="font-label-md text-label-md text-primary block" for="confirmPassword">
+              Confirmá la contraseña
+            </label>
+            <div class="relative border border-outline-variant rounded-btn bg-surface-container-lowest focus-within:border-brand-teal focus-within:ring-1 focus-within:ring-brand-teal transition-shadow duration-200">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="material-symbols-outlined text-outline text-xl">lock</span>
+              </div>
+              <input
+                id="confirmPassword"
+                type="password"
+                name="confirmPassword"
+                required
+                minlength="8"
+                placeholder="••••••••"
+                [value]="confirmPassword()"
+                (input)="confirmPassword.set($any($event.target).value)"
+                class="block w-full pl-10 pr-3 py-3 bg-transparent text-on-surface font-body-md text-body-md rounded-btn border-none focus:outline-none focus:ring-0"
+              >
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="newPasswordLoading()"
+            class="w-full flex justify-center py-3 px-4 rounded-btn shadow-sm font-label-md text-body-lg text-primary bg-brand-teal hover:bg-brand-teal-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-teal transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+          >
+            @if (newPasswordLoading()) {
+              <span class="material-symbols-outlined animate-spin text-xl mr-2">progress_activity</span>
+            }
+            Confirmar y continuar
+          </button>
+        </form>
       }
-
-      <!-- Formulario -->
-      <form class="space-y-6" (ngSubmit)="onSubmit($event)">
-
-        <!-- Email -->
-        <div class="space-y-2">
-          <label class="font-label-md text-label-md text-primary block" for="email">
-            Correo electrónico
-          </label>
-          <div class="relative border border-outline-variant rounded-btn bg-surface-container-lowest focus-within:border-brand-teal focus-within:ring-1 focus-within:ring-brand-teal transition-shadow duration-200">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span class="material-symbols-outlined text-outline text-xl">mail</span>
-            </div>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              required
-              placeholder="admin@tourvacation.com"
-              [value]="email()"
-              (input)="email.set($any($event.target).value)"
-              class="block w-full pl-10 pr-3 py-3 bg-transparent text-on-surface font-body-md text-body-md rounded-btn border-none focus:outline-none focus:ring-0"
-            >
-          </div>
-        </div>
-
-        <!-- Contraseña -->
-        <div class="space-y-2">
-          <label class="font-label-md text-label-md text-primary block" for="password">
-            Contraseña
-          </label>
-          <div class="relative border border-outline-variant rounded-btn bg-surface-container-lowest focus-within:border-brand-teal focus-within:ring-1 focus-within:ring-brand-teal transition-shadow duration-200">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span class="material-symbols-outlined text-outline text-xl">lock</span>
-            </div>
-            <input
-              id="password"
-              [type]="showPassword() ? 'text' : 'password'"
-              name="password"
-              required
-              placeholder="••••••••"
-              [value]="password()"
-              (input)="password.set($any($event.target).value)"
-              class="block w-full pl-10 pr-10 py-3 bg-transparent text-on-surface font-body-md text-body-md rounded-btn border-none focus:outline-none focus:ring-0"
-            >
-            <button
-              type="button"
-              (click)="togglePassword()"
-              class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-primary transition-colors"
-            >
-              <span class="material-symbols-outlined text-xl">
-                {{ showPassword() ? 'visibility_off' : 'visibility' }}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Opciones -->
-        <div class="flex items-center justify-between">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" class="h-4 w-4 rounded border-outline-variant text-brand-teal focus:ring-brand-teal">
-            <span class="font-label-md text-label-md text-on-surface-variant">Recordarme</span>
-          </label>
-          <a href="#" class="font-label-md text-label-md text-primary hover:text-brand-teal transition-colors">
-            ¿Olvidaste tu contraseña?
-          </a>
-        </div>
-
-        <!-- Botón -->
-        <button
-          type="submit"
-          [disabled]="loading()"
-          class="w-full flex justify-center py-3 px-4 rounded-btn shadow-sm font-label-md text-body-lg text-primary bg-brand-teal hover:bg-brand-teal-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-teal transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
-        >
-          @if (loading()) {
-            <span class="material-symbols-outlined animate-spin text-xl mr-2">progress_activity</span>
-          }
-          Ingresar
-        </button>
-
-      </form>
     </div>
 
     <!-- Footer -->

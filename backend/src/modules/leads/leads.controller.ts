@@ -16,6 +16,7 @@ import { ContactEmailDto } from './dto/contact-email.dto';
 import { BulkContactEmailDto } from './dto/bulk-contact-email.dto';
 import { Public } from '../auth/public.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
+import type { AuthenticatedUser } from '../auth/authenticated-user';
 
 @Controller('leads')
 export class LeadsController {
@@ -23,8 +24,8 @@ export class LeadsController {
 
   @Public()
   @Post()
-  create(@Body() dto: CreateLeadDto, @CurrentUser() actorEmail?: string) {
-    return this.service.create(dto, actorEmail);
+  create(@Body() dto: CreateLeadDto, @CurrentUser() actor?: AuthenticatedUser) {
+    return this.service.create(dto, actor?.email);
   }
 
   @Get()
@@ -46,26 +47,26 @@ export class LeadsController {
   addActivity(
     @Param('id') id: string,
     @Body() dto: CreateLeadActivityDto,
-    @CurrentUser() actorEmail?: string,
+    @CurrentUser() actor?: AuthenticatedUser,
   ) {
-    return this.service.addActivity(id, dto, actorEmail);
+    return this.service.addActivity(id, dto, actor?.email);
   }
 
   @Post(':id/contact-email')
   sendContactEmail(
     @Param('id') id: string,
     @Body() dto: ContactEmailDto,
-    @CurrentUser() actorEmail?: string,
+    @CurrentUser() actor?: AuthenticatedUser,
   ) {
-    return this.service.sendContactEmail(id, dto, actorEmail);
+    return this.service.sendContactEmail(id, dto, actor?.email);
   }
 
   @Post('bulk-contact-email')
   sendBulkContactEmail(
     @Body() dto: BulkContactEmailDto,
-    @CurrentUser() actorEmail?: string,
+    @CurrentUser() actor?: AuthenticatedUser,
   ) {
-    return this.service.sendBulkContactEmail(dto, actorEmail);
+    return this.service.sendBulkContactEmail(dto, actor?.email);
   }
 
   @Delete(':id')

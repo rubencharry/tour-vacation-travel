@@ -7,6 +7,8 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigatewayv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import * as apigatewayv2Integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import * as path from 'path';
 
 export class TourVacationStack extends cdk.Stack {
@@ -42,6 +44,54 @@ export class TourVacationStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
+    const usersTable = new dynamodb.Table(this, 'UsersTable', {
+      tableName: 'Users',
+      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    usersTable.addGlobalSecondaryIndex({
+      indexName: 'email-index',
+      partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    // ── Cognito (usuarios del panel admin) ───────────────────────────────────
+
+    const userPool = new cognito.UserPool(this, 'AdminUserPool', {
+      selfSignUpEnabled: false,
+      signInAliases: { email: true, username: false },
+      autoVerify: { email: true },
+      accountRecovery: cognito.AccountRecovery.NONE,
+      passwordPolicy: {
+        minLength: 8,
+        requireLowercase: true,
+        requireUppercase: true,
+        requireDigits: true,
+        requireSymbols: false,
+      },
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    const userPoolClient = new cognito.UserPoolClient(
+      this,
+      'AdminUserPoolClient',
+      {
+        userPool,
+        authFlows: { userPassword: true },
+        generateSecret: false,
+      },
+    );
+
+    const roleGroups = ['admin', 'gerente', 'asesor'];
+    for (const roleName of roleGroups) {
+      new cognito.CfnUserPoolGroup(this, `${roleName}Group`, {
+        userPoolId: userPool.userPoolId,
+        groupName: roleName,
+      });
+    }
+
     // ── Media bucket (imágenes de planes) ────────────────────────────────────
 
     const mediaBucket = new s3.Bucket(this, 'MediaBucket', {
@@ -64,14 +114,34 @@ export class TourVacationStack extends cdk.Stack {
         DDB_TABLE_PLANS: plansTable.tableName,
         DDB_TABLE_LEADS: leadsTable.tableName,
         DDB_TABLE_PROVIDERS: providersTable.tableName,
+        DDB_TABLE_USERS: usersTable.tableName,
         MEDIA_BUCKET_NAME: mediaBucket.bucketName,
+        COGNITO_USER_POOL_ID: userPool.userPoolId,
+        COGNITO_CLIENT_ID: userPoolClient.userPoolClientId,
       },
     });
 
     plansTable.grantReadWriteData(backendLambda);
     leadsTable.grantReadWriteData(backendLambda);
     providersTable.grantReadWriteData(backendLambda);
+    usersTable.grantReadWriteData(backendLambda);
     mediaBucket.grantReadWrite(backendLambda);
+
+    backendLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: [
+          'cognito-idp:AdminCreateUser',
+          'cognito-idp:AdminSetUserPassword',
+          'cognito-idp:AdminAddUserToGroup',
+          'cognito-idp:AdminRemoveUserFromGroup',
+          'cognito-idp:AdminUpdateUserAttributes',
+          'cognito-idp:AdminGetUser',
+          'cognito-idp:AdminDisableUser',
+          'cognito-idp:AdminEnableUser',
+        ],
+        resources: [userPool.userPoolArn],
+      }),
+    );
 
     // ── API Gateway HTTP API ──────────────────────────────────────────────────
 
@@ -141,6 +211,11 @@ export class TourVacationStack extends cdk.Stack {
       defaultRootObject: 'index.html',
     });
 
+    backendLambda.addEnvironment(
+      'FRONTEND_URL',
+      `https://${distribution.distributionDomainName}`,
+    );
+
     // ── Outputs ───────────────────────────────────────────────────────────────
 
     new cdk.CfnOutput(this, 'CloudFrontUrl', {
@@ -166,6 +241,16 @@ export class TourVacationStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'MediaBucketName', {
       value: mediaBucket.bucketName,
       description: 'Nombre del bucket S3 para imágenes de planes',
+    });
+
+    new cdk.CfnOutput(this, 'UserPoolId', {
+      value: userPool.userPoolId,
+      description: 'ID del User Pool de Cognito (usuarios del panel admin)',
+    });
+
+    new cdk.CfnOutput(this, 'UserPoolClientId', {
+      value: userPoolClient.userPoolClientId,
+      description: 'ID del App Client de Cognito',
     });
   }
 }

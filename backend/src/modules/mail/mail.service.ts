@@ -25,7 +25,10 @@ export class MailService {
   private readonly isDev: boolean;
 
   constructor(config: ConfigService) {
-    this.isDev = config.get('NODE_ENV') !== 'production';
+    // MAIL_FORCE_SEND permite mandar por SES real en local (dev) para probar
+    // flujos de email de punta a punta sin promover NODE_ENV a production.
+    const forceSend = config.get<string>('MAIL_FORCE_SEND') === 'true';
+    this.isDev = config.get('NODE_ENV') !== 'production' && !forceSend;
     this.fromAddress = config.get<string>('SES_FROM_ADDRESS', '');
     if (!this.isDev && !this.fromAddress) {
       this.logger.warn(
