@@ -7,6 +7,8 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigatewayv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import * as apigatewayv2Integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as path from 'path';
 
 export class TourVacationStack extends cdk.Stack {
@@ -65,6 +67,8 @@ export class TourVacationStack extends cdk.Stack {
         DDB_TABLE_LEADS: leadsTable.tableName,
         DDB_TABLE_PROVIDERS: providersTable.tableName,
         MEDIA_BUCKET_NAME: mediaBucket.bucketName,
+        SES_FROM_ADDRESS: process.env.SES_FROM_ADDRESS ?? '',
+        APP_URL: 'https://tourvacationtravel.com',
       },
     });
 
@@ -72,6 +76,13 @@ export class TourVacationStack extends cdk.Stack {
     leadsTable.grantReadWriteData(backendLambda);
     providersTable.grantReadWriteData(backendLambda);
     mediaBucket.grantReadWrite(backendLambda);
+
+    backendLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+        resources: ['*'],
+      }),
+    );
 
     // ── API Gateway HTTP API ──────────────────────────────────────────────────
 
@@ -106,7 +117,15 @@ export class TourVacationStack extends cdk.Stack {
 
     const apiOriginHostname = `${api.apiId}.execute-api.${this.region}.amazonaws.com`;
 
+    const certificate = acm.Certificate.fromCertificateArn(
+      this,
+      'CustomDomainCert',
+      'arn:aws:acm:us-east-1:507744946224:certificate/a23df631-6eb6-4228-aa73-4ce933c75b96',
+    );
+
     const distribution = new cloudfront.Distribution(this, 'Distribution', {
+      domainNames: ['tourvacationtravel.com', 'www.tourvacationtravel.com'],
+      certificate,
       defaultBehavior: {
         origin: origins.S3BucketOrigin.withOriginAccessControl(frontendBucket, {
           originAccessControl: oac,

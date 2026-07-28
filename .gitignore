@@ -37,6 +37,9 @@ Thumbs.db
 # Claude Code
 .claude/
 
+# Serena (herramienta de análisis de código)
+.serena/
+
 # Tests / coverage
 coverage/
 .nyc_output/

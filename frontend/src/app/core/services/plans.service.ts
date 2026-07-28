@@ -4,6 +4,15 @@ import { Observable } from 'rxjs';
 
 export type PlanType = 'internacional' | 'nacional';
 
+export type PromotionType = 'dos_x_uno' | 'precio_especial' | 'cupos_limitados' | 'texto_libre';
+
+export interface Promotion {
+  type: PromotionType;
+  label: string;
+  expiresAt?: string;
+  active: boolean;
+}
+
 export interface Plan {
   planId: string;
   title: string;
@@ -21,6 +30,7 @@ export interface Plan {
   imageUrls: string[];
   active: boolean;
   displayOrder: number;
+  promotion?: Promotion;
   createdAt: string;
   updatedAt: string;
 }
@@ -68,5 +78,13 @@ export class PlansService {
 
   deletePlan(id: string): Observable<void> {
     return this.http.delete<void>(`/api/plans/${id}`);
+  }
+
+  setPromotion(id: string, dto: { type: PromotionType; label: string; expiresAt?: string; active: boolean }): Observable<Plan> {
+    return this.http.put<Plan>(`/api/plans/${id}/promotion`, dto);
+  }
+
+  clearPromotion(id: string): Observable<Plan> {
+    return this.http.delete<Plan>(`/api/plans/${id}/promotion`);
   }
 }

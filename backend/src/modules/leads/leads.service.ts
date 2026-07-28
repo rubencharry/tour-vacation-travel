@@ -4,16 +4,18 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { LeadsRepository } from './leads.repository';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
 import { CreateLeadActivityDto } from './dto/create-lead-activity.dto';
-import { ContactEmailDto } from './dto/contact-email.dto';
-import { BulkContactEmailDto } from './dto/bulk-contact-email.dto';
+import { SendCampaignDto } from './dto/send-campaign.dto';
 import { Lead, LeadActivity, LeadStatus } from './entities/lead.entity';
 import { MailService, BulkMailResult } from '../mail/mail.service';
 import { leadConfirmationTemplate } from '../mail/templates/lead-confirmation.template';
-import { outreachTemplate } from '../mail/templates/outreach.template';
+import { planCampaignTemplate } from '../mail/templates/plan-campaign.template';
+import { PlansRepository } from '../plans/plans.repository';
+import { PlansService } from '../plans/plans.service';
 
 const IDEMPOTENCY_WINDOW_MS = 60 * 60 * 1000; // 1 hora
 const BULK_CONTACT_BATCH_SIZE = 10;
@@ -23,10 +25,17 @@ const BULK_CONTACT_BATCH_DELAY_MS = 800;
 export class LeadsService {
   private readonly logger = new Logger(LeadsService.name);
 
+  private readonly siteUrl: string;
+
   constructor(
     private readonly repo: LeadsRepository,
     private readonly mail: MailService,
-  ) {}
+    private readonly plansRepo: PlansRepository,
+    private readonly plansService: PlansService,
+    config: ConfigService,
+  ) {
+    this.siteUrl = config.get<string>('APP_URL', 'http://localhost:4200');
+  }
 
   async create(dto: CreateLeadDto, actorEmail?: string): Promise<Lead> {
     const email = dto.email.toLowerCase();
@@ -52,7 +61,9 @@ export class LeadsService {
     };
     await this.repo.put(lead);
 
-    this.sendConfirmation(lead).catch((err) =>
+    // await es necesario en Lambda: el proceso se congela al retornar el handler
+    // y el fire-and-forget nunca llega a ejecutarse
+    await this.sendConfirmation(lead).catch((err) =>
       this.logger.error(`Email confirmation failed for ${lead.leadId}: ${err}`),
     );
 
@@ -117,69 +128,76 @@ export class LeadsService {
     return this.repo.addActivity(leadId, activity, newStatus);
   }
 
-  async sendContactEmail(
-    leadId: string,
-    dto: ContactEmailDto,
-    actorEmail?: string,
-  ): Promise<Lead> {
-    const lead = await this.findOne(leadId);
-    const { subject, html } = outreachTemplate({
+  private async sendConfirmation(lead: Lead): Promise<void> {
+    const allPlans = await this.plansRepo.findAll();
+    const featuredPlans = allPlans
+      .filter((p) => p.active)
+      .sort((a, b) => a.displayOrder - b.displayOrder)
+      .slice(0, 3)
+      .map((p) => ({
+        title: p.title,
+        price: p.price,
+        currency: p.currency,
+        durationDays: p.durationDays,
+        durationNights: p.durationNights,
+        imageUrls: p.imageUrls,
+        departureCity: p.departureCity,
+        inclusions: p.inclusions,
+      }));
+
+    const { subject, html } = leadConfirmationTemplate({
       name: lead.name,
-      planTitle: dto.planTitle,
+      featuredPlans,
+      siteUrl: this.siteUrl,
     });
     await this.mail.send({ to: lead.email, subject, html });
-
-    return this.addActivity(
-      leadId,
-      { type: 'contacted', channel: 'email' },
-      actorEmail,
-    );
+    await this.repo.markEmailSent(lead.leadId);
   }
 
-  async sendBulkContactEmail(
-    dto: BulkContactEmailDto,
+  async sendCampaign(
+    dto: SendCampaignDto,
     actorEmail?: string,
   ): Promise<BulkMailResult> {
+    const plan = await this.plansService.findOne(dto.planId);
     let sent = 0;
     let failed = 0;
 
-    for (let i = 0; i < dto.leads.length; i += BULK_CONTACT_BATCH_SIZE) {
-      const batch = dto.leads.slice(i, i + BULK_CONTACT_BATCH_SIZE);
+    for (let i = 0; i < dto.leadIds.length; i += BULK_CONTACT_BATCH_SIZE) {
+      const batch = dto.leadIds.slice(i, i + BULK_CONTACT_BATCH_SIZE);
 
       const results = await Promise.allSettled(
-        batch.map((item) =>
-          this.sendContactEmail(
-            item.leadId,
-            { planTitle: item.planTitle },
+        batch.map(async (leadId) => {
+          const lead = await this.findOne(leadId);
+          const { subject, html } = planCampaignTemplate({
+            recipientName: lead.name,
+            plan,
+            siteUrl: this.siteUrl,
+          });
+          await this.mail.send({ to: lead.email, subject, html });
+          await this.addActivity(
+            leadId,
+            { type: 'contacted', channel: 'email' },
             actorEmail,
-          ),
-        ),
+          );
+        }),
       );
 
       for (const result of results) {
         if (result.status === 'fulfilled') sent++;
         else {
           failed++;
-          this.logger.error(
-            `Bulk contact email failed: ${String(result.reason)}`,
-          );
+          this.logger.error(`Campaign email failed: ${String(result.reason)}`);
         }
       }
 
-      if (i + BULK_CONTACT_BATCH_SIZE < dto.leads.length) {
+      if (i + BULK_CONTACT_BATCH_SIZE < dto.leadIds.length) {
         await new Promise((resolve) =>
           setTimeout(resolve, BULK_CONTACT_BATCH_DELAY_MS),
         );
       }
     }
 
-    return { sent, failed, total: dto.leads.length };
-  }
-
-  private async sendConfirmation(lead: Lead): Promise<void> {
-    const { subject, html } = leadConfirmationTemplate({ name: lead.name });
-    await this.mail.send({ to: lead.email, subject, html });
-    await this.repo.markEmailSent(lead.leadId);
+    return { sent, failed, total: dto.leadIds.length };
   }
 
   private async findExisting(

@@ -144,6 +144,7 @@
                 </button>
               </th>
               <th class="p-4 text-center">Estado</th>
+              <th class="p-4 text-center">Promoción</th>
               <th class="p-4 pr-6 text-right">Acciones</th>
             </tr>
           </thead>
@@ -184,6 +185,16 @@
                         [class]="plan.active ? 'translate-x-5' : 'translate-x-0'"></div>
                     </div>
                   </button>
+                </td>
+                <td class="p-4 text-center">
+                  @if (promoDisplay(plan); as promo) {
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap"
+                      [style.background]="promo.bg" [style.color]="promo.color">
+                      {{ promo.icon }} {{ promo.label }}
+                    </span>
+                  } @else {
+                    <span class="text-on-surface-variant/30 select-none">—</span>
+                  }
                 </td>
                 <td class="p-4 pr-6 text-right">
                   <div class="flex items-center justify-end gap-2">

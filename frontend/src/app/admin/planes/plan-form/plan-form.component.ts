@@ -2,8 +2,8 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
-import { CreatePlanPayload, PlansService } from '../../../core/services/plans.service';
+import { firstValueFrom, switchMap, of } from 'rxjs';
+import { CreatePlanPayload, Promotion, PromotionType, PlansService } from '../../../core/services/plans.service';
 import { PlanServicesService, PlanService } from '../../../core/services/plan-services.service';
 import { ToastService } from '../../../core/services/toast.service';
 
@@ -86,6 +86,20 @@ export class PlanFormComponent implements OnInit {
 
   protected selectedInclusions = new Set<string>();
 
+  protected readonly promoTypeOptions: { value: PromotionType; label: string }[] = [
+    { value: 'dos_x_uno', label: '2 × 1 — Dos personas al precio de una' },
+    { value: 'precio_especial', label: 'Precio especial — Con fecha límite' },
+    { value: 'cupos_limitados', label: 'Cupos limitados — Genera urgencia' },
+    { value: 'texto_libre', label: 'Texto libre — Descripción personalizada' },
+  ];
+
+  protected readonly currentPlanPromo = signal<Promotion | undefined>(undefined);
+  protected readonly promoActive = signal(false);
+  protected readonly promoType = signal<PromotionType>('dos_x_uno');
+  protected readonly promoLabel = signal('');
+  protected readonly promoExpiresAt = signal('');
+  protected readonly promoError = signal('');
+
   ngOnInit(): void {
     this.servicesSvc.getAll().subscribe({ next: (c) => this.catalog.set(c) });
 
@@ -131,6 +145,13 @@ export class PlanFormComponent implements OnInit {
           validity: plan.validity,
           terms: plan.terms,
         });
+        if (!duplicate && plan.promotion) {
+          this.currentPlanPromo.set(plan.promotion);
+          this.promoActive.set(plan.promotion.active);
+          this.promoType.set(plan.promotion.type);
+          this.promoLabel.set(plan.promotion.label);
+          this.promoExpiresAt.set(plan.promotion.expiresAt ? plan.promotion.expiresAt.slice(0, 10) : '');
+        }
         this.loading.set(false);
       },
       error: () => { this.error.set('Error al cargar el plan.'); this.loading.set(false); },
@@ -252,9 +273,14 @@ export class PlanFormComponent implements OnInit {
 
   protected submit(publish: boolean): void {
     this.error.set('');
+    this.promoError.set('');
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.error.set('Completá todos los campos obligatorios.');
+      return;
+    }
+    if (this.isEdit() && this.promoActive() && !this.promoLabel().trim()) {
+      this.promoError.set('La descripción de la promoción es obligatoria.');
       return;
     }
     const raw = this.form.getRawValue();
@@ -292,7 +318,20 @@ export class PlanFormComponent implements OnInit {
       ? this.svc.updatePlan(this.planId!, payload)
       : this.svc.createPlan(payload);
 
-    op.subscribe({
+    op.pipe(
+      switchMap(() => {
+        if (this.isEdit() && this.promoActive() && this.promoLabel().trim()) {
+          const expiresAt = this.promoExpiresAt() ? `${this.promoExpiresAt()}T23:59:59.000Z` : undefined;
+          return this.svc.setPromotion(this.planId!, {
+            type: this.promoType(),
+            label: this.promoLabel().trim(),
+            expiresAt,
+            active: true,
+          });
+        }
+        return of(null);
+      }),
+    ).subscribe({
       next: () => {
         const msg = this.isDuplicate()
           ? 'Plan duplicado correctamente'
@@ -312,5 +351,27 @@ export class PlanFormComponent implements OnInit {
   protected isInvalid(field: string): boolean {
     const ctrl = this.form.get(field);
     return !!(ctrl?.invalid && ctrl.touched);
+  }
+
+  protected clearPromotionAction(): void {
+    if (!this.planId) return;
+
+    this.saving.set(true);
+    this.promoError.set('');
+
+    this.svc.clearPromotion(this.planId).subscribe({
+      next: () => {
+        this.currentPlanPromo.set(undefined);
+        this.promoActive.set(false);
+        this.promoLabel.set('');
+        this.promoExpiresAt.set('');
+        this.saving.set(false);
+        this.toast.success('Promoción eliminada.');
+      },
+      error: () => {
+        this.promoError.set('Error al quitar la promoción.');
+        this.saving.set(false);
+      },
+    });
   }
 }

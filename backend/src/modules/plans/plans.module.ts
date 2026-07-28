@@ -8,5 +8,6 @@ import { FileModule } from '../file/file.module';
   imports: [FileModule],
   controllers: [PlansController],
   providers: [PlansService, PlansRepository],
+  exports: [PlansRepository, PlansService],
 })
 export class PlansModule {}
