@@ -154,4 +154,11 @@
   </div>
 </div>
 
+@if (navigating()) {
+  <div class="fixed top-0 left-0 right-0 h-[3px] z-[60] bg-brand-teal/20 overflow-hidden">
+    <div class="absolute h-full w-[30%] bg-brand-teal rounded-full shadow-[0_0_8px_0_rgba(43,199,208,0.6)]"
+         style="animation: nav-progress 0.9s cubic-bezier(0.65,0,0.35,1) infinite;"></div>
+  </div>
+}
+
 <app-toast />

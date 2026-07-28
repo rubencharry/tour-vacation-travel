@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes nav-progress {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
 @layer utilities {
   .shadow-soft {
     box-shadow: 0 4px 20px rgba(29, 53, 87, 0.08);
