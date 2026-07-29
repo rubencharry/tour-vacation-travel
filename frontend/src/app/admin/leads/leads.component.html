@@ -284,15 +284,6 @@
                     </button>
                     <button
                       type="button"
-                      (click)="contactWhatsapp(lead)"
-                      [disabled]="!lead.phone"
-                      class="p-1.5 inline-flex items-center justify-center text-brand-teal hover:text-secondary hover:bg-brand-teal/10 rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                      title="Contactar por WhatsApp"
-                    >
-                      <app-whatsapp-icon [size]="18" />
-                    </button>
-                    <button
-                      type="button"
                       (click)="openCampaignModalForLead(lead)"
                       class="p-1.5 inline-flex items-center justify-center text-brand-terracotta/80 hover:text-brand-terracotta hover:bg-brand-terracotta/10 rounded transition-colors"
                       title="Enviar email de campaña"
