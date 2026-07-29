@@ -16,9 +16,16 @@ export class PlansService {
 
   async create(dto: CreatePlanDto): Promise<Plan> {
     const now = new Date().toISOString();
+    let displayOrder = dto.displayOrder;
+    if (displayOrder === undefined) {
+      const existing = await this.repo.findAll();
+      const max = existing.reduce((m, p) => Math.max(m, p.displayOrder ?? 0), 0);
+      displayOrder = max + 1;
+    }
     const plan: Plan = {
       planId: crypto.randomUUID(),
       ...dto,
+      displayOrder,
       imageUrls: dto.imageUrls.map((u) => this.fileService.extractS3Key(u)),
       planType: dto.planType as PlanType,
       createdAt: now,
