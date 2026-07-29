@@ -2,7 +2,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, CdkDragPreview, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Plan, PlansService, PromotionType } from '../../core/services/plans.service';
 import { AppSelectComponent, SelectOption } from '../../shared/components/app-select/app-select.component';
 
@@ -12,7 +12,7 @@ type SortDir = 'asc' | 'desc';
 @Component({
   selector: 'app-planes-admin',
   standalone: true,
-  imports: [RouterLink, DecimalPipe, FormsModule, AppSelectComponent, CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [RouterLink, DecimalPipe, FormsModule, AppSelectComponent, CdkDropList, CdkDrag, CdkDragHandle, CdkDragPreview],
   templateUrl: './planes.component.html',
 })
 export class PlanesAdminComponent implements OnInit {

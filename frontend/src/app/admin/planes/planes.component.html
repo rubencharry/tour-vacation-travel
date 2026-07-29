@@ -175,11 +175,23 @@
             @for (plan of filteredPlans(); track plan.planId) {
               <tr
                 cdkDrag
-                cdkDragPreviewContainer="parent"
                 [cdkDragDisabled]="!dragEnabled()"
                 class="hover:bg-surface/50 transition-colors"
                 [class.cursor-default]="!dragEnabled()"
               >
+                <!-- Preview flotante al arrastrar -->
+                <ng-template cdkDragPreview>
+                  <div class="flex items-center gap-3 rounded-xl px-4 py-3 shadow-[0_8px_30px_rgba(29,53,87,0.18)]"
+                       style="background:#fff; border-left: 4px solid #2bc7d0; min-width: 260px;">
+                    <span class="material-symbols-outlined" style="color:#2bc7d0; font-size:20px;">drag_indicator</span>
+                    <div>
+                      <p style="font-weight:600; font-size:0.875rem; color:#1d3557; line-height:1.25;">{{ plan.title }}</p>
+                      <p style="font-size:0.75rem; color:#74777f;">{{ plan.departureCity }}</p>
+                    </div>
+                    <span class="material-symbols-outlined" style="color:#2bc7d0; font-size:16px; margin-left:auto;">open_with</span>
+                  </div>
+                </ng-template>
+
                 <!-- Handle -->
                 <td class="w-10 pl-3">
                   @if (dragEnabled()) {
