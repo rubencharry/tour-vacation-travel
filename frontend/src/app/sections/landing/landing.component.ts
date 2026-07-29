@@ -1,8 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, catchError, of, startWith } from 'rxjs';
 import { Plan, PlansService, PromotionType } from '../../core/services/plans.service';
 import { LeadsService } from '../../core/services/leads.service';
+import { SeoService } from '../../core/services/seo.service';
 import { ScrollRevealDirective } from '../../shared/directives/scroll-reveal.directive';
 import { RouterLink } from '@angular/router';
 import { PlanCardComponent } from '../../shared/components/plan-card/plan-card.component';
@@ -17,9 +18,18 @@ const GENERAL_INQUIRY_PLAN_ID = 'general';
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
 })
-export class LandingComponent {
+export class LandingComponent implements OnInit {
   private plansService = inject(PlansService);
   private leadsService = inject(LeadsService);
+  private seo = inject(SeoService);
+
+  ngOnInit(): void {
+    this.seo.setPage({
+      title: 'Planes de Viaje Únicos',
+      description: 'Descubre los mejores planes de viaje con Tour Vacation Travel. Escapadas, aventuras y destinos únicos para toda la familia. Agencia de viajes con más de 11 años de experiencia.',
+      path: '/',
+    });
+  }
 
   protected formName = signal('');
   protected formEmail = signal('');

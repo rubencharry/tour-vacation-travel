@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ScrollRevealDirective } from '../../shared/directives/scroll-reveal.directive';
+import { SeoService } from '../../core/services/seo.service';
 
 @Component({
   selector: 'app-nosotros',
@@ -9,7 +10,16 @@ import { ScrollRevealDirective } from '../../shared/directives/scroll-reveal.dir
   templateUrl: './nosotros.component.html',
   styleUrl: './nosotros.component.scss',
 })
-export class NosotrosComponent {
+export class NosotrosComponent implements OnInit {
+  private seo = inject(SeoService);
+
+  ngOnInit(): void {
+    this.seo.setPage({
+      title: 'Quiénes Somos',
+      description: 'Conoce al equipo de Tour Vacation Travel. Más de 11 años creando experiencias de viaje únicas con pasión, confianza y un trato genuinamente personal.',
+      path: '/nosotros',
+    });
+  }
   protected readonly team = [
     {
       name: 'Blanca Mendoza',

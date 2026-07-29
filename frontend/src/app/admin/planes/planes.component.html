@@ -8,7 +8,15 @@
         <span class="material-symbols-outlined text-[14px]">chevron_right</span>
         <span class="text-primary font-semibold">Planes</span>
       </nav>
-      <h2 class="font-headline-md text-headline-md text-primary-container">Gestión de Planes</h2>
+      <div class="flex items-center gap-3">
+        <h2 class="font-headline-md text-headline-md text-primary-container">Gestión de Planes</h2>
+        @if (savingOrder()) {
+          <span class="flex items-center gap-1 text-sm text-brand-teal animate-pulse">
+            <span class="material-symbols-outlined text-[16px]">sync</span>
+            Guardando orden...
+          </span>
+        }
+      </div>
     </div>
     <a
       routerLink="/admin/planes/nuevo"
@@ -79,6 +87,14 @@
 
   </div>
 
+  <!-- Hint drag deshabilitado -->
+  @if (!dragEnabled() && !loading() && filteredPlans().length > 0) {
+    <p class="flex items-center gap-1.5 text-xs text-on-surface-variant px-1">
+      <span class="material-symbols-outlined text-[14px]">info</span>
+      Ordena por <strong>Orden ↑</strong> y borra la búsqueda para activar el arrastre de filas.
+    </p>
+  }
+
   <!-- Tabla -->
   <div class="bg-surface-container-lowest rounded-card shadow-coastal border border-surface-variant overflow-hidden">
 
@@ -108,8 +124,10 @@
         <table class="w-full text-left">
           <thead>
             <tr class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md border-b border-surface-variant">
+              <!-- Handle column -->
+              <th class="w-10 pl-3"></th>
               <!-- Título — ordenable -->
-              <th class="p-4 pl-6">
+              <th class="p-4">
                 <button type="button" (click)="toggleSort('title')"
                   class="flex items-center gap-1 hover:text-primary-container transition-colors group">
                   Título
@@ -148,10 +166,49 @@
               <th class="p-4 pr-6 text-right">Acciones</th>
             </tr>
           </thead>
-          <tbody class="font-body-md text-on-surface divide-y divide-surface-variant">
+
+          <tbody
+            cdkDropList
+            (cdkDropListDropped)="onDrop($event)"
+            class="font-body-md text-on-surface divide-y divide-surface-variant"
+          >
             @for (plan of filteredPlans(); track plan.planId) {
-              <tr class="hover:bg-surface/50 transition-colors">
-                <td class="p-4 pl-6">
+              <tr
+                cdkDrag
+                [cdkDragDisabled]="!dragEnabled()"
+                class="hover:bg-surface/50 transition-colors"
+                [class.cursor-default]="!dragEnabled()"
+              >
+                <!-- Preview flotante al arrastrar -->
+                <ng-template cdkDragPreview>
+                  <div class="flex items-center gap-3 rounded-xl px-4 py-3 shadow-[0_8px_30px_rgba(29,53,87,0.18)]"
+                       style="background:#fff; border-left: 4px solid #2bc7d0; min-width: 260px;">
+                    <span class="material-symbols-outlined" style="color:#2bc7d0; font-size:20px;">drag_indicator</span>
+                    <div>
+                      <p style="font-weight:600; font-size:0.875rem; color:#1d3557; line-height:1.25;">{{ plan.title }}</p>
+                      <p style="font-size:0.75rem; color:#74777f;">{{ plan.departureCity }}</p>
+                    </div>
+                    <span class="material-symbols-outlined" style="color:#2bc7d0; font-size:16px; margin-left:auto;">open_with</span>
+                  </div>
+                </ng-template>
+
+                <!-- Handle -->
+                <td class="w-10 pl-3">
+                  @if (dragEnabled()) {
+                    <span
+                      cdkDragHandle
+                      class="material-symbols-outlined text-[20px] text-on-surface-variant/30 hover:text-on-surface-variant cursor-grab active:cursor-grabbing select-none block"
+                      title="Arrastrar para reordenar"
+                    >drag_indicator</span>
+                  } @else {
+                    <span class="material-symbols-outlined text-[20px] text-on-surface-variant/15 select-none block"
+                      title="Ordena por Orden ↑ y borra la búsqueda para arrastrar">
+                      drag_indicator
+                    </span>
+                  }
+                </td>
+
+                <td class="p-4">
                   <div class="font-semibold text-primary-container">{{ plan.title }}</div>
                   <div class="text-caption text-on-surface-variant">{{ plan.departureCity }}</div>
                 </td>

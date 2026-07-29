@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
 import { AuthService, UserRole } from '../../core/services/auth.service';
@@ -62,6 +62,14 @@ export class AdminLayoutComponent {
       startWith(this.resolveTitle()),
     ),
     { initialValue: 'Dashboard' },
+  );
+
+  protected readonly navigating = toSignal(
+    this.router.events.pipe(
+      filter((e) => e instanceof NavigationStart || e instanceof NavigationEnd || e instanceof NavigationCancel || e instanceof NavigationError),
+      map((e) => e instanceof NavigationStart),
+    ),
+    { initialValue: false },
   );
 
   protected get initials(): string {

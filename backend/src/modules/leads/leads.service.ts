@@ -16,6 +16,7 @@ import { leadConfirmationTemplate } from '../mail/templates/lead-confirmation.te
 import { planCampaignTemplate } from '../mail/templates/plan-campaign.template';
 import { PlansRepository } from '../plans/plans.repository';
 import { PlansService } from '../plans/plans.service';
+import { FileService } from '../file/file.service';
 
 const IDEMPOTENCY_WINDOW_MS = 60 * 60 * 1000; // 1 hora
 const BULK_CONTACT_BATCH_SIZE = 10;
@@ -32,6 +33,7 @@ export class LeadsService {
     private readonly mail: MailService,
     private readonly plansRepo: PlansRepository,
     private readonly plansService: PlansService,
+    private readonly fileService: FileService,
     config: ConfigService,
   ) {
     this.siteUrl = config.get<string>('APP_URL', 'http://localhost:4200');
@@ -130,20 +132,22 @@ export class LeadsService {
 
   private async sendConfirmation(lead: Lead): Promise<void> {
     const allPlans = await this.plansRepo.findAll();
-    const featuredPlans = allPlans
-      .filter((p) => p.active)
-      .sort((a, b) => a.displayOrder - b.displayOrder)
-      .slice(0, 3)
-      .map((p) => ({
-        title: p.title,
-        price: p.price,
-        currency: p.currency,
-        durationDays: p.durationDays,
-        durationNights: p.durationNights,
-        imageUrls: p.imageUrls,
-        departureCity: p.departureCity,
-        inclusions: p.inclusions,
-      }));
+    const featuredPlans = await Promise.all(
+      allPlans
+        .filter((p) => p.active)
+        .sort((a, b) => a.displayOrder - b.displayOrder)
+        .slice(0, 3)
+        .map(async (p) => ({
+          title: p.title,
+          price: p.price,
+          currency: p.currency,
+          durationDays: p.durationDays,
+          durationNights: p.durationNights,
+          imageUrls: await this.fileService.presignImageUrls(p.imageUrls ?? []),
+          departureCity: p.departureCity,
+          inclusions: p.inclusions,
+        })),
+    );
 
     const { subject, html } = leadConfirmationTemplate({
       name: lead.name,

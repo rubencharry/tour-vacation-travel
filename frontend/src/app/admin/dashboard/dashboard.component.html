@@ -53,20 +53,35 @@
 </div>
 
 <!-- KPIs -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-  @for (kpi of kpiCards; track kpi.label) {
-    <div class="bg-surface-container-lowest p-5 rounded-card shadow-coastal border border-surface-variant hover:shadow-coastal-hover transition-shadow duration-150 group">
-      <div class="flex items-start justify-between mb-4">
-        <div class="w-11 h-11 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform" [ngClass]="kpi.iconBg">
-          <span class="material-symbols-outlined text-[22px]" [ngClass]="kpi.iconColor" style="font-variation-settings:'FILL' 1">{{ kpi.icon }}</span>
+@if (loading()) {
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    @for (_ of [1, 2, 3, 4]; track $index) {
+      <div class="bg-surface-container-lowest p-5 rounded-card shadow-coastal border border-surface-variant animate-pulse">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-11 h-11 rounded-full bg-surface-container"></div>
+          <div class="h-5 w-10 rounded-full bg-surface-container"></div>
         </div>
-        <span class="text-xs font-bold px-2 py-1 rounded-full" [ngClass]="kpi.badgeColor">{{ kpi.badge }}</span>
+        <div class="h-8 w-16 rounded bg-surface-container mb-2"></div>
+        <div class="h-4 w-24 rounded bg-surface-container"></div>
       </div>
-      <p class="text-3xl font-bold text-primary-container tracking-tight">{{ kpi.value }}</p>
-      <p class="font-label-md text-label-md text-on-surface-variant mt-0.5">{{ kpi.label }}</p>
-    </div>
-  }
-</div>
+    }
+  </div>
+} @else {
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    @for (kpi of kpiCards(); track kpi.label) {
+      <div class="bg-surface-container-lowest p-5 rounded-card shadow-coastal border border-surface-variant hover:shadow-coastal-hover transition-shadow duration-150 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-11 h-11 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform" [ngClass]="kpi.iconBg">
+            <span class="material-symbols-outlined text-[22px]" [ngClass]="kpi.iconColor" style="font-variation-settings:'FILL' 1">{{ kpi.icon }}</span>
+          </div>
+          <span class="text-xs font-bold px-2 py-1 rounded-full" [ngClass]="kpi.badgeColor">{{ kpi.badge }}</span>
+        </div>
+        <p class="text-3xl font-bold text-primary-container tracking-tight">{{ kpi.value }}</p>
+        <p class="font-label-md text-label-md text-on-surface-variant mt-0.5">{{ kpi.label }}</p>
+      </div>
+    }
+  </div>
+}
 
 <!-- Charts -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
@@ -77,10 +92,20 @@
         <h3 class="font-headline-md text-headline-md text-primary-container">Crecimiento de Leads</h3>
         <p class="text-xs text-on-surface-variant mt-0.5">Últimos 7 días</p>
       </div>
-      <span class="text-xs font-bold text-brand-teal bg-brand-teal/10 px-2 py-1 rounded-full">+18%</span>
+      @if (!loading()) {
+        <span
+          class="text-xs font-bold px-2 py-1 rounded-full"
+          [ngClass]="weekGrowth() >= 0 ? 'text-brand-teal bg-brand-teal/10' : 'text-brand-terracotta bg-brand-terracotta/10'"
+        >{{ weekGrowth() >= 0 ? '+' + weekGrowth() : weekGrowth() }}%</span>
+      }
     </div>
     <div class="relative h-52">
-      <canvas #leadGrowthCanvas></canvas>
+      @if (loading()) {
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="w-8 h-8 border-2 border-brand-teal border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      }
+      <canvas #leadGrowthCanvas [class.opacity-0]="loading()"></canvas>
     </div>
   </div>
 
@@ -90,17 +115,14 @@
         <h3 class="font-headline-md text-headline-md text-primary-container">Leads por Destino</h3>
         <p class="text-xs text-on-surface-variant mt-0.5">Top 5 más consultados</p>
       </div>
-      <div class="flex items-center gap-3 text-caption text-on-surface-variant">
-        <span class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-sm bg-primary-container inline-block"></span>Estándar
-        </span>
-        <span class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-sm bg-brand-teal inline-block"></span>Premium
-        </span>
-      </div>
     </div>
     <div class="relative h-52">
-      <canvas #plansCanvas></canvas>
+      @if (loading()) {
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="w-8 h-8 border-2 border-brand-teal border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      }
+      <canvas #plansCanvas [class.opacity-0]="loading()"></canvas>
     </div>
   </div>
 
@@ -116,33 +138,52 @@
     </a>
   </div>
 
-  <div class="divide-y divide-surface-variant">
-    @for (lead of recentLeads; track lead.email) {
-      <div class="flex items-center gap-4 px-5 py-3.5 hover:bg-surface-container/50 transition-colors">
-        <div class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-          <span class="text-white text-xs font-bold">{{ lead.initials }}</span>
+  @if (loading()) {
+    <div class="divide-y divide-surface-variant">
+      @for (_ of [1, 2, 3]; track $index) {
+        <div class="flex items-center gap-4 px-5 py-3.5 animate-pulse">
+          <div class="w-9 h-9 rounded-full bg-surface-container shrink-0"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-4 bg-surface-container rounded w-32"></div>
+            <div class="h-3 bg-surface-container rounded w-48"></div>
+          </div>
+          <div class="hidden sm:block text-right space-y-2">
+            <div class="h-4 bg-surface-container rounded w-24"></div>
+            <div class="h-3 bg-surface-container rounded w-16"></div>
+          </div>
+          <div class="h-6 w-16 rounded-full bg-surface-container shrink-0"></div>
         </div>
-        <div class="flex-1 min-w-0">
-          <p class="font-semibold text-sm text-primary-container truncate">{{ lead.name }}</p>
-          <p class="text-caption text-on-surface-variant truncate">{{ lead.email }}</p>
+      }
+    </div>
+  } @else {
+    <div class="divide-y divide-surface-variant">
+      @for (lead of recentLeads(); track lead.email) {
+        <div class="flex items-center gap-4 px-5 py-3.5 hover:bg-surface-container/50 transition-colors">
+          <div class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+            <span class="text-white text-xs font-bold">{{ lead.initials }}</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-sm text-primary-container truncate">{{ lead.name }}</p>
+            <p class="text-caption text-on-surface-variant truncate">{{ lead.email }}</p>
+          </div>
+          <div class="text-right shrink-0 hidden sm:block">
+            <p class="text-sm text-on-surface font-medium">{{ lead.destination }}</p>
+            <p class="text-caption text-on-surface-variant">{{ lead.date }}</p>
+          </div>
+          @if (lead.sent) {
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-teal/10 text-brand-teal shrink-0">Enviado</span>
+          } @else {
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-terracotta/10 text-brand-terracotta shrink-0">Pendiente</span>
+          }
         </div>
-        <div class="text-right shrink-0 hidden sm:block">
-          <p class="text-sm text-on-surface font-medium">{{ lead.destination }}</p>
-          <p class="text-caption text-on-surface-variant">{{ lead.date }}</p>
-        </div>
-        @if (lead.sent) {
-          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-teal/10 text-brand-teal shrink-0">Enviado</span>
-        } @else {
-          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-terracotta/10 text-brand-terracotta shrink-0">Pendiente</span>
-        }
-      </div>
-    }
+      }
 
-    @if (recentLeads.length === 0) {
-      <div class="flex flex-col items-center justify-center py-12 text-on-surface-variant">
-        <span class="material-symbols-outlined text-[40px] mb-2 opacity-30">inbox</span>
-        <p class="text-sm">Sin leads aún</p>
-      </div>
-    }
-  </div>
+      @if (recentLeads().length === 0) {
+        <div class="flex flex-col items-center justify-center py-12 text-on-surface-variant">
+          <span class="material-symbols-outlined text-[40px] mb-2 opacity-30">inbox</span>
+          <p class="text-sm">Sin leads aún</p>
+        </div>
+      }
+    </div>
+  }
 </div>
