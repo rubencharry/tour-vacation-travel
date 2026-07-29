@@ -19,7 +19,10 @@ export class PlansService {
     let displayOrder = dto.displayOrder;
     if (displayOrder === undefined) {
       const existing = await this.repo.findAll();
-      const max = existing.reduce((m, p) => Math.max(m, p.displayOrder ?? 0), 0);
+      const max = existing.reduce(
+        (m, p) => Math.max(m, p.displayOrder ?? 0),
+        0,
+      );
       displayOrder = max + 1;
     }
     const plan: Plan = {
