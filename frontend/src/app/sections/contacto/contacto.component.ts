@@ -1,10 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, catchError, of } from 'rxjs';
 import { ScrollRevealDirective } from '../../shared/directives/scroll-reveal.directive';
 import { PlansService } from '../../core/services/plans.service';
 import { LeadsService } from '../../core/services/leads.service';
+import { SeoService } from '../../core/services/seo.service';
 
 type FormState = 'idle' | 'sending' | 'success' | 'error';
 
@@ -17,9 +18,18 @@ const GENERAL_INQUIRY_PLAN_ID = 'general';
   templateUrl: './contacto.component.html',
   styleUrl: './contacto.component.scss',
 })
-export class ContactoComponent {
+export class ContactoComponent implements OnInit {
   private plansService = inject(PlansService);
   private leadsService = inject(LeadsService);
+  private seo = inject(SeoService);
+
+  ngOnInit(): void {
+    this.seo.setPage({
+      title: 'Contacto',
+      description: 'Contáctanos para planear tu próximo viaje. Nuestros asesores están disponibles para ayudarte a crear el itinerario perfecto.',
+      path: '/contacto',
+    });
+  }
 
   protected nombre = signal('');
   protected email = signal('');

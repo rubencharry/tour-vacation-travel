@@ -1,7 +1,8 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { catchError, map, of, startWith } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Plan, PlanType, PlansService } from '../../core/services/plans.service';
+import { SeoService } from '../../core/services/seo.service';
 import { PlanCardComponent } from '../../shared/components/plan-card/plan-card.component';
 import { PlanModalComponent } from '../../shared/components/plan-modal/plan-modal.component';
 
@@ -12,8 +13,17 @@ import { PlanModalComponent } from '../../shared/components/plan-modal/plan-moda
   templateUrl: './planes.component.html',
   styleUrl: './planes.component.scss',
 })
-export class PlanesComponent {
+export class PlanesComponent implements OnInit {
   private plansService = inject(PlansService);
+  private seo = inject(SeoService);
+
+  ngOnInit(): void {
+    this.seo.setPage({
+      title: 'Todos los Planes de Viaje',
+      description: 'Explora nuestra colección completa de planes de viaje nacionales e internacionales. Encuentra el destino perfecto para ti con Tour Vacation Travel.',
+      path: '/planes',
+    });
+  }
 
   protected activeFilter = signal<PlanType>('internacional');
   protected searchQuery = signal('');
