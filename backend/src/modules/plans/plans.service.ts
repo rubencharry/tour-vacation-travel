@@ -43,6 +43,8 @@ export class PlansService {
       all = all.filter((p) => p.planType === planType);
     }
 
+    all.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+
     const totalItems = all.length;
     const totalPages = Math.ceil(totalItems / limit);
     const startIndex = (page - 1) * limit;
@@ -63,7 +65,9 @@ export class PlansService {
 
   async findActive(): Promise<Plan[]> {
     const all = await this.repo.findAll();
-    const active = all.filter((p) => p.active);
+    const active = all
+      .filter((p) => p.active)
+      .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
     return this.addPresignedUrls(active);
   }
 
