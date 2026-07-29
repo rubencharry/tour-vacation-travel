@@ -4,11 +4,11 @@ import {
   IsIn,
   IsInt,
   IsNumber,
+  IsOptional,
   IsString,
   IsUrl,
   Min,
 } from 'class-validator';
-import { SERVICE_IDS } from '../../services/services.catalog';
 
 export class CreatePlanDto {
   @IsString()
@@ -44,12 +44,13 @@ export class CreatePlanDto {
   @IsIn(['internacional', 'nacional'])
   planType!: string;
 
+  @IsOptional()
   @IsInt()
   @Min(0)
-  displayOrder!: number;
+  displayOrder?: number;
 
   @IsArray()
-  @IsIn(SERVICE_IDS, { each: true })
+  @IsString({ each: true })
   inclusions!: string[];
 
   @IsString()

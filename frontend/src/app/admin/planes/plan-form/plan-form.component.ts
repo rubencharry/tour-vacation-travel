@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -76,7 +76,6 @@ export class PlanFormComponent implements OnInit {
     currency:       ['USD', [Validators.required]],
     planType:       ['internacional', [Validators.required]],
     active:         [true],
-    displayOrder:   [0, [Validators.required, Validators.min(0)]],
     durationDays:   [0, [Validators.required, Validators.min(0)]],
     durationNights: [0, [Validators.required, Validators.min(0)]],
     departureCity:  ['', [Validators.required]],
@@ -85,6 +84,11 @@ export class PlanFormComponent implements OnInit {
   });
 
   protected selectedInclusions = new Set<string>();
+  protected readonly customInclusionInput = signal('');
+  protected readonly catalogIds = computed(() => new Set(this.catalog().map((s) => s.id)));
+  protected readonly customInclusions = computed(() =>
+    [...this.selectedInclusions].filter((id) => !this.catalogIds().has(id)),
+  );
 
   protected readonly promoTypeOptions: { value: PromotionType; label: string }[] = [
     { value: 'dos_x_uno', label: '2 × 1 — Dos personas al precio de una' },
@@ -138,7 +142,6 @@ export class PlanFormComponent implements OnInit {
           currency: plan.currency,
           planType: plan.planType,
           active: duplicate ? false : plan.active,
-          displayOrder: plan.displayOrder,
           durationDays: plan.durationDays,
           durationNights: plan.durationNights,
           departureCity: plan.departureCity,
@@ -190,6 +193,24 @@ export class PlanFormComponent implements OnInit {
   protected toggleInclusion(id: string): void {
     if (this.selectedInclusions.has(id)) this.selectedInclusions.delete(id);
     else this.selectedInclusions.add(id);
+  }
+
+  protected addCustomInclusion(): void {
+    const value = this.customInclusionInput().trim();
+    if (!value || this.selectedInclusions.has(value)) return;
+    this.selectedInclusions.add(value);
+    this.customInclusionInput.set('');
+  }
+
+  protected removeInclusion(id: string): void {
+    this.selectedInclusions.delete(id);
+  }
+
+  protected onCustomInclusionKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.addCustomInclusion();
+    }
   }
 
   private addImagesFromFiles(files: FileList | null): void {
@@ -303,7 +324,6 @@ export class PlanFormComponent implements OnInit {
       currency:       raw.currency!,
       planType:       raw.planType as 'internacional' | 'nacional',
       active:         publish ? true : !!raw.active,
-      displayOrder:   Number(raw.displayOrder),
       durationDays:   Number(raw.durationDays),
       durationNights: Number(raw.durationNights),
       departureCity:  raw.departureCity!,

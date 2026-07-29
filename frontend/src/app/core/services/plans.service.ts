@@ -48,8 +48,8 @@ export interface PlansResponse {
   meta: PlansMeta;
 }
 
-export type CreatePlanPayload = Omit<Plan, 'planId' | 'createdAt' | 'updatedAt'>;
-export type UpdatePlanPayload = Partial<CreatePlanPayload>;
+export type CreatePlanPayload = Omit<Plan, 'planId' | 'createdAt' | 'updatedAt' | 'displayOrder'>;
+export type UpdatePlanPayload = Partial<Omit<Plan, 'planId' | 'createdAt' | 'updatedAt'>>;
 
 @Injectable({ providedIn: 'root' })
 export class PlansService {

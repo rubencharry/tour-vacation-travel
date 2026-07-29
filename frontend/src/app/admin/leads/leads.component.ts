@@ -15,7 +15,6 @@ import {
 import { Plan, PlansService } from '../../core/services/plans.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AppSelectComponent, SelectOption } from '../../shared/components/app-select/app-select.component';
-import { WhatsappIconComponent } from '../../shared/components/whatsapp-icon/whatsapp-icon.component';
 import { LeadDetailComponent } from './lead-detail.component';
 
 type DateRangeFilter = 'all' | '7d' | '30d' | 'custom';
@@ -28,7 +27,7 @@ type SortDirection = 'asc' | 'desc';
 @Component({
   selector: 'app-leads-admin',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, AppSelectComponent, WhatsappIconComponent, LeadDetailComponent],
+  imports: [FormsModule, ReactiveFormsModule, AppSelectComponent, LeadDetailComponent],
   templateUrl: './leads.component.html',
 })
 export class LeadsAdminComponent implements OnInit {

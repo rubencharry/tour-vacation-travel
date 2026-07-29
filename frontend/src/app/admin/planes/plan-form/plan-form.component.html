@@ -244,14 +244,6 @@
             class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors" />
         </div>
 
-        <div class="md:col-span-2">
-          <label class="block font-label-md text-label-md text-primary-container mb-1" for="displayOrder">
-            Orden de visualización
-          </label>
-          <input id="displayOrder" type="number" formControlName="displayOrder" min="0"
-            class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors md:w-40" />
-          <p class="text-caption text-on-surface-variant mt-1">Número menor = aparece primero en la landing.</p>
-        </div>
 
       </div>
     </section>
@@ -284,6 +276,50 @@
           </label>
         }
       </div>
+
+      <!-- Servicio personalizado -->
+      <div class="mt-4 flex gap-2">
+        <div class="relative flex-1">
+          <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
+            <span class="material-symbols-outlined text-[16px]">add_circle</span>
+          </span>
+          <input
+            type="text"
+            placeholder="Agregar servicio personalizado..."
+            [value]="customInclusionInput()"
+            (input)="customInclusionInput.set($any($event.target).value)"
+            (keydown)="onCustomInclusionKeydown($event)"
+            class="w-full h-9 bg-surface-container-lowest border border-outline-variant rounded-btn pl-8 pr-3 text-on-surface text-sm placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-brand-teal/50 focus:border-brand-teal transition-all"
+          />
+        </div>
+        <button
+          type="button"
+          (click)="addCustomInclusion()"
+          [disabled]="!customInclusionInput().trim()"
+          class="h-9 px-3 flex items-center gap-1.5 text-sm font-medium border-2 border-brand-teal text-primary-container rounded-btn hover:bg-brand-teal/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <span class="material-symbols-outlined text-[16px]">add</span>
+          Agregar
+        </button>
+      </div>
+
+      @if (customInclusions().length > 0) {
+        <div class="flex flex-wrap gap-2 mt-2">
+          @for (svc of customInclusions(); track svc) {
+            <span class="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1 rounded-full text-sm font-medium bg-primary-container/10 text-primary-container border border-primary-container/20">
+              {{ svc }}
+              <button
+                type="button"
+                (click)="removeInclusion(svc)"
+                class="w-4 h-4 rounded-full flex items-center justify-center hover:bg-primary-container/20 transition-colors"
+                title="Quitar"
+              >
+                <span class="material-symbols-outlined text-[12px]">close</span>
+              </button>
+            </span>
+          }
+        </div>
+      }
     </section>
 
     <!-- 5. Imágenes -->
