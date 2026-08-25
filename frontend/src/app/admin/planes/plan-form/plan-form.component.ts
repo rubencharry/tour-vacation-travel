@@ -83,11 +83,11 @@ export class PlanFormComponent implements OnInit {
     terms:          ['', [Validators.required]],
   });
 
-  protected selectedInclusions = new Set<string>();
+  protected readonly selectedInclusions = signal<Set<string>>(new Set());
   protected readonly customInclusionInput = signal('');
   protected readonly catalogIds = computed(() => new Set(this.catalog().map((s) => s.id)));
   protected readonly customInclusions = computed(() =>
-    [...this.selectedInclusions].filter((id) => !this.catalogIds().has(id)),
+    [...this.selectedInclusions()].filter((id) => !this.catalogIds().has(id)),
   );
 
   protected readonly promoTypeOptions: { value: PromotionType; label: string }[] = [
@@ -123,7 +123,7 @@ export class PlanFormComponent implements OnInit {
     this.loading.set(true);
     this.svc.getPlan(id).subscribe({
       next: (plan) => {
-        this.selectedInclusions = new Set(plan.inclusions);
+        this.selectedInclusions.set(new Set(plan.inclusions));
         this.imageItems.set(
           plan.imageUrls.map((url) => ({
             id: this.newImageId(),
@@ -191,19 +191,27 @@ export class PlanFormComponent implements OnInit {
   }
 
   protected toggleInclusion(id: string): void {
-    if (this.selectedInclusions.has(id)) this.selectedInclusions.delete(id);
-    else this.selectedInclusions.add(id);
+    this.selectedInclusions.update((set) => {
+      const next = new Set(set);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   }
 
   protected addCustomInclusion(): void {
     const value = this.customInclusionInput().trim();
-    if (!value || this.selectedInclusions.has(value)) return;
-    this.selectedInclusions.add(value);
+    if (!value || this.selectedInclusions().has(value)) return;
+    this.selectedInclusions.update((set) => new Set(set).add(value));
     this.customInclusionInput.set('');
   }
 
   protected removeInclusion(id: string): void {
-    this.selectedInclusions.delete(id);
+    this.selectedInclusions.update((set) => {
+      const next = new Set(set);
+      next.delete(id);
+      return next;
+    });
   }
 
   protected onCustomInclusionKeydown(event: KeyboardEvent): void {
@@ -329,7 +337,7 @@ export class PlanFormComponent implements OnInit {
       departureCity:  raw.departureCity!,
       validity:       raw.validity!,
       terms:          raw.terms!,
-      inclusions:     [...this.selectedInclusions],
+      inclusions:     [...this.selectedInclusions()],
       imageUrls,
     };
 
