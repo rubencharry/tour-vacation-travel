@@ -112,7 +112,7 @@ export function planCampaignTemplate(data: PlanCampaignData): {
 } {
   const { plan, siteUrl } = data;
   const firstName = data.recipientName.trim().split(' ')[0];
-  const logoUrl = `${siteUrl}/logo-horizontal.webp`;
+  const logoUrl = `${siteUrl}/logo-positiva-transparent.webp`;
 
   const hasPromo = plan.promotion?.active === true;
   const promo = hasPromo ? plan.promotion! : null;
@@ -235,6 +235,7 @@ export function planCampaignTemplate(data: PlanCampaignData): {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
   <title>${plan.title} — Tour Vacation Travel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="${FONTS}" rel="stylesheet">
@@ -248,9 +249,8 @@ export function planCampaignTemplate(data: PlanCampaignData): {
 
         <!-- ── HEADER ── -->
         <tr><td style="background:${C.navy};padding:28px 40px 24px;text-align:center">
-          <img src="${logoUrl}" alt="Tour Vacation Travel" height="48"
-            style="height:48px;display:inline-block;
-              filter:brightness(0) invert(1);-webkit-filter:brightness(0) invert(1)">
+          <img src="${logoUrl}" alt="Tour Vacation Travel" height="64"
+            style="height:64px;display:inline-block">
           <p style="margin:8px 0 0;font-family:${F.condensed};font-size:11px;font-weight:700;
             color:${C.teal};letter-spacing:0.18em;text-transform:uppercase">
             Agencia de Viajes

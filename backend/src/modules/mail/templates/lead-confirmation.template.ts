@@ -184,7 +184,7 @@ export function leadConfirmationTemplate(data: LeadConfirmationData): {
   subject: string;
   html: string;
 } {
-  const logoUrl = `${data.siteUrl}/logo-horizontal.webp`;
+  const logoUrl = `${data.siteUrl}/logo-positiva-transparent.webp`;
   const planLine = data.planTitle
     ? `sobre el plan <strong style="color:${C.teal}">${data.planTitle}</strong>`
     : 'sobre nuestros planes de viaje';
@@ -238,6 +238,7 @@ export function leadConfirmationTemplate(data: LeadConfirmationData): {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
   <title>Tour Vacation Travel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="${FONTS}" rel="stylesheet">
@@ -256,9 +257,8 @@ export function leadConfirmationTemplate(data: LeadConfirmationData): {
 
         <!-- ── HEADER: logo blanco sobre navy ── -->
         <tr><td style="background:${C.navy};padding:28px 40px 24px;text-align:center">
-          <img src="${logoUrl}" alt="Tour Vacation Travel" height="48"
-            style="height:48px;display:inline-block;
-              filter:brightness(0) invert(1);-webkit-filter:brightness(0) invert(1)">
+          <img src="${logoUrl}" alt="Tour Vacation Travel" height="64"
+            style="height:64px;display:inline-block">
           <p style="margin:8px 0 0;font-family:${F.condensed};font-size:11px;font-weight:700;
             color:${C.teal};letter-spacing:0.18em;text-transform:uppercase">
             Agencia de Viajes
@@ -278,7 +278,7 @@ export function leadConfirmationTemplate(data: LeadConfirmationData): {
             margin-left:auto;margin-right:auto">
             Recibimos tu consulta ${planLine}.<br>
             <strong style="color:#ffffff;font-weight:700">
-              Un asesor te contacta en menos de 2 horas hábiles
+              Un asesor te contacta en menos de 15 minutos
             </strong>
             con una propuesta personalizada para ti.
           </p>
@@ -315,7 +315,7 @@ export function leadConfirmationTemplate(data: LeadConfirmationData): {
               </p>
               <p style="margin:0;font-family:${F.condensed};font-size:12px;font-weight:700;
                 color:${C.teal};letter-spacing:0.08em;text-transform:uppercase">
-                Tiempo de respuesta: menos de 2 horas hábiles
+                Tiempo de respuesta: menos de 15 minutos
               </p>
             </td></tr>
 
