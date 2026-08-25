@@ -8,7 +8,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // ─── constants (mirrors plan-campaign.template.ts) ───────────────────────────
 const WHATSAPP_URL = 'https://wa.me/573127466554';
 const SITE_URL = 'http://localhost:4200';
-const LOGO_URL = `${SITE_URL}/logo-positiva-transparent.webp`;
+const LOGO_URL = `${SITE_URL}/logo-positiva-transparent.png`;
 const FONTS =
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600' +
   '&family=Barlow+Condensed:wght@600;700' +
@@ -284,10 +284,13 @@ function buildEmail(recipientName, plan) {
         </td></tr>
 
         <!-- HOURS -->
-        <tr><td style="padding:0 40px 32px;text-align:center;background:${C.bgLight}">
+        <tr><td style="padding:24px 40px 32px;text-align:center;background:${C.bgLight}">
+          <p style="margin:0 0 4px;font-family:${F.sans};font-size:13px;color:${C.textMuted};line-height:1.6">
+            También puedes escribirnos respondiendo este correo.
+          </p>
           <p style="margin:0;font-family:${F.condensed};font-size:12px;font-weight:700;
             color:${C.teal};letter-spacing:0.08em;text-transform:uppercase">
-            Lunes a sábado &nbsp;·&nbsp; 8:00 am – 7:00 pm
+            Tiempo de respuesta: menos de 15 minutos.
           </p>
         </td></tr>
 
