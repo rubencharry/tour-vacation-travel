@@ -80,6 +80,8 @@ export class ProveedoresAdminComponent implements OnInit {
     website: [''],
     paymentMethod: [''],
     commissionPct: [null as number | null],
+    username: [''],
+    password: [''],
     status: ['activo', [Validators.required]],
     notes: [''],
   });
@@ -225,6 +227,8 @@ export class ProveedoresAdminComponent implements OnInit {
       website: '',
       paymentMethod: '',
       commissionPct: null,
+      username: '',
+      password: '',
       status: 'activo',
       notes: '',
     });
@@ -250,6 +254,8 @@ export class ProveedoresAdminComponent implements OnInit {
       website: provider.website ?? '',
       paymentMethod: provider.paymentMethod ?? '',
       commissionPct: provider.commissionPct ?? null,
+      username: provider.username ?? '',
+      password: provider.password ?? '',
       status: provider.status,
       notes: provider.notes ?? '',
     });
@@ -282,6 +288,8 @@ export class ProveedoresAdminComponent implements OnInit {
       website: value.website || undefined,
       paymentMethod: value.paymentMethod || undefined,
       commissionPct: value.commissionPct != null ? Number(value.commissionPct) : undefined,
+      username: value.username || undefined,
+      password: value.password || undefined,
       notes: value.notes || undefined,
     };
 
@@ -342,7 +350,8 @@ export class ProveedoresAdminComponent implements OnInit {
     const headers = [
       'Razón Social', 'NIT', 'Tipo', 'Estado', 'Contacto', 'Cargo',
       'Teléfono', 'WhatsApp', 'Email', 'Ciudad', 'País',
-      'Sitio web', 'Método de pago', 'Comisión %', 'Servicios', 'Notas', 'Fecha de registro',
+      'Sitio web', 'Método de pago', 'Comisión %', 'Usuario', 'Contraseña',
+      'Servicios', 'Notas', 'Fecha de registro',
     ];
     const rows = source.map((p) => [
       p.businessName, p.nit, p.operatorType, p.status,
@@ -350,6 +359,7 @@ export class ProveedoresAdminComponent implements OnInit {
       p.email, p.city ?? '', p.country ?? '',
       p.website ?? '', p.paymentMethod ?? '',
       p.commissionPct != null ? String(p.commissionPct) : '',
+      p.username ?? '', p.password ?? '',
       p.services.join('; '), p.notes ?? '', p.registrationDate,
     ]);
 

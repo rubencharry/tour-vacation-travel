@@ -416,6 +416,22 @@
               </a>
             </div>
           }
+          @if (provider.username || provider.password) {
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              @if (provider.username) {
+                <div>
+                  <p class="text-caption text-on-surface-variant mb-0.5">Usuario</p>
+                  <p class="text-sm text-on-surface">{{ provider.username }}</p>
+                </div>
+              }
+              @if (provider.password) {
+                <div>
+                  <p class="text-caption text-on-surface-variant mb-0.5">Contraseña</p>
+                  <p class="text-sm text-on-surface">{{ provider.password }}</p>
+                </div>
+              }
+            </div>
+          }
         </div>
 
         <!-- Contacto -->
@@ -680,6 +696,28 @@
                 id="p-website" type="url" formControlName="website"
                 placeholder="https://www.empresa.com"
                 class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn pl-9 pr-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+              />
+            </div>
+          </div>
+
+          <!-- Usuario + Contraseña (portal del proveedor) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-label-md text-label-md text-primary-container mb-1" for="p-username">Usuario</label>
+              <input
+                id="p-username" type="text" formControlName="username"
+                autocomplete="off"
+                placeholder="Usuario del portal"
+                class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
+              />
+            </div>
+            <div>
+              <label class="block font-label-md text-label-md text-primary-container mb-1" for="p-password">Contraseña</label>
+              <input
+                id="p-password" type="password" formControlName="password"
+                autocomplete="new-password"
+                placeholder="Contraseña del portal"
+                class="w-full h-11 bg-surface-container-lowest border border-brand-teal-light rounded-btn px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-brand-teal/50 transition-colors"
               />
             </div>
           </div>

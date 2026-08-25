@@ -6,7 +6,7 @@ import { execSync } from 'child_process';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ─── constants (mirrors plan-campaign.template.ts) ───────────────────────────
-const WHATSAPP_URL = 'https://wa.me/573001234567';
+const WHATSAPP_URL = 'https://wa.me/573127466554';
 const SITE_URL = 'http://localhost:4200';
 const LOGO_URL = `${SITE_URL}/logo-horizontal.webp`;
 const FONTS =

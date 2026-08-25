@@ -46,6 +46,8 @@ jobs:
       - name: Build Lambda bundle
         run: npm run build:lambda
       - name: CDK deploy
+        env:
+          SES_FROM_ADDRESS: ${{ secrets.SES_FROM_ADDRESS }}
         run: npm run cdk --workspace=infra -- deploy --require-approval never
 
   deploy-frontend:

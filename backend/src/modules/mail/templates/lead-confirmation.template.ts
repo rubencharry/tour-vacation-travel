@@ -1,4 +1,4 @@
-const WHATSAPP_URL = 'https://wa.me/573001234567';
+const WHATSAPP_URL = 'https://wa.me/573127466554';
 
 const FONTS =
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600' +
