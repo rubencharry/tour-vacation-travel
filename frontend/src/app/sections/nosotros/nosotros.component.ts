@@ -67,6 +67,27 @@ export class NosotrosComponent implements OnInit {
 
   protected readonly displayTeam = [...this.team, ...this.team];
 
+  protected readonly legalDocuments = [
+    {
+      icon: 'description',
+      title: 'RUT',
+      description: 'Registro Único Tributario ante la DIAN.',
+      file: '/documentos/rut.pdf',
+    },
+    {
+      icon: 'account_balance',
+      title: 'Cámara de Comercio',
+      description: 'Certificado de existencia y representación legal.',
+      file: '/documentos/camara-comercio.pdf',
+    },
+    {
+      icon: 'confirmation_number',
+      title: 'RNT',
+      description: 'Registro Nacional de Turismo vigente.',
+      file: '/documentos/rnt.pdf',
+    },
+  ];
+
   protected readonly values = [
     {
       icon: 'favorite',

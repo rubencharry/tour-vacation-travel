@@ -154,6 +154,46 @@
   </div>
 </section>
 
+<!-- Documentos Legales -->
+<section class="bg-brand-cream pt-lg pb-xl px-margin-mobile md:px-margin-desktop">
+  <div class="max-w-[1200px] mx-auto">
+    <div class="text-center mb-14">
+      <div class="flex items-center justify-center gap-3 mb-4">
+        <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+        <span class="text-brand-terracotta uppercase tracking-[0.25em] text-[15px] font-bold font-condensed">Operamos con Transparencia</span>
+        <div class="w-8 h-[1.5px] bg-brand-terracotta"></div>
+      </div>
+      <h2 class="text-primary-container font-editorial italic font-normal leading-tight text-[34px] md:text-[48px]">
+        Documentos Legales
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      @for (doc of legalDocuments; track doc.title) {
+        <div appScrollReveal [delay]="$index * 100"
+             class="bg-white rounded-card shadow-soft p-8 flex flex-col items-center text-center
+                    hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+          <div class="w-14 h-14 rounded-full bg-brand-terracotta/10 flex items-center justify-center mb-5">
+            <span class="material-symbols-outlined text-brand-terracotta text-[26px]">{{ doc.icon }}</span>
+          </div>
+          <h3 class="font-condensed font-bold text-[18px] tracking-[0.01em] text-primary-container mb-2">
+            {{ doc.title }}
+          </h3>
+          <p class="font-body-md text-body-md text-on-surface-variant mb-5">
+            {{ doc.description }}
+          </p>
+          <a [href]="doc.file" target="_blank" rel="noopener"
+             class="inline-flex items-center gap-2 text-brand-terracotta hover:text-primary-container
+                    font-condensed font-bold text-[12px] uppercase tracking-[0.15em] transition-colors">
+            Ver documento
+            <span class="material-symbols-outlined text-[16px]">north_east</span>
+          </a>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
 <!-- CTA Final -->
 <section class="bg-primary py-xl px-margin-mobile md:px-margin-desktop">
   <div class="max-w-[1200px] mx-auto text-center">
