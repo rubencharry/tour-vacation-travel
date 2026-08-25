@@ -132,22 +132,20 @@ export class LeadsService {
 
   private async sendConfirmation(lead: Lead): Promise<void> {
     const allPlans = await this.plansRepo.findAll();
-    const featuredPlans = await Promise.all(
-      allPlans
-        .filter((p) => p.active)
-        .sort((a, b) => a.displayOrder - b.displayOrder)
-        .slice(0, 3)
-        .map(async (p) => ({
-          title: p.title,
-          price: p.price,
-          currency: p.currency,
-          durationDays: p.durationDays,
-          durationNights: p.durationNights,
-          imageUrls: await this.fileService.presignImageUrls(p.imageUrls ?? []),
-          departureCity: p.departureCity,
-          inclusions: p.inclusions,
-        })),
-    );
+    const featuredPlans = allPlans
+      .filter((p) => p.active)
+      .sort((a, b) => a.displayOrder - b.displayOrder)
+      .slice(0, 3)
+      .map((p) => ({
+        title: p.title,
+        price: p.price,
+        currency: p.currency,
+        durationDays: p.durationDays,
+        durationNights: p.durationNights,
+        imageUrls: this.fileService.presignImageUrls(p.imageUrls ?? []),
+        departureCity: p.departureCity,
+        inclusions: p.inclusions,
+      }));
 
     const { subject, html } = leadConfirmationTemplate({
       name: lead.name,

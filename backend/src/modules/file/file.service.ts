@@ -72,10 +72,13 @@ export class FileService {
     return `${this.appUrl}/media/${key}`;
   }
 
-  async presignImageUrls(urls: string[]): Promise<string[]> {
+  presignImageUrls(urls: string[]): string[] {
     return (urls ?? []).map((url) => {
       if (!url) return url;
-      if (url.startsWith('http') && !(this.bucket && url.includes(this.bucket))) {
+      if (
+        url.startsWith('http') &&
+        !(this.bucket && url.includes(this.bucket))
+      ) {
         return url; // URL externa: pasa tal cual
       }
       return this.mediaUrl(this.extractS3Key(url));

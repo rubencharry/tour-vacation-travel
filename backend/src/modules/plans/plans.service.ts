@@ -37,7 +37,7 @@ export class PlansService {
     await this.repo.put(plan);
     return {
       ...plan,
-      imageUrls: await this.fileService.presignImageUrls(plan.imageUrls),
+      imageUrls: this.fileService.presignImageUrls(plan.imageUrls),
     };
   }
 
@@ -59,7 +59,7 @@ export class PlansService {
     const totalPages = Math.ceil(totalItems / limit);
     const startIndex = (page - 1) * limit;
     const paginatedItems = all.slice(startIndex, startIndex + limit);
-    const data = await this.addPresignedUrls(paginatedItems);
+    const data = this.addPresignedUrls(paginatedItems);
 
     return {
       data,
@@ -86,7 +86,7 @@ export class PlansService {
     if (!plan) throw new NotFoundException(`Plan ${planId} no encontrado`);
     return {
       ...plan,
-      imageUrls: await this.fileService.presignImageUrls(plan.imageUrls ?? []),
+      imageUrls: this.fileService.presignImageUrls(plan.imageUrls ?? []),
     };
   }
 
@@ -104,9 +104,7 @@ export class PlansService {
     const updated = await this.repo.update(planId, updates);
     return {
       ...updated,
-      imageUrls: await this.fileService.presignImageUrls(
-        updated.imageUrls ?? [],
-      ),
+      imageUrls: this.fileService.presignImageUrls(updated.imageUrls ?? []),
     };
   }
 
@@ -125,9 +123,7 @@ export class PlansService {
     });
     return {
       ...updated,
-      imageUrls: await this.fileService.presignImageUrls(
-        updated.imageUrls ?? [],
-      ),
+      imageUrls: this.fileService.presignImageUrls(updated.imageUrls ?? []),
     };
   }
 
@@ -136,9 +132,7 @@ export class PlansService {
     const updated = await this.repo.clearPromotion(planId);
     return {
       ...updated,
-      imageUrls: await this.fileService.presignImageUrls(
-        updated.imageUrls ?? [],
-      ),
+      imageUrls: this.fileService.presignImageUrls(updated.imageUrls ?? []),
     };
   }
 
@@ -149,12 +143,10 @@ export class PlansService {
     return this.fileService.saveBase64(base64, extension, 'plans');
   }
 
-  private async addPresignedUrls(plans: Plan[]): Promise<Plan[]> {
-    return Promise.all(
-      plans.map(async (p) => ({
-        ...p,
-        imageUrls: await this.fileService.presignImageUrls(p.imageUrls ?? []),
-      })),
-    );
+  private addPresignedUrls(plans: Plan[]): Plan[] {
+    return plans.map((p) => ({
+      ...p,
+      imageUrls: this.fileService.presignImageUrls(p.imageUrls ?? []),
+    }));
   }
 }
