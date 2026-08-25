@@ -278,7 +278,7 @@ export function leadConfirmationTemplate(data: LeadConfirmationData): {
             margin-left:auto;margin-right:auto">
             Recibimos tu consulta ${planLine}.<br>
             <strong style="color:#ffffff;font-weight:700">
-              Un asesor te contacta en menos de 2 horas hábiles
+              Un asesor te contacta en menos de 15 minutos
             </strong>
             con una propuesta personalizada para ti.
           </p>
@@ -315,7 +315,7 @@ export function leadConfirmationTemplate(data: LeadConfirmationData): {
               </p>
               <p style="margin:0;font-family:${F.condensed};font-size:12px;font-weight:700;
                 color:${C.teal};letter-spacing:0.08em;text-transform:uppercase">
-                Tiempo de respuesta: menos de 2 horas hábiles
+                Tiempo de respuesta: menos de 15 minutos
               </p>
             </td></tr>
 
