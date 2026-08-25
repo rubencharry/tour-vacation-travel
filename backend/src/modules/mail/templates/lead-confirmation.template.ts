@@ -184,7 +184,7 @@ export function leadConfirmationTemplate(data: LeadConfirmationData): {
   subject: string;
   html: string;
 } {
-  const logoUrl = `${data.siteUrl}/logo-positiva-transparent.webp`;
+  const logoUrl = `${data.siteUrl}/logo-positiva-transparent.png`;
   const planLine = data.planTitle
     ? `sobre el plan <strong style="color:${C.teal}">${data.planTitle}</strong>`
     : 'sobre nuestros planes de viaje';
@@ -282,9 +282,9 @@ export function leadConfirmationTemplate(data: LeadConfirmationData): {
             </strong>
             con una propuesta personalizada para ti.
           </p>
-          <p style="margin:0 0 32px;font-family:${F.condensed};font-size:12px;font-weight:600;
+          <p style="margin:0 0 32px;text-align:center;font-family:${F.condensed};font-size:12px;font-weight:600;
             color:${C.teal};letter-spacing:0.1em;text-transform:uppercase">
-            Lunes a sábado &nbsp;·&nbsp; 8:00 am – 7:00 pm
+            Lunes a sábado &nbsp;·&nbsp; 8:00&#8203;am – 7:00&#8203;pm
           </p>
           <!-- CTA primario WhatsApp -->
           <a href="${WHATSAPP_URL}"
@@ -315,7 +315,7 @@ export function leadConfirmationTemplate(data: LeadConfirmationData): {
               </p>
               <p style="margin:0;font-family:${F.condensed};font-size:12px;font-weight:700;
                 color:${C.teal};letter-spacing:0.08em;text-transform:uppercase">
-                Tiempo de respuesta: menos de 15 minutos
+                Tiempo de respuesta: menos de 15 minutos.
               </p>
             </td></tr>
 

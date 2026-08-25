@@ -45,24 +45,24 @@ export class NosotrosComponent implements OnInit {
       photo: '/team/maria-jose.webp',
       years: '1 año de experiencia',
     },
-    // {
-    //   name: 'Francy Reyes',
-    //   role: 'Directora de Desarrollo de Negocios y Producto',
-    //   photo: '/team/francy.webp',
-    //   years: '8 años en turismo',
-    // },
+    {
+      name: 'Francy Reyes',
+      role: 'Directora de Desarrollo de Negocios y Producto',
+      photo: '/team/francy.webp',
+      years: '8 años en turismo',
+    },
     {
       name: 'Valentina Rodríguez',
       role: 'Directora de Marketing',
       photo: '/team/valentina.webp',
       years: '3 años de experiencia',
     },
-    {
-      name: 'Yulieth Roa',
-      role: 'Directora de Producto y Alianzas Estratégicas',
-      photo: '/team/yulieth.webp',
-      years: '10 años en turismo',
-    },
+    // {
+    //   name: 'Yulieth Roa',
+    //   role: 'Directora de Producto y Alianzas Estratégicas',
+    //   photo: '/team/yulieth.webp',
+    //   years: '10 años en turismo',
+    // },
   ];
 
   protected readonly displayTeam = [...this.team, ...this.team];

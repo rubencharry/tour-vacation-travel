@@ -112,7 +112,7 @@ export function planCampaignTemplate(data: PlanCampaignData): {
 } {
   const { plan, siteUrl } = data;
   const firstName = data.recipientName.trim().split(' ')[0];
-  const logoUrl = `${siteUrl}/logo-positiva-transparent.webp`;
+  const logoUrl = `${siteUrl}/logo-positiva-transparent.png`;
 
   const hasPromo = plan.promotion?.active === true;
   const promo = hasPromo ? plan.promotion! : null;
@@ -371,9 +371,9 @@ export function planCampaignTemplate(data: PlanCampaignData): {
 
             <!-- HOURS -->
             <tr><td style="padding:0 40px 32px;text-align:center;background:${C.bgLight}">
-              <p style="margin:0;font-family:${F.condensed};font-size:12px;font-weight:700;
+              <p style="margin:0;text-align:center;font-family:${F.condensed};font-size:12px;font-weight:700;
                 color:${C.teal};letter-spacing:0.08em;text-transform:uppercase">
-                Lunes a sábado &nbsp;·&nbsp; 8:00 am – 7:00 pm
+                Lunes a sábado &nbsp;·&nbsp; 8:00&#8203;am – 7:00&#8203;pm
               </p>
             </td></tr>
 
