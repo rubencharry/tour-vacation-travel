@@ -6,7 +6,7 @@ import { execSync } from 'child_process';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const SITE_URL = 'http://localhost:4200';
-const LOGO_URL = `${SITE_URL}/logo-horizontal.webp`;
+const LOGO_URL = `${SITE_URL}/logo-positiva-transparent.webp`;
 const WHATSAPP_URL = 'https://wa.me/573127466554';
 const FONTS =
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600' +
@@ -193,6 +193,7 @@ function buildHtml(name, plans) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
   <title>Tour Vacation Travel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="${FONTS}" rel="stylesheet">
@@ -211,8 +212,8 @@ function buildHtml(name, plans) {
 
         <!-- HEADER -->
         <tr><td style="background:${C.navy};padding:28px 40px 24px;text-align:center">
-          <img src="${LOGO_URL}" alt="Tour Vacation Travel" height="48"
-            style="height:48px;display:inline-block;filter:brightness(0) invert(1);-webkit-filter:brightness(0) invert(1)">
+          <img src="${LOGO_URL}" alt="Tour Vacation Travel" height="64"
+            style="height:64px;display:inline-block">
           <p style="margin:8px 0 0;font-family:${F.condensed};font-size:11px;font-weight:700;
             color:${C.teal};letter-spacing:0.18em;text-transform:uppercase">
             Agencia de Viajes
