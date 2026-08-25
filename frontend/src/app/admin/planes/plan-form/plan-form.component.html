@@ -258,19 +258,19 @@
         @for (item of catalog(); track item.id) {
           <label
             class="flex items-center gap-2 cursor-pointer p-3 rounded-btn border transition-colors"
-            [class]="selectedInclusions.has(item.id)
+            [class]="selectedInclusions().has(item.id)
               ? 'border-brand-teal bg-brand-teal/10 text-primary-container'
               : 'border-surface-variant bg-surface-container text-on-surface-variant hover:border-brand-teal-light'"
           >
             <input
               type="checkbox"
-              [checked]="selectedInclusions.has(item.id)"
+              [checked]="selectedInclusions().has(item.id)"
               (change)="toggleInclusion(item.id)"
               class="sr-only"
             />
             <span class="material-symbols-outlined text-[18px]"
-              [class]="selectedInclusions.has(item.id) ? 'text-brand-teal' : 'text-on-surface-variant'">
-              {{ selectedInclusions.has(item.id) ? 'check_box' : 'check_box_outline_blank' }}
+              [class]="selectedInclusions().has(item.id) ? 'text-brand-teal' : 'text-on-surface-variant'">
+              {{ selectedInclusions().has(item.id) ? 'check_box' : 'check_box_outline_blank' }}
             </span>
             <span class="font-label-md text-label-md">{{ item.label }}</span>
           </label>

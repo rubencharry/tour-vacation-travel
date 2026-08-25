@@ -2,11 +2,9 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   DeleteObjectCommand,
-  GetObjectCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as crypto from 'crypto';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
@@ -17,9 +15,11 @@ export class FileService {
   private readonly s3: S3Client | null;
   private readonly bucket: string | null;
   private readonly region: string;
+  private readonly appUrl: string;
 
   constructor(config: ConfigService) {
     this.region = config.get('AWS_REGION') ?? 'sa-east-1';
+    this.appUrl = config.get<string>('APP_URL', 'http://localhost:4200');
     const bucket = config.get<string>('MEDIA_BUCKET_NAME');
 
     if (bucket) {
@@ -55,38 +55,31 @@ export class FileService {
           ContentType: this.mimeFromExtension(extension),
         }),
       );
-      const publicUrl = await this.presignKey(key);
+      const publicUrl = this.mediaUrl(key);
       return { key, publicUrl };
     }
 
     return this.saveLocally(buffer, key);
   }
 
-  async presignKey(key: string, expirySeconds = 3600): Promise<string> {
+  // URL pública estable: el bucket sigue privado, CloudFront lo sirve vía OAC
+  // en /media/*, así que a diferencia de una URL prefirmada, nunca expira.
+  mediaUrl(key: string): string {
     if (!this.s3 || !this.bucket) {
       const port = process.env['PORT'] ?? 3000;
       return `http://localhost:${port}/uploads/${key.split('/').pop()}`;
     }
-    return getSignedUrl(
-      this.s3,
-      new GetObjectCommand({ Bucket: this.bucket, Key: key }),
-      { expiresIn: expirySeconds },
-    );
+    return `${this.appUrl}/media/${key}`;
   }
 
   async presignImageUrls(urls: string[]): Promise<string[]> {
-    return Promise.all(
-      (urls ?? []).map((url) => {
-        if (!url) return Promise.resolve(url);
-        if (
-          url.startsWith('http') &&
-          !(this.bucket && url.includes(this.bucket))
-        ) {
-          return Promise.resolve(url); // URL externa: pasa tal cual
-        }
-        return this.presignKey(this.extractS3Key(url));
-      }),
-    );
+    return (urls ?? []).map((url) => {
+      if (!url) return url;
+      if (url.startsWith('http') && !(this.bucket && url.includes(this.bucket))) {
+        return url; // URL externa: pasa tal cual
+      }
+      return this.mediaUrl(this.extractS3Key(url));
+    });
   }
 
   extractS3Key(url: string): string {

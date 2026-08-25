@@ -23,13 +23,13 @@ export class NosotrosComponent implements OnInit {
   protected readonly team = [
     {
       name: 'Blanca Mendoza',
-      role: 'Socia Fundadora & Directora Ejecutiva',
+      role: 'Fundadora & Directora Ejecutiva',
       photo: '/team/blanca.webp',
       years: '15 años de experiencia',
     },
     {
       name: 'José Gómez',
-      role: 'Socio Fundador & Director de Operaciones',
+      role: 'Fundador & Director de Operaciones',
       photo: '/team/jose.webp',
       years: '20 años de experiencia',
     },
@@ -41,16 +41,16 @@ export class NosotrosComponent implements OnInit {
     },
     {
       name: 'María José Gómez',
-      role: 'Imagen de Marca y Creativa',
+      role: 'Creativa e Imagen de Marca',
       photo: '/team/maria-jose.webp',
       years: '1 año de experiencia',
     },
-    {
-      name: 'Francy Reyes',
-      role: 'Directora de Desarrollo de Negocios y Producto',
-      photo: '/team/francy.webp',
-      years: '8 años en turismo',
-    },
+    // {
+    //   name: 'Francy Reyes',
+    //   role: 'Directora de Desarrollo de Negocios y Producto',
+    //   photo: '/team/francy.webp',
+    //   years: '8 años en turismo',
+    // },
     {
       name: 'Valentina Rodríguez',
       role: 'Directora de Marketing',

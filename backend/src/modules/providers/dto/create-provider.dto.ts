@@ -56,6 +56,14 @@ export class CreateProviderDto {
   @Min(0)
   commissionPct?: number;
 
+  @IsOptional()
+  @IsString()
+  username?: string;
+
+  @IsOptional()
+  @IsString()
+  password?: string;
+
   @IsEnum(['activo', 'inactivo'] as const)
   status!: ProviderStatus;
 

@@ -183,6 +183,7 @@ export class TourVacationStack extends cdk.Stack {
     // ── CloudFront ────────────────────────────────────────────────────────────
 
     const oac = new cloudfront.S3OriginAccessControl(this, 'FrontendOAC');
+    const mediaOac = new cloudfront.S3OriginAccessControl(this, 'MediaOAC');
 
     const apiOriginHostname = `${api.apiId}.execute-api.${this.region}.amazonaws.com`;
 
@@ -212,6 +213,13 @@ export class TourVacationStack extends cdk.Stack {
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
           originRequestPolicy:
             cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+        },
+        '/media/*': {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(mediaBucket, {
+            originAccessControl: mediaOac,
+          }),
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
         },
       },
       errorResponses: [

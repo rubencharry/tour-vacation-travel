@@ -21,6 +21,8 @@ export interface Provider {
   website?: string;
   paymentMethod?: string;
   commissionPct?: number;
+  username?: string;
+  password?: string;
   status: ProviderStatus;
   notes?: string;
   services: string[];
@@ -40,6 +42,8 @@ export interface CreateProviderPayload {
   website?: string;
   paymentMethod?: string;
   commissionPct?: number;
+  username?: string;
+  password?: string;
   status: ProviderStatus;
   notes?: string;
   services: string[];
