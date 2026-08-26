@@ -185,6 +185,24 @@ export class TourVacationStack extends cdk.Stack {
     const oac = new cloudfront.S3OriginAccessControl(this, 'FrontendOAC');
     const mediaOac = new cloudfront.S3OriginAccessControl(this, 'MediaOAC');
 
+    // Los objetos en el MediaBucket se guardan sin el prefijo "media/" (ej. "plans/xxx.jpg"),
+    // pero las URLs públicas usan "/media/*". Sin esta función, CloudFront reenvía la ruta
+    // completa al origen S3 y busca una key que no existe, devolviendo 403/404 → que a su vez
+    // la distribución mapea a /index.html con status 200 (pensado para el SPA routing).
+    const stripMediaPrefixFunction = new cloudfront.Function(
+      this,
+      'StripMediaPrefixFunction',
+      {
+        code: cloudfront.FunctionCode.fromInline(`
+function handler(event) {
+  var request = event.request;
+  request.uri = request.uri.replace(/^\\/media/, '');
+  return request;
+}
+`),
+      },
+    );
+
     const apiOriginHostname = `${api.apiId}.execute-api.${this.region}.amazonaws.com`;
 
     const certificate = acm.Certificate.fromCertificateArn(
@@ -220,6 +238,12 @@ export class TourVacationStack extends cdk.Stack {
           }),
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+          functionAssociations: [
+            {
+              function: stripMediaPrefixFunction,
+              eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+            },
+          ],
         },
       },
       errorResponses: [
