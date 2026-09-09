@@ -46,6 +46,7 @@ export interface CreateLeadPayload {
   interestedPlanId: string;
   source?: LeadSource;
   message?: string;
+  _hp?: string;
 }
 
 export type UpdateLeadPayload = Partial<CreateLeadPayload>;

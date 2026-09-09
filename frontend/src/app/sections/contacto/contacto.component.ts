@@ -37,6 +37,8 @@ export class ContactoComponent implements OnInit {
   protected planId = signal('');
   protected mensaje = signal('');
   protected formState = signal<FormState>('idle');
+  protected honeypot = signal('');
+  private formLoadedAt = Date.now();
 
   protected readonly plans = toSignal(
     this.plansService.getPlans({ active: true, limit: 100 }).pipe(
@@ -48,6 +50,7 @@ export class ContactoComponent implements OnInit {
 
   protected enviarMensaje(): void {
     if (!this.nombre() || !this.email() || !this.mensaje() || this.formState() === 'sending') return;
+    if (Date.now() - this.formLoadedAt < 3000) return;
 
     this.formState.set('sending');
 
@@ -59,6 +62,7 @@ export class ContactoComponent implements OnInit {
         interestedPlanId: this.planId() || GENERAL_INQUIRY_PLAN_ID,
         source: 'web',
         message: this.mensaje().trim(),
+        _hp: this.honeypot(),
       })
       .subscribe({
         next: () => {
