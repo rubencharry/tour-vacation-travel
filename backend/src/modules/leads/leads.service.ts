@@ -40,6 +40,13 @@ export class LeadsService {
   }
 
   async create(dto: CreateLeadDto, actorEmail?: string): Promise<Lead> {
+    if (dto._hp) {
+      this.logger.warn(
+        `Honeypot triggered — discarding submission from ${dto.email}`,
+      );
+      return this.fakeLeadResponse(dto);
+    }
+
     const email = dto.email.toLowerCase();
     const existing = await this.findExisting(email, dto.interestedPlanId);
     if (existing) return existing;
@@ -213,5 +220,21 @@ export class LeadsService {
         l.interestedPlanId === planId &&
         new Date(l.createdAt).getTime() > cutoff,
     );
+  }
+
+  private fakeLeadResponse(dto: CreateLeadDto): Lead {
+    return {
+      leadId: crypto.randomUUID(),
+      email: dto.email.toLowerCase(),
+      name: dto.name,
+      phone: dto.phone,
+      interestedPlanId: dto.interestedPlanId,
+      source: dto.source,
+      message: dto.message,
+      createdAt: new Date().toISOString(),
+      emailSent: false,
+      status: 'nuevo',
+      activities: [],
+    };
   }
 }
