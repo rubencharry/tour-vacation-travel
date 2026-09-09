@@ -18,7 +18,9 @@ export class CreateLeadDto {
   @IsString()
   @MinLength(2)
   @MaxLength(200)
-  @Matches(/^[a-zA-ZÀ-ÿ\s\-'.]+$/, { message: 'name must contain only letters and spaces' })
+  @Matches(/^[a-zA-ZÀ-ÿ\s\-'.]+$/, {
+    message: 'name must contain only letters and spaces',
+  })
   name!: string;
 
   @IsOptional()
