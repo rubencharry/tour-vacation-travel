@@ -1,6 +1,6 @@
 {
   "name": "tour-vacation",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "private": true,
   "description": "Monorepo for Tour Vacation (Angular frontend + NestJS backend)",
   "workspaces": [
